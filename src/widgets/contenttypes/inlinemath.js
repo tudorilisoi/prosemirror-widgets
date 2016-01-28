@@ -1,6 +1,6 @@
 import {Inline, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
 
 export class InlineMath extends Inline {
 	get attrs() {
@@ -28,7 +28,7 @@ InlineMath.prototype.serializeDOM = node => {
 InlineMath.register("command", "insert", {
 	label: "InlineMath",
 	run(pm, tex) {
-    	return pm.tr.replaceSelection(this.create({tex})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({tex})).apply(pm.apply.scroll)
   	},
 	params: [
      	{ name: "Latex", label: "Latex Expression", type: "text", 

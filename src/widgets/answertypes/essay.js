@@ -1,6 +1,6 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
 
 export class Essay extends Block {
 	get attrs() {
@@ -33,7 +33,7 @@ Essay.prototype.serializeDOM = (node,s) => s.renderAs(node,"textarea",{
 Essay.register("command", "insert", {
 	label: "Essay",
 	run(pm, name, rows, cols) {
-    	return pm.tr.replaceSelection(this.create({name,rows,cols})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({name,rows,cols})).apply(pm.apply.scroll)
   	},
 	params: [
   	    { name: "Name", label: "Short ID", type: "text",

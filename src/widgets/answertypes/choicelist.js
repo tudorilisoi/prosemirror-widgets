@@ -1,6 +1,6 @@
-import {Block, Textblock, Paragraph, TextNode, Text, Fragment, Attribute, Pos} from "prosemirror/dist/model"
+import {Block, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
 export class Choice extends Textblock {
 	static get kinds() { return "choice" }
@@ -12,14 +12,19 @@ export class Choice extends Textblock {
 		}
 	}
 	create(attrs, content, marks) {
-		// if content not null then it is a fragment with paragraph as first child
-		let para = content? content.firstChild: pm.schema.defaultTextblockType().create(null)
-		return super.create(attrs,[this.schema.node("radiobutton",attrs),para],marks)
+		// remove any radiobuttons from split/join operations
+		let result = []
+		for (let iter = content.iter(), n; n = iter.next().value;) 
+			if (n.type.name != "radiobutton") result.push(n)
+		// prepend the new radiobutton
+		result.unshift(this.schema.node("radiobutton",attrs))
+		return super.create(attrs,Fragment.from(result),marks)
 	}
 }
  
 export class ChoiceList extends Block {
-	static get contains() { return "choice"}
+	static get kinds() { return super.kinds + " choicelist"}
+	get contains() { return "choice"}
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -28,22 +33,23 @@ export class ChoiceList extends Block {
 	}
 	get isList() { return true }
 	create(attrs, content, marks) {
-		return super.create(attrs,[this.schema.node("choice",{name: attrs.name, value:1})],marks)
+		return super.create(attrs,this.schema.node("choice",{name: attrs.name, value:1}, emptyFragment),marks)
 	}
 } 
   
 defParser(Choice,"div","widgets-choice")
 defParser(ChoiceList,"div","widgets-choicelist")
  
-Choice.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
+Choice.prototype.serializeDOM = (node,s) => { 
+	return s.renderAs(node,"div",node.attrs)
+}
  
 ChoiceList.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
  
-function renumber(pm, node) {
-	let i = 1
-	node.forEach(ch => {
-		let radio = ch.firstChild
-		if (radio) radio.attrs.value = i++
+function renumber(pm, pos) {
+	let cl = pm.doc.path(pos.path), i = 1
+	cl.forEach((node, start) => {
+		pm.tr.setNodeType(new Pos(pos.path,start), node.type, {name: node.attrs.name, value:i++}).apply()
 	})
 }
 
@@ -52,21 +58,24 @@ Choice.register("command", "split", {
   run(pm) {
     let {from, to, node} = pm.selection
     if ((node && node.isBlock) || from.path.length < 2 || !Pos.samePath(from.path, to.path)) return false
-    let toParent = from.shorten(), parent = pm.doc.path(toParent.path)
-    if (parent.type != this) return false
-    //let toMC = toParent.shorten(), mc = pm.doc.path(toMC.path)
-    let nextType = to.offset == parent.child(toParent.offset).size ? pm.schema.defaultTextblockType() : null
-    // need to renumber nodes and move cursor
-    return pm.tr.delete(from, to).split(from, 2, nextType).apply(andScroll)
+    if (pm.doc.path(from.path).type != this) return false
+    let toParent = from.shorten(), cl = pm.doc.path(toParent.path)
+    let tr = pm.tr.delete(from, to).split(from, 1, this, {name:cl.attrs.name, value: cl.size+1}).apply(pm.apply.scroll)
+    renumber(pm, toParent)
+    return tr
   },
-  keys: ["Enter(19)"]
+  keys: ["Enter(10)"]
 })
 
 Choice.register("command", "delete", {
-  label: "delete this choice or choicelist",
+  label: "delete text, this choice or choicelist",
   run(pm) {
 	let {from,to} = pm.selection
-    return pm.tr.delete(from.move(-1),to).apply(andScroll)
+	if (from.offset > 1) return pm.tr.delete(from,to).apply(pm.apply.scroll)
+	let tr = pm.tr.delete(new Pos(from.path,0),to).apply(pm.apply.scroll)
+	pm.execCommand("joinBackward")
+	renumber(pm, from.shorten())
+	return tr
   },
   keys: ["Backspace(20)", "Mod-Backspace(20)"]
 })
@@ -74,12 +83,10 @@ Choice.register("command", "delete", {
 ChoiceList.register("command", "insert", {
 	label: "ChoiceList",
 	run(pm, name) {
-//    	let mc = this.create({name}, pm.schema.node("choice",{name, value: 1}))
-   		return pm.tr.replaceSelection(this.create({name})).apply(andScroll)
+   		return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
 	},
 	select(pm) {
 		return true
-		//return pm.doc.path(pm.selection.from.path).type.canContainType(this)
 	},
 	params: [
  	    { name: "Name", label: "Short ID", type: "text",
@@ -100,10 +107,13 @@ insertCSS(`
 	float: left;
 }
 
+.widgets-choicelist {
+	padding-left: 8px;
+	padding-top: 8px;
+}
+
 .ProseMirror .widgets-choice:hover {
 	cursor: text;
 }
-
-.ProseMirror .widgets-choicelist {}
 
 `)

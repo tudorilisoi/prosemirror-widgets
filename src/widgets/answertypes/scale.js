@@ -1,6 +1,6 @@
 import {Block, Paragraph, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
 export class Scale extends Block {
 	static get contains() { return "paragraph"}
@@ -50,7 +50,7 @@ Scale.prototype.serializeDOM = (node,s) => {
 Scale.register("command", "insert",{
 	label: "Scale",
 	run(pm, name, startvalue, startlabel, endvalue, endlabel) {
-    	return pm.tr.replaceSelection(this.create({name,startvalue,startlabel,endvalue,endlabel})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({name,startvalue,startlabel,endvalue,endlabel})).apply(pm.apply.scroll)
   	},
 	params: [
   	    { name: "Name", label: "Short ID", type: "text",

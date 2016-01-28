@@ -1,7 +1,7 @@
 import {Inline, Attribute} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {Input} from "./input"
-import {defParser, defParamsClick, andScroll, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
 export class CheckBox extends Input {
 	get attrs() {
@@ -22,7 +22,7 @@ CheckBox.prototype.serializeDOM = (node,s) => s.renderAs(node,"input",node.attrs
 CheckBox.register("command", "insert",{
 	label: "CheckBox",
 	run(pm, name) {
-    	return pm.tr.replaceSelection(this.create({name})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
   	},
 	params: [
 	    { name: "Name", label: "Short ID", type: "text",

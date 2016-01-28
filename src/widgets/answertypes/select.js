@@ -1,6 +1,6 @@
 import {Block, Inline, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
 export class Select extends Inline {
 	get contains() { return null}
@@ -27,7 +27,7 @@ Select.prototype.serializeDOM = node => {
 Select.register("command", "insert", {
 	label: "Select",
 	run(pm, name, options, multiple) {
-    	return pm.tr.replaceSelection(this.create({name,options,multiple})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({name,options,multiple})).apply(pm.apply.scroll)
   	},
 	params: [
   	    { name: "Name", label: "Short ID", type: "text",

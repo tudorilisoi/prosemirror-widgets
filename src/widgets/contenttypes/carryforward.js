@@ -1,6 +1,6 @@
 import {Block, Inline, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
  
 function getCarryOptions(names) {
 	return names.map(w => ({value: w, label: w}))
@@ -27,7 +27,7 @@ CarryForward.prototype.serializeDOM = node => {
 CarryForward.register("command", "insert", {
 	label: "CarryForward",
 	run(pm, name) {
-    	return pm.tr.replaceSelection(this.create({name})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
   	},
 	params: [ 
    	    { name: "Name", label: "Element name", type: "select",

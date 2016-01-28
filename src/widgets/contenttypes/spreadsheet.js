@@ -1,6 +1,6 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
 
 export class SpreadSheet extends Block {
 	get attrs() {
@@ -42,7 +42,7 @@ SpreadSheet.prototype.serializeDOM = node => {
 SpreadSheet.register("command", "insert", {
 	label: "SpreadSheet",
 	run(pm, data) {
-    	return pm.tr.replaceSelection(this.create({data})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({data})).apply(pm.apply.scroll)
   	},
 	params: [
      	{ name: "Data Link", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 

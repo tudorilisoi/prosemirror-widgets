@@ -1,6 +1,6 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
 
 export class Website extends Block {
 	get attrs() {
@@ -28,7 +28,7 @@ Website.prototype.serializeDOM = (node, s) => s.renderAs(node, "iframe",{
 Website.register("command", "insert", {
 	label: "Website",
 	run(pm, src, width, height) {
-    	return pm.tr.replaceSelection(this.create({src, width, height})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({src, width, height})).apply(pm.apply.scroll)
   	},
 	params: [
      	{ name: "URL", label: "Link to website, youTube, Google Maps ...", type: "url",
@@ -47,8 +47,8 @@ defParamsClick(Website,"website:insert")
 insertCSS(`
 
 .ProseMirror .widgets-website:hover {
-	padding-left: 16px;
-    padding-top: 16px;
+	padding-left: 8px;
+    padding-top: 8px;
 }
 
 `)

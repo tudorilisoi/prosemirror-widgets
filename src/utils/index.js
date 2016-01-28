@@ -2,8 +2,6 @@ export {widgetParamHandler, defineFileHandler, namePattern, nameTitle, defParams
 import {selectableNodeAbove} from "prosemirror/dist/edit/selection"
 import {widgetParamHandler} from "./params"
 
-export const andScroll = {scrollIntoView: true}
-
 if (window.MathJax)
 	MathJax.Hub.Queue(function () {
 	    MathJax.Hub.Config({
@@ -27,4 +25,14 @@ export function defParser(type,tag,cls) {
 		}
 	})	
 }
+
+/*import {InputRule} from "prosemirror/dist/inputrules"
+let urlex = /((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/
+LinkMark.register("autoInput","startLink", new InputRule(urlex," ",
+	function(pm, match, pos) {
+		let url = match[0]
+		console.log(url)
+		pm.setMark(this,pos,{href: url, title: ""})
+	}
+))*/
 

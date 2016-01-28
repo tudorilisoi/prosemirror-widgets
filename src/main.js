@@ -1,5 +1,6 @@
 import {ProseMirror} from "prosemirror/dist/edit"
 import {insertCSS} from "prosemirror/dist/dom"
+import {baseCommands} from "prosemirror/dist/edit"
 import "prosemirror/dist/menu/tooltipmenu"
 import "prosemirror/dist/menu/menubar"
 import "prosemirror/dist/inputrules/autoinput"
@@ -13,15 +14,7 @@ import {Input, Content, Answers, ShortAnswer, Essay, CheckBox, RadioButton, Sele
 	Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward,
 	Choice, ChoiceList, Scale, CheckItem, CheckList} from "./widgets"
 
-/*import {InputRule} from "prosemirror/dist/inputrules"
-let urlex = /((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/
-LinkMark.register("autoInput","startLink", new InputRule(urlex," ",
-	function(pm, match, pos) {
-		let url = match[0]
-		console.log(url)
-		pm.setMark(this,pos,{href: url, title: ""})
-	}
-))*/
+delete baseCommands.selectParentNode
 
 const widgetSpec = new SchemaSpec({
 	doc: Doc,
@@ -77,6 +70,9 @@ let pm = window.pm = new ProseMirror({
   schema: widgetSchema
 })
 
+/*pm.setOption("menuBar", false)
+pm.setOption("tooltipMenu", {selectedBlockMenu: true})
+*/	
 defineFileHandler(function(files) {
 	console.log(files)
 })
@@ -88,11 +84,17 @@ insertCSS(`
 	min-height: 200px;
 }
 
+.ProseMirror-menu {
+	background: white;
+	color: black;
+}
+
 div.ProseMirror-dropdown-menu {
   position: absolute;
   background: white;
   color: black;
   border-radius: 6px;
+  border: 1px solid silver;
   padding: 2px 2px;
   z-index: 15;
 }

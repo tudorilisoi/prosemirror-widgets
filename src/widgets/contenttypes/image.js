@@ -1,6 +1,6 @@
 import {Inline, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
 
 export class Image extends Inline {
 	get attrs() {
@@ -20,7 +20,7 @@ Image.prototype.serializeDOM = (node, s) => s.renderAs(node, "img", node.attrs)
 Image.register("command", "insert", {
   label: "Image",
   run(pm, src, alt, title) {
-    return pm.tr.replaceSelection(this.create({src, title, alt})).apply(andScroll)
+    return pm.tr.replaceSelection(this.create({src, title, alt})).apply(pm.apply.scroll)
   },
   params: [
     { name: "File", label: "Image File", type: "file", default: "img.png", 

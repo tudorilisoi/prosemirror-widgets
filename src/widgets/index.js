@@ -26,7 +26,7 @@ CheckBox.register("insertMenu", "main", {label: "Check Box", command: "insert", 
 insertCSS(`
 
 .ProseMirror .widgets-edit:hover {
-	background-image: url('icons/edit45.png');
+	background-image: url('icons/settings.png');
 	background-repeat: no-repeat;
 	background-position: top left;
 	cursor: pointer;

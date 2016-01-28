@@ -1,10 +1,9 @@
-import {Block, Paragraph, Attribute, Pos} from "prosemirror/dist/model"
+import {Block, Textblock, emptyFragment, Fragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
-export class CheckItem extends Block {
+export class CheckItem extends Textblock {
 	static get kinds() { return "checkitem" }
-	get isTextblock() { return true }
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -13,13 +12,18 @@ export class CheckItem extends Block {
 		}
 	}
 	create(attrs, content, marks) {
-		// if content not null then it is a fragment with paragraph as first child
-		let para = content? content = content.firstChild: pm.schema.defaultTextblockType().create(null)
-		return super.create(attrs,[this.schema.node("checkbox",attrs),para],marks)
+		// remove any checkboxes from split/join operations
+		let result = []
+		for (let iter = content.iter(), n; n = iter.next().value;) 
+			if (n.type.name != "checkbox") result.push(n)
+		// prepend the new checkbox
+		result.unshift(this.schema.node("checkbox",{name: attrs.name+"-"+attrs.value, value: attrs.value}))
+		return super.create(attrs,Fragment.from(result),marks)
 	}
 }
 
 export class CheckList extends Block {
+	static get kinds() { return super.kinds + " checklist"}
 	static get contains() { return "checkitem" }
 	get attrs() {
 		return {
@@ -29,6 +33,9 @@ export class CheckList extends Block {
 		}
 	}
 	get isList() { return true }
+	create(attrs, content, marks) {
+		return super.create(attrs,this.schema.node("checkitem",{name: attrs.name, value:1}, emptyFragment),marks)
+	}
 }
 
 defParser(CheckItem,"div","widgets-checkitem")
@@ -38,18 +45,25 @@ CheckItem.prototype.serializeDOM = (node,s) => s.renderAs(node,"div", node.attrs
 
 CheckList.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
 
+function renumber(pm, pos) {
+	let cl = pm.doc.path(pos.path), i = 1
+	cl.forEach((node,start) => {
+		pm.tr.setNodeType(new Pos(pos.path,start), node.type, {name: node.attrs.name+"-"+i, value:i++}).apply()
+	})
+}
+
 CheckItem.register("command", "split", {
 	  label: "Split the current checkitem",
 	  run(pm) {
 	    let {from, to, node} = pm.selection
 	    if ((node && node.isBlock) || from.path.length < 2 || !Pos.samePath(from.path, to.path)) return false
-	    let toParent = from.shorten(), parent = pm.doc.path(toParent.path)
-	    if (parent.type != this) return false
-	    let nextType = to.offset == parent.child(toParent.offset).size ? pm.schema.defaultTextblockType() : null
-	    // need to renumber nodes and move cursor
-	    return pm.tr.delete(from, to).split(from, 2, nextType).apply(andScroll)
+	    if (pm.doc.path(from.path).type != this) return false
+	    let toParent = from.shorten(), cl = pm.doc.path(toParent.path)
+	    let tr = pm.tr.delete(from, to).split(from, 1, this, {name:cl.attrs.name, value: cl.size+1}).apply(pm.apply.scroll)
+	    renumber(pm, toParent)
+	    return tr
 	  },
-	  keys: ["Enter(19)"]
+	  keys: ["Enter(10)"]
 	})
 
 
@@ -57,15 +71,18 @@ CheckItem.register("command", "delete",{
 	label: "delete this checkitem or checklist",
 	run(pm) {
 		let {from,to} = pm.selection
-	    return pm.tr.delete(from,to).apply(andScroll)
+		if (from.offset > 1) return pm.tr.delete(from,to).apply(pm.apply.scroll)
+		pm.tr.delete(new Pos(from.path,0),to).apply(pm.apply.scroll)
+		pm.execCommand("joinBackward")
+		renumber(pm, from.shorten())
 	},
-	keys: ["Backspace(50)", "Mod-Backspace(50)"]
+	keys: ["Backspace(20)", "Mod-Backspace(20)"]
 })
 
 CheckList.register("command", "insert", {
 	label: "Check List",
 	run(pm, name, layout) {
-		return pm.tr.replaceSelection(this.create({name, layout})).apply(andScroll)
+		return pm.tr.replaceSelection(this.create({name, layout})).apply(pm.apply.scroll)
   	},
 	select(pm) {
   		return true
@@ -90,19 +107,18 @@ defParamsClick(CheckList,"checklist:insert")
 
 insertCSS(`
 
-.ProseMirror .widgets-checkitem {
+.ProseMirror .widgets-checkitem input {
 	float: left;
 }
 
-div.widgets-checkitem:first-child input {
-	display: none;
+.widgets-checklist {
+	padding-left: 8px;
+	padding-top: 8px;
 }
 
 .ProseMirror .widgets-checkitem:hover {
 	cursor: text;
 }
 
-.ProseMirror .widgets-checklist {
-}
 
 `)

@@ -1,6 +1,6 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, andScroll, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
  
 export class BlockMath extends Block {
 	get attrs() {
@@ -27,7 +27,7 @@ BlockMath.prototype.serializeDOM = node => {
 BlockMath.register("command", "insert", {
 	label: "BlockMath",
 	run(pm, tex) {
-    	return pm.tr.replaceSelection(this.create({tex})).apply(andScroll)
+    	return pm.tr.replaceSelection(this.create({tex})).apply(pm.apply.scroll)
   	},
 	params: [
      	{ name: "Latex", label: "Latex Expression", type: "text", 
