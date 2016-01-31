@@ -1,9 +1,11 @@
 import {Block, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
+import {TextBox} from "./textbox"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
-export class Choice extends Textblock {
+export class Choice extends Block {
 	static get kinds() { return "choice" }
+	get contains() {return "text"}
 	get attrs() {
 		return {
 			name: new Attribute(),
@@ -12,13 +14,8 @@ export class Choice extends Textblock {
 		}
 	}
 	create(attrs, content, marks) {
-		// remove any radiobuttons from split/join operations
-		let result = []
-		for (let iter = content.iter(), n; n = iter.next().value;) 
-			if (n.type.name != "radiobutton") result.push(n)
-		// prepend the new radiobutton
-		result.unshift(this.schema.node("radiobutton",attrs))
-		return super.create(attrs,Fragment.from(result),marks)
+		content = content? content.content[0]:this.schema.nodes.textbox.create(null," ",marks)
+		return super.create(attrs,[this.schema.nodes.radiobutton.create(attrs),content],marks)
 	}
 }
  
@@ -33,7 +30,7 @@ export class ChoiceList extends Block {
 	}
 	get isList() { return true }
 	create(attrs, content, marks) {
-		return super.create(attrs,this.schema.node("choice",{name: attrs.name, value:1}, emptyFragment),marks)
+		return super.create(attrs,this.schema.nodes.choice.create({name: attrs.name, value:1},marks))
 	}
 } 
   
@@ -58,10 +55,10 @@ Choice.register("command", "split", {
   run(pm) {
     let {from, to, node} = pm.selection
     if ((node && node.isBlock) || from.path.length < 2 || !Pos.samePath(from.path, to.path)) return false
-    if (pm.doc.path(from.path).type != this) return false
-    let toParent = from.shorten(), cl = pm.doc.path(toParent.path)
-    let tr = pm.tr.delete(from, to).split(from, 1, this, {name:cl.attrs.name, value: cl.size+1}).apply(pm.apply.scroll)
-    renumber(pm, toParent)
+    let toParent = from.shorten(), parent = pm.doc.path(toParent.path)
+    if (parent.type != this) return false
+    let tr = pm.tr.delete(from, to).split(from, 2).apply(pm.apply.scroll)
+    //renumber(pm, toParent)
     return tr
   },
   keys: ["Enter(10)"]
@@ -70,12 +67,25 @@ Choice.register("command", "split", {
 Choice.register("command", "delete", {
   label: "delete text, this choice or choicelist",
   run(pm) {
-	let {from,to} = pm.selection
+	let {from,to,head} = pm.selection
 	if (from.offset > 1) return pm.tr.delete(from,to).apply(pm.apply.scroll)
-	let tr = pm.tr.delete(new Pos(from.path,0),to).apply(pm.apply.scroll)
-	pm.execCommand("joinBackward")
-	renumber(pm, from.shorten())
-	return tr
+	// check if text is still remaining
+	if (pm.doc.path(from.path).size > 1) return false;
+    // if this is the only choice then delete whole choicelist
+    let toParent = from.shorten(), cl = pm.doc.path(toParent.path)
+    if (cl.size > 1) {
+    	let tr = pm.tr.delete(new Pos(from.path,0),to).apply(pm.apply.scroll)
+    	pm.execCommand("joinBackward")
+    	renumber(pm, from.shorten())
+    	return tr
+    } else {
+        let before, cut
+        for (let i = head.path.length - 1; !before && i >= 0; i--) if (head.path[i] > 0) {
+          cut = head.shorten(i)
+          before = pm.doc.path(cut.path).child(cut.offset - 1)
+        }
+    	return pm.tr.delete(cut, cut.move(1)).apply(pm.apply.scroll)
+    }
   },
   keys: ["Backspace(20)", "Mod-Backspace(20)"]
 })
@@ -83,6 +93,7 @@ Choice.register("command", "delete", {
 ChoiceList.register("command", "insert", {
 	label: "ChoiceList",
 	run(pm, name) {
+		let {from,to,head} = pm.selection
    		return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
 	},
 	select(pm) {

@@ -155,6 +155,7 @@ function paramDialog(pm, command, callback) {
     	let params = gatherParams(pm, command, form)
 		if (params) {
 			pm.wrapper.removeChild(dialog)
+			pm.sel.clearNode()
 			pm.focus()
 			callback(params)
 		}
@@ -165,6 +166,7 @@ function paramDialog(pm, command, callback) {
 	let cancel = elt("input",{name: "cancel", type: "button", value: "Cancel"})
     cancel.addEventListener("mousedown", e => {
     	e.preventDefault(); e.stopPropagation()
+		pm.sel.clearNode()
 		pm.wrapper.removeChild(dialog)
 		pm.focus()
     })

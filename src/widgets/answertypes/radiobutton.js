@@ -12,7 +12,6 @@ export class RadioButton extends Input {
 			class: new Attribute({default: "widgets-radiobutton"})
 		}
 	}
-	get selectable() { return true}
 	get contains() { return null}
 }
 

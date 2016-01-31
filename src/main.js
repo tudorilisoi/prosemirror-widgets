@@ -1,16 +1,17 @@
-import {ProseMirror} from "prosemirror/dist/edit"
 import {insertCSS} from "prosemirror/dist/dom"
-import {baseCommands} from "prosemirror/dist/edit"
+import {ProseMirror, baseCommands} from "prosemirror/dist/edit"
 import "prosemirror/dist/menu/tooltipmenu"
 import "prosemirror/dist/menu/menubar"
+import {InputRule} from "prosemirror/dist/inputrules"
 import "prosemirror/dist/inputrules/autoinput"
+import {Pos} from "prosemirror/dist/model"
 import {widgetParamHandler, defineFileHandler} from "./utils"
  
 import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, HorizontalRule,
 	Paragraph, Heading, Text, HardBreak,
 	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec} from "prosemirror/dist/model"
 
-import {Input, Content, Answers, ShortAnswer, Essay, CheckBox, RadioButton, Select, 
+import {Input, TextBox, ShortAnswer, Essay, CheckBox, RadioButton, Select, 
 	Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward,
 	Choice, ChoiceList, Scale, CheckItem, CheckList} from "./widgets"
 
@@ -32,8 +33,7 @@ const widgetSpec = new SchemaSpec({
 	hard_break: HardBreak,
 	
 	input: Input,
-	content: Content,
-	answers: Answers,
+	textbox: TextBox,
 	shortanswer: ShortAnswer,
 	essay: Essay,
 	checkbox: CheckBox,
@@ -102,19 +102,6 @@ div.ProseMirror-dropdown-menu {
 div.ProseMirror-dropdown-menu {
   cursor: pointer;
   padding: 0 1em 0 2px;
-}
-
-.ProseMirror-dropdown-menu div:nth-child(1), div:nth-child(9) {
-  font-weight: bold;
-  border-top: 1px solid #AAA;	
-  border-bottom: 1px solid #AAA;	
-}
-
-.ProseMirror-dropdown-menu div:nth-child(1):hover, 
-.ProseMirror-dropdown-menu div:nth-child(9):hover
-{
-	background: white;
-	color: inherit;
 }
 
 div.ProseMirror-menubar-inner {

@@ -70,11 +70,25 @@ CheckItem.register("command", "split", {
 CheckItem.register("command", "delete",{
 	label: "delete this checkitem or checklist",
 	run(pm) {
-		let {from,to} = pm.selection
+		let {from,to,head} = pm.selection
 		if (from.offset > 1) return pm.tr.delete(from,to).apply(pm.apply.scroll)
-		pm.tr.delete(new Pos(from.path,0),to).apply(pm.apply.scroll)
-		pm.execCommand("joinBackward")
-		renumber(pm, from.shorten())
+		// check if text is still remaining
+		if (pm.doc.path(from.path).size > 1) return false;
+	    // if this is the only choice then delete whole checklist
+	    let toParent = from.shorten(), cl = pm.doc.path(toParent.path)
+	    if (cl.size > 1) {
+	    	let tr = pm.tr.delete(new Pos(from.path,0),to).apply(pm.apply.scroll)
+	    	pm.execCommand("joinBackward")
+	    	renumber(pm, from.shorten())
+	    	return tr
+	    } else {
+	        let before, cut
+	        for (let i = head.path.length - 1; !before && i >= 0; i--) if (head.path[i] > 0) {
+	          cut = head.shorten(i)
+	          before = pm.doc.path(cut.path).child(cut.offset - 1)
+	        }
+	    	return pm.tr.delete(cut, cut.move(1)).apply(pm.apply.scroll)
+	    }
 	},
 	keys: ["Backspace(20)", "Mod-Backspace(20)"]
 })

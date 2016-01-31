@@ -1,5 +1,4 @@
-export {Input, TextBox, CheckBox, RadioButton, CheckList, CheckItem, ChoiceList, Choice, Scale, Select, Essay, ShortAnswer} from "./answertypes"
-export {BlockMath,CarryForward,Image,InlineMath,SpreadSheet,Website} from "./contenttypes"
+export {} from "./answertypes"
 import {insertCSS} from "prosemirror/dist/dom"
 
 insertCSS(`
