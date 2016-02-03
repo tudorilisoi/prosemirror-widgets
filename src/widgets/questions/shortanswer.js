@@ -1,9 +1,9 @@
-import {Attribute} from "prosemirror/dist/model"
-import {insertCSS} from "prosemirror/dist/dom"
-import {Input} from "./input"
+import {Block, Attribute} from "prosemirror/dist/model"
+import {elt, insertCSS} from "prosemirror/dist/dom"
+import {TextField} from "../input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
-export class ShortAnswer extends Input {
+export class ShortAnswer extends Block {
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -11,14 +11,18 @@ export class ShortAnswer extends Input {
 			size: new Attribute({default: "20"}),
 			class: new Attribute({default: "widgets-shortanswer widgets-edit"})
 		}
+	}	
+	create(attrs, content, marks) {
+		return super.create(attrs,[
+		    this.schema.nodes.paragraph.create(null,"",marks),
+		    this.schema.nodes.textfield.create(attrs)],marks)
 	}
-	get contains() { return null }
 }
 
-defParser(ShortAnswer,"input","widgets-shortanswer")
+ShortAnswer.prototype.serializeDOM = (node, s) => s.renderAs(node,"div",node.attrs)
 
-ShortAnswer.prototype.serializeDOM = (node,s) => s.renderAs(node,"input",node.attrs)
 
+defParser(ShortAnswer,"div","widgets-shortanswer")
 
 ShortAnswer.register("command", "insert", {
 	label: "Short Answer",
@@ -42,9 +46,14 @@ defParamsClick(ShortAnswer, "shortanswer:insert")
 
 insertCSS(`
 
+.ProseMirror .widgets-shortanswer p:hover {
+    cursor: text;
+}
+
+
 .ProseMirror .widgets-shortanswer {
-	resize: horizontal;
-	overflow: auto;
+	border-top: 1px solid #AAA;
+	padding: 8px;
 }
 
 `)

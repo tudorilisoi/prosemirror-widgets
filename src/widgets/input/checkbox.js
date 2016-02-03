@@ -1,5 +1,5 @@
 import {Inline, Attribute} from "prosemirror/dist/model"
-import {insertCSS} from "prosemirror/dist/dom"
+import {elt, insertCSS} from "prosemirror/dist/dom"
 import {Input} from "./input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
@@ -12,12 +12,9 @@ export class CheckBox extends Input {
 			class: new Attribute({default: "widgets-checkbox"})
 		}
 	}
-	get contains() { return null }
 }
 
 defParser(CheckBox,"input","widgets-checkbox")
-
-CheckBox.prototype.serializeDOM = (node,s) => s.renderAs(node,"input",node.attrs)
 
 CheckBox.register("command", "insert",{
 	label: "CheckBox",

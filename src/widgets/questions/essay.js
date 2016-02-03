@@ -11,29 +11,27 @@ export class Essay extends Block {
 			class: new Attribute({default: "widgets-essay widgets-edit"})
 		}
 	}
-	get contains() { return null }
+	create(attrs, content, marks) {
+		return super.create(attrs,[
+		    this.schema.nodes.paragraph.create(null,"",marks),
+		    this.schema.nodes.textarea.create(attrs,null,marks)],marks)
+	}
 }
 
-defParser(Essay,"input","widgets-essay")
+defParser(Essay,"div","widgets-essay")
 
-// if new then use default. If style has changed, Essay has been resized otherwise return the stored value
-/*function getDim(pm, dim) {
-	let dom = getLastClicked()
-	if (!dom) return 200
-	if (dom.style[dim].length > 2) return dom.style[dim].slice(0,dom.style[dim].length-2)
-}
-*/
-Essay.prototype.serializeDOM = (node,s) => s.renderAs(node,"textarea",{
-	name: node.attrs.name,
-	rows: node.attrs.rows,
-	cols: node.attrs.cols,
-	class: "widgets-essay widgets-edit"
-})
+
+Essay.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
 
 Essay.register("command", "insert", {
 	label: "Essay",
 	run(pm, name, rows, cols) {
-    	return pm.tr.replaceSelection(this.create({name,rows,cols})).apply(pm.apply.scroll)
+		let {from,to,node} = pm.selection
+		if (node && node.type == this) {
+			let tr = pm.tr.setNodeType(from, this, {name,rows,cols}).apply()
+			return tr
+		} else
+			return pm.tr.replaceSelection(this.create({name,rows,cols})).apply(pm.apply.scroll)
   	},
 	params: [
   	    { name: "Name", label: "Short ID", type: "text",
@@ -57,8 +55,13 @@ defParamsClick(Essay,"essay:insert")
 
 insertCSS(`
 
+.ProseMirror .widgets-essay p:hover {
+    cursor: text;
+}
+
 .ProseMirror .widgets-essay {
-	resize: none;
+	border-top: 1px solid #AAA;
+	padding: 8px;
 }
 
 `)

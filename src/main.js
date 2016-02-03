@@ -11,11 +11,16 @@ import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, Horizonta
 	Paragraph, Heading, Text, HardBreak,
 	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec} from "prosemirror/dist/model"
 
-import {Input, TextBox, ShortAnswer, Essay, CheckBox, RadioButton, Select, 
-	Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward,
-	Choice, ChoiceList, Scale, CheckItem, CheckList} from "./widgets"
+// basic form input elements
+import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
+// question elements
+import {TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
+// content elements
+import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward } from "./widgets"
 
+// remove these commands for default use
 delete baseCommands.selectParentNode
+CodeMark.register("command","toggle",null)
 
 const widgetSpec = new SchemaSpec({
 	doc: Doc,
@@ -23,31 +28,37 @@ const widgetSpec = new SchemaSpec({
 	ordered_list: OrderedList,
 	bullet_list: BulletList,
 	list_item: ListItem,
-	horizontal_rule: HorizontalRule,
 
 	paragraph: Paragraph,
 	heading: Heading,
 
 	text: Text,
-	image: Image,
 	hard_break: HardBreak,
 	
 	input: Input,
-	textbox: TextBox,
-	shortanswer: ShortAnswer,
-	essay: Essay,
 	checkbox: CheckBox,
 	radiobutton: RadioButton,
 	select: Select,
+	textfield: TextField,
+	textarea: TextArea,
+
+	textbox: TextBox,
+	choice: Choice,
+	multiplechoice: MultipleChoice,
+	scaledisplay: ScaleDisplay,
+	scale: Scale,
+	checkitem: CheckItem,
+	checklist: CheckList,
+	shortanswer: ShortAnswer,
+	essay: Essay,
+	selection: Selection,
+	
+	horizontal_rule: HorizontalRule,
+	image: Image,
 	inlinemath: InlineMath,
 	blockmath: BlockMath,
 	website: Website,
 	carryforward: CarryForward,
-	choice: Choice,
-	choicelist: ChoiceList,
-	scale: Scale,
-	checkitem: CheckItem,
-	checklist: CheckList,
 	spreadsheet: SpreadSheet
 }, {
 	em: EmMark,

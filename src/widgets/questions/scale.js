@@ -2,25 +2,20 @@ import {Block, Paragraph, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
-export class Scale extends Block {
-	static get contains() { return "paragraph"}
+export class ScaleDisplay extends Block {
 	get attrs() {
 		return {
 			name: new Attribute,
 			startvalue: new Attribute({default: "1"}),
 			startlabel: new Attribute({default: "low"}),
 			endvalue: new Attribute({default: "10"}),
-			endlabel: new Attribute({default: "high"}),
+			endlabel: new Attribute({default: "high"})
 		}
 	}
 }
 
-defParser(Scale,"div","widgets-scale")
-
-Scale.prototype.serializeDOM = (node,s) => {
-	let dom = s.renderAs(node,"div",{class: "widgets-scale widgets-edit", contenteditable: false})
-	let para = elt("p")
-	dom.appendChild(para)
+ScaleDisplay.prototype.serializeDOM = (node,s) => {
+	let para = elt("div",{contenteditable: false})
 	para.appendChild(elt("span", null, node.attrs.startlabel+" "))
 	let startVal = Number(node.attrs.startvalue)
 	let endVal = Number(node.attrs.endvalue)
@@ -44,13 +39,41 @@ Scale.prototype.serializeDOM = (node,s) => {
 			)
 		}
 	para.appendChild(elt("span", null, " "+node.attrs.endlabel))
-	return dom
+	return para
 }
+
+export class Scale extends Block {
+	static get contains() { return "text"}
+	get attrs() {
+		return {
+			name: new Attribute,
+			startvalue: new Attribute({default: "1"}),
+			startlabel: new Attribute({default: "low"}),
+			endvalue: new Attribute({default: "10"}),
+			endlabel: new Attribute({default: "high"}),
+			class: new Attribute({default: "widgets-scale widgets-edit"})
+		}
+	}
+	create(attrs, content, marks) {
+		return super.create(attrs,[
+		    this.schema.nodes.paragraph.create(null,"",marks),
+		    this.schema.nodes.scaledisplay.create(attrs, null, marks)
+		],marks)
+	}
+}
+
+defParser(Scale,"div","widgets-scale")
+
+Scale.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
 
 Scale.register("command", "insert",{
 	label: "Scale",
 	run(pm, name, startvalue, startlabel, endvalue, endlabel) {
-    	return pm.tr.replaceSelection(this.create({name,startvalue,startlabel,endvalue,endlabel})).apply(pm.apply.scroll)
+		let {from,to,node} = pm.selection
+		if (node && node.type == this) {
+			return pm.tr.setNodeType(from, this, {name,startvalue,startlabel,endvalue,endlabel}).apply(pm.apply.scroll)
+		} else
+			return pm.tr.replaceSelection(this.create({name,startvalue,startlabel,endvalue,endlabel})).apply(pm.apply.scroll)
   	},
 	params: [
   	    { name: "Name", label: "Short ID", type: "text",
@@ -77,6 +100,7 @@ insertCSS(`
 .widgets-scaleitem {
 	display: inline-block;
 	text-align: center;
+    padding: 4px;
 }
 
 .widgets-scaleitem input {
@@ -88,6 +112,19 @@ insertCSS(`
 	font-weight: normal;
 }
 
-.ProseMirror .widgets-scale:hover {}
+.ProseMirror .widgets-scale p:hover {
+    cursor: text;
+}
 
+.widgets-scale {
+	padding: 8px;
+    border-top: 1px solid #AAA;
+}
+
+.widgets-scale div {
+	padding: 4px;
+	background: #EEE;
+    border-radius: 6px;
+    border: 1px solid #AAA;
+}
 `)

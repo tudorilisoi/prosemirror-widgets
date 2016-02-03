@@ -1,8 +1,9 @@
 import {Block, Textblock, emptyFragment, Fragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
+import {TextBox} from "./textbox"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
-export class CheckItem extends Textblock {
+export class CheckItem extends Block {
 	static get kinds() { return "checkitem" }
 	get attrs() {
 		return {
@@ -12,13 +13,8 @@ export class CheckItem extends Textblock {
 		}
 	}
 	create(attrs, content, marks) {
-		// remove any checkboxes from split/join operations
-		let result = []
-		for (let iter = content.iter(), n; n = iter.next().value;) 
-			if (n.type.name != "checkbox") result.push(n)
-		// prepend the new checkbox
-		result.unshift(this.schema.node("checkbox",{name: attrs.name+"-"+attrs.value, value: attrs.value}))
-		return super.create(attrs,Fragment.from(result),marks)
+		content = content? content.content[0]:this.schema.nodes.textbox.create(null,"",marks)
+		return super.create(attrs,[this.schema.nodes.checkbox.create(attrs),content],marks)
 	}
 }
 
@@ -28,13 +24,15 @@ export class CheckList extends Block {
 	get attrs() {
 		return {
 			name: new Attribute,
-			layout: new Attribute({default: "vertical"}),
 			class: new Attribute({default: "widgets-checklist widgets-edit"})
 		}
 	}
 	get isList() { return true }
 	create(attrs, content, marks) {
-		return super.create(attrs,this.schema.node("checkitem",{name: attrs.name, value:1}, emptyFragment),marks)
+		return super.create(attrs,[
+		   this.schema.nodes.paragraph.create(null,"",marks),
+		   this.schema.nodes.checkitem.create({name: attrs.name, value:1}, content,marks)
+		])
 	}
 }
 
@@ -57,10 +55,10 @@ CheckItem.register("command", "split", {
 	  run(pm) {
 	    let {from, to, node} = pm.selection
 	    if ((node && node.isBlock) || from.path.length < 2 || !Pos.samePath(from.path, to.path)) return false
-	    if (pm.doc.path(from.path).type != this) return false
-	    let toParent = from.shorten(), cl = pm.doc.path(toParent.path)
-	    let tr = pm.tr.delete(from, to).split(from, 1, this, {name:cl.attrs.name, value: cl.size+1}).apply(pm.apply.scroll)
-	    renumber(pm, toParent)
+	    let toParent = from.shorten(), parent = pm.doc.path(toParent.path)
+	    if (parent.type != this) return false    
+	    let tr = pm.tr.delete(from, to).split(from, 2).apply(pm.apply.scroll)
+	    renumber(pm, toParent.shorten())
 	    return tr
 	  },
 	  keys: ["Enter(10)"]
@@ -71,22 +69,19 @@ CheckItem.register("command", "delete",{
 	label: "delete this checkitem or checklist",
 	run(pm) {
 		let {from,to,head} = pm.selection
-		if (from.offset > 1) return pm.tr.delete(from,to).apply(pm.apply.scroll)
-		// check if text is still remaining
-		if (pm.doc.path(from.path).size > 1) return false;
-	    // if this is the only choice then delete whole checklist
-	    let toParent = from.shorten(), cl = pm.doc.path(toParent.path)
-	    if (cl.size > 1) {
-	    	let tr = pm.tr.delete(new Pos(from.path,0),to).apply(pm.apply.scroll)
-	    	pm.execCommand("joinBackward")
-	    	renumber(pm, from.shorten())
-	    	return tr
+		if (from.offset > 0) return pm.tr.delete(from,to).apply(pm.apply.scroll)
+	    let toCH = from.shorten(), ch = pm.doc.path(toCH.path)
+	    let toMC = toCH.shorten(), mc = pm.doc.path(toMC.path)
+	    // if more than one choice then delete choice otherwise delete whole multiplechoice
+	    if (mc.size > 1) {
+	    	let cut = getPosInParent(pm, toMC, ch)
+	    	pm.tr.lift(head).apply()
+	    	return pm.tr.delete(cut, cut.move(1)).apply(pm.apply.scroll)
+	     	//renumber(pm, toMC)
 	    } else {
-	        let before, cut
-	        for (let i = head.path.length - 1; !before && i >= 0; i--) if (head.path[i] > 0) {
-	          cut = head.shorten(i)
-	          before = pm.doc.path(cut.path).child(cut.offset - 1)
-	        }
+	    	// don't delete if still content in first choice
+	    	if (pm.doc.path(from.path).size > 0) return true
+	    	let cut = getPosInParent(pm, toMC.shorten(), mc)
 	    	return pm.tr.delete(cut, cut.move(1)).apply(pm.apply.scroll)
 	    }
 	},
@@ -95,9 +90,15 @@ CheckItem.register("command", "delete",{
 
 CheckList.register("command", "insert", {
 	label: "Check List",
-	run(pm, name, layout) {
-		return pm.tr.replaceSelection(this.create({name, layout})).apply(pm.apply.scroll)
-  	},
+	run(pm, name) {
+		let {from,to,node} = pm.selection
+		if (node && node.type == this) {
+			let tr = pm.tr.setNodeType(from, this, {name: name}).apply()
+			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
+			return tr
+		} else
+			return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
+	 	},
 	select(pm) {
   		return true
 	},
@@ -107,13 +108,7 @@ CheckList.register("command", "insert", {
  		  options: {
  			  pattern: namePattern, 
  			  size: 10, 
- 			  title: nameTitle}},
-	    { name: "Layout", label: "vertical or horizontal", type: "select", default: "vertical",
-	      prefill: function(pm) { return selectedNodeAttr(pm, this, "layout") },
-	      options: [
-	       	  {value: "vertical", label: "vertical"},
-     	      {value: "horizontal", label: "horizontal"}
-     	  ]}
+ 			  title: nameTitle}}
 	]
 })
 
@@ -126,11 +121,16 @@ insertCSS(`
 }
 
 .widgets-checklist {
+	border-top: 1px solid #DDD;
 	padding-left: 8px;
 	padding-top: 8px;
 }
+.ProseMirror .widgets-checklist p {
+    cursor: text;
+}
 
-.ProseMirror .widgets-checkitem:hover {
+
+.ProseMirror .widgets-checkitem {
 	cursor: text;
 }
 

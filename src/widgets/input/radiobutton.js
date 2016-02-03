@@ -1,5 +1,5 @@
 import {Attribute} from "prosemirror/dist/model"
-import {insertCSS} from "prosemirror/dist/dom"
+import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser} from "../../utils"
 import {Input} from "./input"
 
@@ -12,12 +12,11 @@ export class RadioButton extends Input {
 			class: new Attribute({default: "widgets-radiobutton"})
 		}
 	}
-	get contains() { return null}
 }
 
 defParser(RadioButton,"input","widgets-radiobutton")
 
-RadioButton.prototype.serializeDOM = (node,s) => s.renderAs(node,"input",node.attrs)
+RadioButton.prototype.serializeDOM = node => elt("input",node.attrs)
 
 insertCSS(`
 

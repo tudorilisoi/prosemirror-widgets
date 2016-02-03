@@ -1,5 +1,6 @@
 export {widgetParamHandler, defineFileHandler, namePattern, nameTitle, defParamsClick, selectedNodeAttr} from "./params"
 export {defineInsertMenu} from "./insert"
+import {Pos} from "prosemirror/dist/model"
 import {selectableNodeAbove} from "prosemirror/dist/edit/selection"
 import {widgetParamHandler} from "./params"
 
@@ -25,6 +26,12 @@ export function defParser(type,tag,cls) {
 			context.insertFrom(dom, type, attrs)
 		}
 	})	
+}
+
+export function getPosInParent(pm, pos, child) {
+	let i = 0, parent = pm.doc.path(pos.path)
+	parent.forEach((node,start) => { i = node == child?start: 0 })
+	return new Pos(pos.path,i)
 }
 
 /*import {InputRule} from "prosemirror/dist/inputrules"
