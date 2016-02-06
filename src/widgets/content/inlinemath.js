@@ -30,6 +30,7 @@ InlineMath.register("command", "insert", {
 	run(pm, tex) {
     	return pm.tr.replaceSelection(this.create({tex})).apply(pm.apply.scroll)
   	},
+	menu: {group: "content", rank: 71, display: {type: "label", label: "Inline Math"}},
 	params: [
      	{ name: "Latex", label: "Latex Expression", type: "text", 
        	  prefill: function(pm) { return selectedNodeAttr(pm, this, "tex") }}

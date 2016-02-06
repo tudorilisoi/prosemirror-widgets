@@ -75,6 +75,7 @@ Scale.register("command", "insert",{
 		} else
 			return pm.tr.replaceSelection(this.create({name,startvalue,startlabel,endvalue,endlabel})).apply(pm.apply.scroll)
   	},
+	menu: {group: "question", rank: 74, display: {type: "label", label: "Scale"}},
 	params: [
   	    { name: "Name", label: "Short ID", type: "text",
      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },
@@ -122,6 +123,7 @@ insertCSS(`
 }
 
 .widgets-scale div {
+	display: inline-block;
 	padding: 4px;
 	background: #EEE;
     border-radius: 6px;

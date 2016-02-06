@@ -1,63 +1,128 @@
 import {elt,insertCSS} from "prosemirror/dist/dom"
-import {paramTypes} from "prosemirror/dist/menu/menu"
-import {defineDefaultParamHandler} from "prosemirror/dist/edit"
-import {selectableNodeAbove} from "prosemirror/dist/edit/selection"
+import {ParamPrompt} from "prosemirror/dist/ui/prompt"
+import {defineOption} from "prosemirror/dist/edit"
+import {selectableNodeAbove} from "prosemirror/dist/edit/dompos"
 import {AssertionError} from "prosemirror/dist/util/error"
 
-let fhandler = null
+let fhandler = null,lastClicked = null
 
 export const namePattern = "[A-Za-z0-9_-]{1,10}"
-	
 export const nameTitle = "letters,digits, -, _ (max:10)"
 
 export function defineFileHandler(handler) { fhandler = handler}
-
-let lastClicked = null;
 export function getLastClicked() { return lastClicked }
 
+class WidgetParamPrompt extends ParamPrompt {
+	prompt() {
+		return openWidgetPrompt(this,{onClose: () => this.close()})
+	}
+}
+
+defineOption("commandParamPrompt", WidgetParamPrompt)
+
+function openWidgetPrompt(wpp, options) {
+	let close = () => {
+	    wpp.pm.off("interaction", close)
+	    if (dialog.parentNode) {
+	      dialog.parentNode.removeChild(dialog)
+	      if (options && options.onClose) options.onClose()
+	    }
+	}
+    let submit = () => {
+       let params = wpp.values()
+       if (params) {
+           wpp.command.exec(wpp.pm, params)
+           close()
+        }
+    }
+	wpp.pm.on("interaction", close)
+	let save = elt("input",{name: "save", type: "button", value: "Save"})
+    save.addEventListener("mousedown", e => { submit() })
+	let cancel = elt("input",{name: "cancel", type: "button", value: "Cancel"})
+    cancel.addEventListener("mousedown", e => {
+    	e.preventDefault(); e.stopPropagation()
+    	close()
+    })
+	let buttons = elt("div",{class: "widgetButtons"},save,cancel)
+	wpp.form = elt("form",{class: "widgetForm"},
+		elt("h4", null, wpp.command.label+" Settings"),
+		wpp.fields.map(f => elt("div", null, f)),
+		buttons)
+	// Submit if Enter pressed and all fields are valid
+    wpp.form.addEventListener("keypress", e => { 
+     	if (e.keyCode == 13) {
+        	e.preventDefault(); e.stopPropagation()
+     		save.click()
+     	}
+   })
+    
+	let dialog = elt("div",null,elt("div",{class: "widgetDialog"}),wpp.form)
+	wpp.pm.wrapper.appendChild(dialog)
+	return {close}
+}
+
 ["text","number","range","email","url","date"].map(type =>
-  paramTypes[type] = {
+  ParamPrompt.prototype.paramTypes[type] = {
     render(param, value) {
-      return elt("input", {
-    	 type,
-         placeholder: param.label,
-         value,
-         required: "required",
-         autocomplete: "off"})
-  },
-  read(dom) {
-    return dom.value
+      let field =  elt("input", {type,placeholder: param.label,value,required: "required",autocomplete: "off"})
+      let label = param.name? param.name: param.label
+      field.setAttribute("name", label)
+      let opt = param.options
+	  if (opt) for (let prop in opt) field.setAttribute(prop, opt[prop])
+	  let fieldLabel = elt("label",{for: label},label)
+	  return elt("div", {class: "widgetField"}, fieldLabel, field)
+    },
+    validate(dom) {
+        let input = dom.querySelector("input")
+        return input.checkValidity()? null: input.name+": "+input.validationMessage
+    },
+    read(dom) {
+       let input = dom.querySelector("input")
+       return input? input.value: input
   }
 })
 
-paramTypes.file = {
+ParamPrompt.prototype.paramTypes.file = {
   render(param,value) {
-	return elt("input", {
-		type: "text",
-		readonly: true,
-        placeholder: param.label,
-        value,
-        required: "required",
-        autocomplete: "off",
-        required: true})
+	let field = elt("input", {type: "text",readonly: true,placeholder: param.label,value,required: "required",autocomplete: "off",required: true})
+    let label = param.name? param.name: param.label
+    field.setAttribute("name", label)
+    let opt = param.options
+	if (opt) for (let prop in opt) field.setAttribute(prop, opt[prop])
+	let fieldLabel = elt("label",{for: label},label)
+	let uploadButton = elt("input",{name: "upload", type: "button", value: "Upload"})
+	uploadButton.addEventListener("click",e => { buildUploadForm(pm, field) })
+	return elt("div", {class: "widgetField"}, fieldLabel, field, uploadButton)
+  },
+  validate(dom) {
+      let input = dom.querySelector("input")
+      return input.checkValidity()? null: input.name+": "+input.validationMessage
   },
   read(dom) {
-    return dom.value
+      let input = dom.querySelector("input")
+      return input? input.value: input
   }
 }
 
-paramTypes.select = {
+ParamPrompt.prototype.paramTypes.select = {
   render(param, value) {
     let options = param.options.call ? param.options(this) : param.options
     let field = elt("select", null, options.map(o => elt("option", {value: o.value, selected: o.value == value ? "true" : null}, o.label)))
     field.setAttribute("required","required")
-    return field
+    let label = param.name? param.name: param.label
+    field.setAttribute("name", label)
+	let fieldLabel = elt("label",{for: name},label)
+	return elt("div", {class: "widgetField"}, fieldLabel, field)
+  },
+  validate(dom) {
+    let select = dom.querySelector("select")
+    return select.checkValidity()? null: select.name+": "+select.validationMessage
   },
   read(dom) {
-    return dom.value
+    let select = dom.querySelector("select")
+    return select? select.value: select
   }
 }
-
 
 function selectClickedNode(pm, e) {
 	  let pos = selectableNodeAbove(pm, e.target, {left: e.clientX, top: e.clientY}, true)
@@ -85,7 +150,7 @@ export function defParamsClick(type, cmdname, spots = ["topleft"]) {
 			let cmd = pm.commands[cmdname]
 			if (cmd) {
 				selectClickedNode(pm,e)
-				widgetParamHandler(pm,cmd)
+				cmd.exec(pm)
 				return true;
 			} else
 				return false;
@@ -98,97 +163,6 @@ export function selectedNodeAttr(pm, type, name) {
   if (node && node.type == type) return node.attrs[name]
 }
 
-function paramDefault(param, pm, command) {
-  if (param.prefill) {
-    let prefill = param.prefill.call(command.self, pm)
-    if (prefill != null) return prefill
-  }
-  return param.default
-}
-
-function buildParamFields(pm, command) {
-	let fields = command.params.map((param, i) => {
-	    if (!(param.type in paramTypes))
-	        AssertionError.raise("Unsupported parameter type: " + param.type)
-	    let val = paramDefault(param, pm, command)
-		let fname = param.name? param.name: param.label
-		let opt = param.options ? param.options: {}
-	    let field = paramTypes[param.type].render.call(pm, param, paramDefault(param, pm, command))
-	    field.setAttribute("data-field", i)
-	    let name = "field_"+i
-	    field.setAttribute("name", name)
-		if (param.type != "select") for (let prop in opt) field.setAttribute(prop, opt[prop])
-		let fieldLabel = elt("label",{for: name},fname)
-		if (param.type == "file") {
-			let uploadButton = elt("input",{name: "upload", type: "button", value: "Upload"})
-			uploadButton.addEventListener("click",e => { buildUploadForm(pm, field) })
-			return elt("div", {class: "widgetField"}, fieldLabel, field, uploadButton)
-		} else
-			return elt("div", {class: "widgetField"}, fieldLabel, field)
-	 })
-	 return fields
-}
-
-function formIsValid(form) {
-	for (let i = 0; i < form.elements.length; i++)
-		if (!form.elements[i].checkValidity()) return false
-	return true
-}
-
-function gatherParams(pm, command, form) {
-	let bad = false
-	let params = command.params.map((param, i) => {
-	    let dom = form.querySelector("[data-field=\"" + i + "\"]")
-		if (dom && dom.validity.valid) { 
-		    let val = paramTypes[param.type].read.call(pm, dom)
-		    if (val) return val
-		    if (param.default) return paramDefault(param, pm, command)
-		}
-		bad = true;
-	})
-	return bad ? null : params
-}
-
-function paramDialog(pm, command, callback) {
-	let dialog, form, finish = e => {
-    	e.preventDefault(); e.stopPropagation()
-    	let params = gatherParams(pm, command, form)
-		if (params) {
-			pm.wrapper.removeChild(dialog)
-			pm.focus()
-			callback(params)
-		}
-	} 
-	let fields = buildParamFields(pm, command)
-	let save = elt("input",{name: "save", type: "submit", value: "Save"})
-    save.addEventListener("mousedown", e => { finish(e) })
-	let cancel = elt("input",{name: "cancel", type: "button", value: "Cancel"})
-    cancel.addEventListener("mousedown", e => {
-    	e.preventDefault(); e.stopPropagation()
-		pm.wrapper.removeChild(dialog)
-		pm.focus()
-    })
-	let buttons = elt("div",{class: "widgetButtons"},save,cancel)
-	form = elt("form", {class: "widgetForm"}, elt("h4",null,command.label+" Settings"),fields, buttons)
-	// Submit if Enter pressed and all fields are valid
-    form.addEventListener("keypress", e => { 
-     	if (e.keyCode == 13)
-    		if (formIsValid(form))
-    			finish(e)
-    		else
-    			save.click()
-    })
-    
-	dialog = elt("div",null,elt("div",{class: "widgetDialog"}),form)
-	
-	pm.wrapper.appendChild(dialog)
- 
-	// FIXME too hacky?
-	setTimeout(() => {
-		let input = form.querySelector("input, select")
-		if (input) input.focus()
-	}, 50)
-}
 
 function FileDragHover(e) {
 	e.stopPropagation();
@@ -197,7 +171,7 @@ function FileDragHover(e) {
 }
 
 function buildUploadForm(pm, field) {
-	let legend = elt("legend", null, "File Upload")
+	let legend = elt("h4", null, "File Upload")
 	let inputHidden = elt("input",{type: "hidden", id: "MAX_FILE_SIZE", name: "MAX_FILE_SIZE", value:"300000"})
 	let label = elt("label", {for: "fileselect"},"File to upload:")
 	let fileselect = elt("input",{id: "fileselect", type: "file", name: "fileselect[]", multiple: "multiple"})
@@ -224,28 +198,16 @@ function buildUploadForm(pm, field) {
 		filedrag.style.display = "block"
 	}
 	let form = elt("form",{id: "upload", enctype: "multipart/form-data"},
-		elt("fieldset", null, legend, inputHidden,
-			elt("div",null,
-				label,
-				fileselect,
-				filedrag
-			),
-			elt("div",null,cancel)
-		)
+		legend,
+		elt("div",null,
+			label,
+			fileselect,
+			filedrag
+		),
+		elt("div",null,cancel)
 	)
 	pm.wrapper.appendChild(form)
 }
-
-export function widgetParamHandler(pm, command, callback) {
-	paramDialog(pm, command, params => {
-		let run = command.spec.run
-		if (params && run) {
-			run.call(command.self, pm, ...params)
-		}
-	})
-}
-
-defineDefaultParamHandler(widgetParamHandler)
 
 insertCSS(`
 
@@ -257,25 +219,24 @@ insertCSS(`
 	height: 100%;
 	background: #FFF;
 	z-index: 8888;
-	opacity:0.8;
+	opacity:0.7;
 	font-family: Helvetica, Arial, Sans-Serif;
 }
 
 .widgetForm {
 	background: white;
 	position: absolute;
-	top: 20px;
-	left: 20px;
-	padding: 5px;
-	border: 1px solid #AAA;
-	border-radius: 6px;
+	top: 10px;
+	left: 10px;
 	z-index: 9999;
 	display: block;
+	border-radius: 6px;
+	border: 1px solid #AAA;
+	padding: 4px;
 }
 
 .widgetForm h4 {
-	color: black;
-	margin: 4px;
+	margin: 0;
 }
 
 .widgetField {
@@ -303,7 +264,6 @@ insertCSS(`
 }
 
 .widgetField input[type = "button"] {
-	border-radius: 4px;
 	margin: 5px;
 }
 
@@ -320,7 +280,6 @@ insertCSS(`
 }
 
 .widgetButtons input {
-	border-radius: 4px;
 	margin: 5px;
 }
 
@@ -329,7 +288,7 @@ insertCSS(`
 	top: 40px;
 	left: 40px;
 	padding: 5px;
-	border: 1px solid black;
+	border: 1px solid #AAA;
 	border-radius: 6px;
 	background: white;
 	z-index: 10000;
@@ -337,8 +296,11 @@ insertCSS(`
 }
 
 #upload input {
-	border-radius: 4px;
 	margin: 5px;
+}
+
+#upload h4 {
+	margin: 0;
 }
 
 #filedrag {
@@ -349,7 +311,7 @@ insertCSS(`
 	margin: 1em 0;
 	color: #555;
 	border: 2px dashed #555;
-	border-radius: 7px;
+	border-radius: 6px;
 	cursor: default;
 }
 
@@ -359,5 +321,16 @@ insertCSS(`
 	border-style: solid;
 	box-shadow: inset 0 3px 4px #888;
 }
+
+.ProseMirror-invalid {
+	  white-space: nowrap;
+	  font-size: 80%;
+	  background: white;
+	  border: 1px solid red;
+	  border-radius: 4px;
+	  padding: 5px 10px;
+	  position: absolute;
+	  min-width: 10em;
+	}
 
 `)

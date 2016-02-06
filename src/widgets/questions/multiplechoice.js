@@ -1,11 +1,8 @@
 import {Block, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {TextBox} from "./textbox"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent} from "../../utils"
-
+ 
 export class Choice extends Block {
-	static get kinds() { return "choice" }
-	get contains() {return "text"}
 	get attrs() {
 		return {
 			name: new Attribute(),
@@ -20,8 +17,6 @@ export class Choice extends Block {
 }
  
 export class MultipleChoice extends Block {
-	static get kinds() { return super.kinds + " multiplechoice"}
-	get contains() { return "choice"}
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -46,7 +41,8 @@ MultipleChoice.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.a
 function renumber(pm, pos) {
 	let cl = pm.doc.path(pos.path), i = 1
 	cl.forEach((node, start) => {
-		pm.tr.setNodeType(new Pos(pos.path,start), node.type, {name: cl.attrs.name, value: i++}).apply()
+		if (start > 0)
+			pm.tr.setNodeType(new Pos(pos.path,start), node.type, {name: cl.attrs.name, value: i++}).apply()
 	})
 }
 
@@ -89,11 +85,11 @@ Choice.register("command", "delete", {
 
 MultipleChoice.register("command", "insert", {
 	label: "MultipleChoice",
-	run(pm, name) {
-		let {from,to,node} = pm.selection
+	run(pm, name) { 
+		let {from,to,node} = pm.selection 
 		if (node && node.type == this) {
 			let tr = pm.tr.setNodeType(from, this, {name: name}).apply()
-			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
+			//renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
 			return tr
 		} else
 			return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
@@ -101,6 +97,7 @@ MultipleChoice.register("command", "insert", {
 	select(pm) {
 		return true
 	},
+	menu: {group: "question", rank: 70, display: {type: "label", label: "MultipleChoice"}},
 	params: [
  	    { name: "Name", label: "Short ID", type: "text",
    	  	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },

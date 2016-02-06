@@ -44,6 +44,7 @@ SpreadSheet.register("command", "insert", {
 	run(pm, data) {
     	return pm.tr.replaceSelection(this.create({data})).apply(pm.apply.scroll)
   	},
+	menu: {group: "content", rank: 75, display: {type: "label", label: "Spreadsheet"}},
 	params: [
      	{ name: "Data Link", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}

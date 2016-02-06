@@ -29,6 +29,7 @@ ShortAnswer.register("command", "insert", {
 	run(pm, name, size) {
     	return pm.tr.replaceSelection(this.create({name,size})).apply(pm.apply.scroll)
   	},
+	menu: {group: "question", rank: 71, display: {type: "label", label: "Short Answer"}},
 	params: [
   	    { name: "Name", label: "Short ID", type: "text",
      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },

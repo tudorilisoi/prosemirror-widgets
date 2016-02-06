@@ -14,7 +14,6 @@ export class Selection extends Block {
 		}
 	}
 	create(attrs, content, marks) {
-		console.log(attrs)
 		return super.create(attrs,[
 		    this.schema.nodes.paragraph.create(null,"",marks),
 		    this.schema.nodes.select.create(attrs,null,marks)],marks)
@@ -36,6 +35,7 @@ Selection.register("command", "insert", {
 		} else
 			return pm.tr.replaceSelection(this.create({name,options,size,multiple})).apply(pm.apply.scroll)
   	},
+	menu: {group: "question", rank: 75, display: {type: "label", label: "Selection"}},
 	params: [
 	   	    { name: "Name", label: "Short ID", type: "text",
 	      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },

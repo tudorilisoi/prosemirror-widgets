@@ -33,6 +33,8 @@ Essay.register("command", "insert", {
 		} else
 			return pm.tr.replaceSelection(this.create({name,rows,cols})).apply(pm.apply.scroll)
   	},
+    select(pm) { return pm.doc.path(pm.selection.from.path).type.canContainType(this)},
+	menu: {group: "question", rank: 72, display: {type: "label", label: "Essay"}, select: "ignore"},
 	params: [
   	    { name: "Name", label: "Short ID", type: "text",
      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name")},

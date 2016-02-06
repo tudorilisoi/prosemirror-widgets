@@ -30,6 +30,7 @@ Website.register("command", "insert", {
 	run(pm, src, width, height) {
     	return pm.tr.replaceSelection(this.create({src, width, height})).apply(pm.apply.scroll)
   	},
+	menu: {group: "content", rank: 74, display: {type: "label", label: "Website"}},
 	params: [
      	{ name: "URL", label: "Link to website, youTube, Google Maps ...", type: "url",
        	  prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},
@@ -47,8 +48,8 @@ defParamsClick(Website,"website:insert")
 insertCSS(`
 
 .ProseMirror .widgets-website:hover {
-	padding-left: 8px;
-    padding-top: 8px;
+	padding-left: 16px;
+    padding-top: 16px;
 }
 
 `)

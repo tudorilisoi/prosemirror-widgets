@@ -1,15 +1,19 @@
 import {insertCSS} from "prosemirror/dist/dom"
-import {ProseMirror, baseCommands} from "prosemirror/dist/edit"
+import {ProseMirror, CommandSet} from "prosemirror/dist/edit"
 import "prosemirror/dist/menu/tooltipmenu"
 import "prosemirror/dist/menu/menubar"
 import {InputRule} from "prosemirror/dist/inputrules"
 import "prosemirror/dist/inputrules/autoinput"
 import {Pos} from "prosemirror/dist/model"
+import {inlineGroup, insertMenu, textblockMenu, blockGroup, historyGroup} from "prosemirror/dist/menu/menu"
+
 import {widgetParamHandler, defineFileHandler} from "./utils"
  
 import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, HorizontalRule,
 	Paragraph, Heading, Text, HardBreak,
 	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec} from "prosemirror/dist/model"
+
+import {widgetInsertMenu} from "./widgets"
 
 // basic form input elements
 import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
@@ -17,10 +21,6 @@ import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widge
 import {TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
 // content elements
 import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward } from "./widgets"
-
-// remove these commands for default use
-delete baseCommands.selectParentNode
-CodeMark.register("command","toggle",null)
 
 const widgetSpec = new SchemaSpec({
 	doc: Doc,
@@ -69,16 +69,23 @@ const widgetSpec = new SchemaSpec({
 
 const widgetSchema = new Schema(widgetSpec)
 
+// remove seletcParentNode and codemark for default use. Move horizontal_rule to content menu
+const updateCmd = Object.create(null)
+updateCmd["horizontal_rule:insert"] = {menu: {group: "content", rank: 71, display: {type: "label", label: "Horizontal Rule"}}}
+updateCmd["selectParentNode"] = null
+updateCmd["code:toggle"] = null
+
 let pm = window.pm = new ProseMirror({
   place: document.querySelector("#editor"),
   menuBar: {
 	float: true,
-	groups: ["inline", "block", "insert", "history"]
+	content: [inlineGroup, [blockGroup,textblockMenu],widgetInsertMenu,historyGroup]	 
   },
+  schema: widgetSchema,
+  commands: CommandSet.default.update(updateCmd),
   autoInput: true,
   doc: document.querySelector("#content"),
-  docFormat: "dom",
-  schema: widgetSchema
+  docFormat: "dom"
 })
 
 /*pm.setOption("menuBar", false)

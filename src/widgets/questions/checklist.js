@@ -102,6 +102,7 @@ CheckList.register("command", "insert", {
 	select(pm) {
   		return true
 	},
+	menu: {group: "question", rank: 70, display: {type: "label", label: "CheckList"}},
 	params: [
  	    { name: "Name", label: "Short ID", type: "text",
    	  	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },

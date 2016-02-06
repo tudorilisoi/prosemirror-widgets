@@ -29,6 +29,7 @@ CarryForward.register("command", "insert", {
 	run(pm, name) {
     	return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
   	},
+	menu: {group: "content", rank: 72, display: {type: "label", label: "Carry Forward"}},
 	params: [ 
    	    { name: "Name", label: "Element name", type: "select",
        	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },

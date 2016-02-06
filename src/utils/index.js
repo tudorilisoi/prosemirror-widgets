@@ -1,5 +1,4 @@
 export {widgetParamHandler, defineFileHandler, namePattern, nameTitle, defParamsClick, selectedNodeAttr} from "./params"
-export {defineInsertMenu} from "./insert"
 import {Pos} from "prosemirror/dist/model"
 import {selectableNodeAbove} from "prosemirror/dist/edit/selection"
 import {widgetParamHandler} from "./params"

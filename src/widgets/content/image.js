@@ -20,8 +20,9 @@ Image.prototype.serializeDOM = (node, s) => s.renderAs(node, "img", node.attrs)
 Image.register("command", "insert", {
   label: "Image",
   run(pm, src, alt, title) {
-    return pm.tr.replaceSelection(this.create({src, title, alt})).apply(pm.apply.scroll)
+    return pm.tr.replaceSelection(this.create({src, alt, title})).apply(pm.apply.scroll)
   },
+  menu: {group: "content", rank: 70, display: {type: "label", label: "Image"}},
   params: [
     { name: "File", label: "Image File", type: "file", default: "img.png", 
    	 prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},
