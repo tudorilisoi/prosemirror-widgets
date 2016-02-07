@@ -104,7 +104,7 @@ CheckList.register("command", "insert", {
 	},
 	menu: {group: "question", rank: 70, display: {type: "label", label: "CheckList"}},
 	params: [
- 	    { name: "Name", label: "Short ID", type: "text",
+ 	    { name: "Name", attr: "name", label: "Short ID", type: "text",
    	  	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },
  		  options: {
  			  pattern: namePattern, 

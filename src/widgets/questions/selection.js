@@ -37,19 +37,19 @@ Selection.register("command", "insert", {
   	},
 	menu: {group: "question", rank: 75, display: {type: "label", label: "Selection"}},
 	params: [
-	   	    { name: "Name", label: "Short ID", type: "text",
+	   	    { name: "Name", attr: "name", label: "Short ID", type: "text",
 	      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },
 	    		  options: {
 	    			  pattern: namePattern, 
 	    			  size: 10, 
 	    			  title: nameTitle}},
-	       	{ name: "Options", label: "comma separated names", type: "text", 
+	       	{ name: "Options", attr: "options", label: "comma separated names", type: "text", 
 	 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "options") }},
- 		    { name: "Size", label: "options displayed", type: "number", default: 1,
- 			  prefill: function(pm) { return selectedNodeAttr(pm, this, "options") },
+ 		    { name: "Size", attr: "size", label: "options displayed", type: "number", default: 1,
+ 			  prefill: function(pm) { return selectedNodeAttr(pm, this, "size") },
  			  options: { min: 1, max:10}
  			},
-	      	{ name: "Selection", label: "Selection (single or multiple)", type: "select", 
+	      	{ name: "Selection", attr: "multiple", label: "Selection (single or multiple)", type: "select", default:"single", 
 	 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "multiple") },
 	 		  options: [
 	      	      {value: "multiple", label:"multiple"},

@@ -30,7 +30,7 @@ export class MultipleChoice extends Block {
 		    this.schema.nodes.choice.create({name: attrs.name, value: 1})],marks)
 	}
 } 
-  
+
 defParser(Choice,"div","widgets-choice")
 defParser(MultipleChoice,"div","widgets-multiplechoice")
  
@@ -54,7 +54,7 @@ Choice.register("command", "split", {
     let toParent = from.shorten(), parent = pm.doc.path(toParent.path)
     if (parent.type != this) return false    
     let tr = pm.tr.delete(from, to).split(from, 2).apply(pm.apply.scroll)
-    renumber(pm, toParent.shorten())
+    //renumber(pm, toParent.shorten())
     return tr
   },
   keys: ["Enter(10)"]
@@ -74,7 +74,7 @@ Choice.register("command", "delete", {
     	return pm.tr.delete(cut, cut.move(1)).apply(pm.apply.scroll)
      	//renumber(pm, toMC)
     } else {
-    	// don't delete if still content in first choice
+    	// don't delete if first choice has content
     	if (pm.doc.path(from.path).size > 0) return true
     	let cut = getPosInParent(pm, toMC.shorten(), mc)
     	return pm.tr.delete(cut, cut.move(1)).apply(pm.apply.scroll)
@@ -99,7 +99,7 @@ MultipleChoice.register("command", "insert", {
 	},
 	menu: {group: "question", rank: 70, display: {type: "label", label: "MultipleChoice"}},
 	params: [
- 	    { name: "Name", label: "Short ID", type: "text",
+ 	    { name: "Name", attr: "name", label: "Short ID", type: "text",
    	  	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },
  		  options: {
  			  pattern: namePattern, 

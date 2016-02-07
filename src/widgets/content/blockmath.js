@@ -25,15 +25,14 @@ BlockMath.prototype.serializeDOM = node => {
 }
 
 BlockMath.register("command", "insert", {
+	derive: {
+		params: [
+	      	{ name: "Latex", attr: "tex", label: "Latex Expression", type: "text", 
+	      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "tex") }}
+	 	]
+    },
 	label: "BlockMath",
-	run(pm, tex) {
-    	return pm.tr.replaceSelection(this.create({tex})).apply(pm.apply.scroll)
-  	},
 	menu: {group: "content", rank: 73, display: {type: "label", label: "Block Math"}},
-	params: [
-     	{ name: "Latex", label: "Latex Expression", type: "text", 
-     	  prefill: function(pm) { return selectedNodeAttr(pm, this, "tex") }}
-	]
 })
 
 defParamsClick(BlockMath,"blockmath:insert")

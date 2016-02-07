@@ -77,19 +77,19 @@ Scale.register("command", "insert",{
   	},
 	menu: {group: "question", rank: 74, display: {type: "label", label: "Scale"}},
 	params: [
-  	    { name: "Name", label: "Short ID", type: "text",
+  	    { name: "Name", attr: "name", label: "Short ID", type: "text",
      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },
    		  options: {
    			  pattern: namePattern, 
    			  size: 10, 
    			  title: nameTitle}},
-     	{ label: "Start value", type: "number", default: 1, 
+     	{ label: "Start value", attr: "startvalue", type: "number", default: 1, 
 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "startvalue") }},
-     	{ name: "Start Label", label: "Text on left", type: "text", default: "low",
+     	{ name: "Start Label", attr: "startlabel", label: "Text on left", type: "text", default: "low",
 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "startlabel") }},
-     	{ label: "End value", type: "number", default: 10,
+     	{ label: "End value", attr: "endvalue", type: "number", default: 10,
   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "endvalue") }},
-     	{ name: "End Label", label: "Text on right", type: "text", default: "high", 
+     	{ name: "End Label", attr: "endlabel", label: "Text on right", type: "text", default: "high", 
   		  prefill: function(pm) { return selectedNodeAttr(pm, this, "endlabel") }}
 	]
 })

@@ -31,13 +31,13 @@ ShortAnswer.register("command", "insert", {
   	},
 	menu: {group: "question", rank: 71, display: {type: "label", label: "Short Answer"}},
 	params: [
-  	    { name: "Name", label: "Short ID", type: "text",
+  	    { name: "Name", attr: "name", label: "Short ID", type: "text",
      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },
    		  options: {
    			  pattern: namePattern, 
    			  size: 10, 
    			  title: nameTitle}},
-     	{ name: "Size", label: "Size in characters", type: "number", default: "20", 
+     	{ name: "Size", attr: "size", label: "Size in characters", type: "number", default: "20", 
 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "size") },
 	      options: {min: 1, max:80}}
 	]

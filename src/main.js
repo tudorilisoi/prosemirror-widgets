@@ -73,7 +73,7 @@ const widgetSchema = new Schema(widgetSpec)
 const updateCmd = Object.create(null)
 updateCmd["horizontal_rule:insert"] = {menu: {group: "content", rank: 71, display: {type: "label", label: "Horizontal Rule"}}}
 updateCmd["selectParentNode"] = null
-updateCmd["code:toggle"] = null
+updateCmd["code:toggle"] = {menu: {group: "textblock", rank: 99, display: {type: "label", label: "Code"}}}
 
 let pm = window.pm = new ProseMirror({
   place: document.querySelector("#editor"),
@@ -88,9 +88,9 @@ let pm = window.pm = new ProseMirror({
   docFormat: "dom"
 })
 
-/*pm.setOption("menuBar", false)
-pm.setOption("tooltipMenu", {selectedBlockMenu: true})
-*/	
+//pm.setOption("menuBar", false)
+//pm.setOption("tooltipMenu", {selectedBlockMenu: true})
+	
 defineFileHandler(function(files) {
 	console.log(files)
 })

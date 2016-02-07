@@ -40,15 +40,14 @@ SpreadSheet.prototype.serializeDOM = node => {
 }
 
 SpreadSheet.register("command", "insert", {
+	derive: {
+	    params: [
+	      	{ name: "Data Link", attr: "data", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
+	   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}
+	 	]
+	},
 	label: "SpreadSheet",
-	run(pm, data) {
-    	return pm.tr.replaceSelection(this.create({data})).apply(pm.apply.scroll)
-  	},
 	menu: {group: "content", rank: 75, display: {type: "label", label: "Spreadsheet"}},
-	params: [
-     	{ name: "Data Link", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
-  	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}
-	]
 })
 
 defParamsClick(SpreadSheet,"spreadsheet:insert",["all"])

@@ -24,17 +24,15 @@ InlineMath.prototype.serializeDOM = node => {
 	return node.rendered;
 }
 
-
 InlineMath.register("command", "insert", {
+	derive: {
+		params: [
+	      	{ name: "Latex", attr: "tex", label: "Latex Expression", type: "text", 
+	          prefill: function(pm) { return selectedNodeAttr(pm, this, "tex") }}
+	    ]
+	},
 	label: "InlineMath",
-	run(pm, tex) {
-    	return pm.tr.replaceSelection(this.create({tex})).apply(pm.apply.scroll)
-  	},
 	menu: {group: "content", rank: 71, display: {type: "label", label: "Inline Math"}},
-	params: [
-     	{ name: "Latex", label: "Latex Expression", type: "text", 
-       	  prefill: function(pm) { return selectedNodeAttr(pm, this, "tex") }}
-	],
 })
 
 defParamsClick(InlineMath,"inlinemath:insert")

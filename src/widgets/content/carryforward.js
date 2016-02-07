@@ -11,7 +11,8 @@ export class CarryForward extends Inline {
 		return {
 			name: new Attribute,
 			model: new Attribute({default: "user_response"}),
-			type: new Attribute({default: "carry_forward"})
+			type: new Attribute({default: "carry_forward"}),
+			class: new Attribute({default: "widgets-carryforward widgets-edit"})
 		}
 	}
 }
@@ -19,22 +20,21 @@ export class CarryForward extends Inline {
 defParser(CarryForward,"thinkspace","widgets-carryforward")
 
 CarryForward.prototype.serializeDOM = node => {
-	return elt("thinkspace",{class: "widgets-carryforward", name: node.attrs.name},
+	return elt("thinkspace",node.attrs,
 		elt("img",{src: "forward.png", width:16, height:16, title:"Carry forward "+node.attrs.name})
 	)
 }
 
 CarryForward.register("command", "insert", {
+	derive: {
+		params: [ 
+		   { name: "Name", attr: "name", label: "Element name", type: "select",
+	         prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },
+	  		 options: function() { return getCarryOptions(["test1","test2"])}}
+	 	]
+	},
 	label: "CarryForward",
-	run(pm, name) {
-    	return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
-  	},
 	menu: {group: "content", rank: 72, display: {type: "label", label: "Carry Forward"}},
-	params: [ 
-   	    { name: "Name", label: "Element name", type: "select",
-       	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name") },
- 		  options: function() { return getCarryOptions(["test1","test2"])}}
-	]
 })
 
 defParamsClick(CarryForward,"carryforward:insert",["all"])

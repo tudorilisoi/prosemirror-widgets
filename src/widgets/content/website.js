@@ -26,21 +26,20 @@ Website.prototype.serializeDOM = (node, s) => s.renderAs(node, "iframe",{
 })
 
 Website.register("command", "insert", {
+	derive: {
+	   params: [
+	      	{ name: "URL", attr: "src", label: "Link to website, youTube, Google Maps ...", type: "url",
+	        	  prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},
+	      	{ name: "Width", attr: "width", label: "Width in pixels", type: "number", default: 200, 
+	           prefill: function(pm) { return selectedNodeAttr(pm, this, "width") },
+	        	  options: {min: 50, height:800}},
+	      	{ name: "Height", attr: "height", label: "Height in pixels", type: "number", default: 200, 
+	           prefill: function(pm) { return selectedNodeAttr(pm, this, "height") },
+	        	  options: {min: 50, height:800}}
+	 	]
+	},
 	label: "Website",
-	run(pm, src, width, height) {
-    	return pm.tr.replaceSelection(this.create({src, width, height})).apply(pm.apply.scroll)
-  	},
 	menu: {group: "content", rank: 74, display: {type: "label", label: "Website"}},
-	params: [
-     	{ name: "URL", label: "Link to website, youTube, Google Maps ...", type: "url",
-       	  prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},
-     	{ name: "Width", label: "Width in pixels", type: "number", default: 200, 
-          prefill: function(pm) { return selectedNodeAttr(pm, this, "width") },
-       	  options: {min: 50, height:800}},
-     	{ name: "Height", label: "Height in pixels", type: "number", default: 200, 
-          prefill: function(pm) { return selectedNodeAttr(pm, this, "height") },
-       	  options: {min: 50, height:800}}
-	]
 })
 
 defParamsClick(Website,"website:insert")

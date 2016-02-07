@@ -20,7 +20,6 @@ Select.prototype.serializeDOM = node => {
 	let selection = node.attrs.multiple == "multiple"
 	let select = elt("select",node.attrs)
 	node.attrs.options.split(",").map(function(option) {
-		console.log("|"+option+"|")
 		select.appendChild(elt("option", {value: option.trim()}, option))
 	})
 	return select

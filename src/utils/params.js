@@ -126,13 +126,16 @@ ParamPrompt.prototype.paramTypes.select = {
 
 function selectClickedNode(pm, e) {
 	  let pos = selectableNodeAbove(pm, e.target, {left: e.clientX, top: e.clientY}, true)
-	  if (!pos) return pm.sel.pollForUpdate()
+	  if (!pos) return pm.sel.fastPoll()
+
 	  let {node, from} = pm.selection
 	  if (node && pos.depth >= from.depth && pos.shorten(from.depth).cmp(from) == 0) {
-	    if (from.depth == 0) return pm.sel.pollForUpdate()
+	    if (from.depth == 0) return pm.sel.fastPoll()
 	    pos = from.shorten()
 	  }
+
 	  pm.setNodeSelection(pos)
+	  pm.focus()
 	  e.preventDefault()
 	  lastClicked = e.target
 	}

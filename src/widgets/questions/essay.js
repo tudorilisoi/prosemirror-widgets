@@ -36,17 +36,17 @@ Essay.register("command", "insert", {
     select(pm) { return pm.doc.path(pm.selection.from.path).type.canContainType(this)},
 	menu: {group: "question", rank: 72, display: {type: "label", label: "Essay"}, select: "ignore"},
 	params: [
-  	    { name: "Name", label: "Short ID", type: "text",
+  	    { name: "Name", attr: "name", label: "Short ID", type: "text",
      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "name")},
    		  options: {
    			  pattern: namePattern, 
    			  size: 10, 
    			  title: nameTitle
    		  }},
-   		  { name: "Rows", label: "In lines lines", type: "number", default: "4", options: {min: 2, max:24}, 
+   		  { name: "Rows", attr: "rows", label: "In lines lines", type: "number", default: "4", options: {min: 2, max:24}, 
    			  prefill: function(pm) { return selectedNodeAttr(pm, this, "rows") }
    		  },
-   	      { name: "Columns", label: "In characters", type: "number", default: "40", 
+   	      { name: "Columns", attr: "cols", label: "In characters", type: "number", default: "40", 
    			  prefill: function(pm) { return selectedNodeAttr(pm, this, "cols") },
    			  options: {min: 2, max:80}
    		  }
