@@ -18,7 +18,7 @@ import {widgetInsertMenu} from "./widgets"
 // basic form input elements
 import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
 // question elements
-import {TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
+import {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
 // content elements
 import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward } from "./widgets"
 
@@ -42,6 +42,7 @@ const widgetSpec = new SchemaSpec({
 	textfield: TextField,
 	textarea: TextArea,
 
+	question: Question,
 	textbox: TextBox,
 	choice: Choice,
 	multiplechoice: MultipleChoice,

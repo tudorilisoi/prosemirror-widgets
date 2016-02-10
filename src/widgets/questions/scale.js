@@ -1,6 +1,7 @@
 import {Block, Paragraph, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {Question} from "./question"
 
 export class ScaleDisplay extends Block {
 	get attrs() {
@@ -42,7 +43,7 @@ ScaleDisplay.prototype.serializeDOM = (node,s) => {
 	return para
 }
 
-export class Scale extends Block {
+export class Scale extends Question {
 	static get contains() { return "text"}
 	get attrs() {
 		return {
@@ -51,7 +52,7 @@ export class Scale extends Block {
 			startlabel: new Attribute({default: "low"}),
 			endvalue: new Attribute({default: "10"}),
 			endlabel: new Attribute({default: "high"}),
-			class: new Attribute({default: "widgets-scale widgets-edit"})
+			class: new Attribute({default: "widgets-scale"})
 		}
 	}
 	create(attrs, content, marks) {
@@ -63,8 +64,6 @@ export class Scale extends Block {
 }
 
 defParser(Scale,"div","widgets-scale")
-
-Scale.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
 
 Scale.register("command", "insert",{
 	label: "Scale",
@@ -111,15 +110,6 @@ insertCSS(`
 .widgets-scale span {
 	vertical-align: middle;
 	font-weight: normal;
-}
-
-.ProseMirror .widgets-scale p:hover {
-    cursor: text;
-}
-
-.widgets-scale {
-	padding: 8px;
-    border-top: 1px solid #AAA;
 }
 
 .widgets-scale div {

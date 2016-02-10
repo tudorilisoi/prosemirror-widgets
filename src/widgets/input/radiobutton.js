@@ -16,8 +16,6 @@ export class RadioButton extends Input {
 
 defParser(RadioButton,"input","widgets-radiobutton")
 
-RadioButton.prototype.serializeDOM = node => elt("input",node.attrs)
-
 insertCSS(`
 
 .widgets-radiobutton {}

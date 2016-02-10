@@ -33,6 +33,15 @@ export function getPosInParent(pm, pos, child) {
 	return new Pos(pos.path,i)
 }
 
+export function nodeBefore(pm, pos) {
+    let before, cut
+    for (let i = pos.path.length - 1; !before && i >= 0; i--) if (pos.path[i] > 0) {
+      cut = pos.shorten(i)
+      before = pm.doc.path(cut.path).child(cut.offset - 1)
+    }
+    return {before,at: new Pos(cut.path,cut.offset-1)}
+}
+
 /*import {InputRule} from "prosemirror/dist/inputrules"
 let urlex = /((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/
 LinkMark.register("autoInput","startLink", new InputRule(urlex," ",

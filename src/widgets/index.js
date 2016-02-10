@@ -1,4 +1,4 @@
-export {Input, TextBox, CheckList, CheckItem, MultipleChoice, Choice, ScaleDisplay, Scale, Essay, ShortAnswer, Selection} from "./questions"
+export {Question, Input, TextBox, CheckList, CheckItem, MultipleChoice, Choice, ScaleDisplay, Scale, Essay, ShortAnswer, Selection} from "./questions"
 export {BlockMath,CarryForward,Image,InlineMath,SpreadSheet,Website} from "./content"
 export {Input, CheckBox, RadioButton, Select, TextField, TextArea} from "./input"
 
@@ -18,7 +18,7 @@ insertCSS(`
 .ProseMirror .widgets-edit:hover {
 	background-image: url('icons/settings.png');
 	background-repeat: no-repeat;
-	background-position: top left;
+	background-position: top right;
 	cursor: pointer;
  }
 

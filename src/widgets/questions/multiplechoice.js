@@ -1,7 +1,8 @@
 import {Block, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent} from "../../utils"
- 
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore} from "../../utils"
+import {Question} from "./question"
+
 export class Choice extends Block {
 	get attrs() {
 		return {
@@ -11,24 +12,20 @@ export class Choice extends Block {
 		}
 	}
 	create(attrs, content, marks) {
-		content = content? content.content[0]:this.schema.nodes.textbox.create(null,"",marks)
-		return super.create(attrs,[this.schema.nodes.radiobutton.create(attrs),content],marks)
+		let len = content.content.length
+		content = Fragment.from([this.schema.nodes.radiobutton.create(attrs),content.content[len-1]])
+		return super.create(attrs,content,marks)
 	}
 }
  
-export class MultipleChoice extends Block {
+export class MultipleChoice extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
-			class: new Attribute({default: "widgets-multiplechoice widgets-edit"})
+			class: new Attribute({default: "widgets-multiplechoice"})
 		}
 	}
 	get isList() { return true }
-	create(attrs, content, marks) {
-		return super.create(attrs,[
-		    this.schema.nodes.paragraph.create(null,"",marks),
-		    this.schema.nodes.choice.create({name: attrs.name, value: 1})],marks)
-	}
 } 
 
 defParser(Choice,"div","widgets-choice")
@@ -36,13 +33,12 @@ defParser(MultipleChoice,"div","widgets-multiplechoice")
  
 Choice.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
  
-MultipleChoice.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
- 
 function renumber(pm, pos) {
 	let cl = pm.doc.path(pos.path), i = 1
 	cl.forEach((node, start) => {
-		if (start > 0)
+		if (node.type.name == "choice") {
 			pm.tr.setNodeType(new Pos(pos.path,start), node.type, {name: cl.attrs.name, value: i++}).apply()
+		}
 	})
 }
 
@@ -54,31 +50,26 @@ Choice.register("command", "split", {
     let toParent = from.shorten(), parent = pm.doc.path(toParent.path)
     if (parent.type != this) return false    
     let tr = pm.tr.delete(from, to).split(from, 2).apply(pm.apply.scroll)
-    //renumber(pm, toParent.shorten())
+    renumber(pm, toParent.shorten())
     return tr
   },
-  keys: ["Enter(10)"]
+  keys: ["Enter(20)"]
 })
 
 Choice.register("command", "delete", {
   label: "delete text, this choice or choicelist",
   run(pm) {
 	let {from,to,head} = pm.selection
-	if (from.offset > 0) return pm.tr.delete(from,to).apply(pm.apply.scroll)
     let toCH = from.shorten(), ch = pm.doc.path(toCH.path)
+    if (ch.type != this) return false
+	if (from.offset > 0) return pm.tr.delete(from,to).apply(pm.apply.scroll)
     let toMC = toCH.shorten(), mc = pm.doc.path(toMC.path)
-    // if more than one choice then delete choice otherwise delete whole multiplechoice
-    if (mc.size > 1) {
-    	let cut = getPosInParent(pm, toMC, ch)
-    	pm.tr.lift(head).apply()
-    	return pm.tr.delete(cut, cut.move(1)).apply(pm.apply.scroll)
-     	//renumber(pm, toMC)
-    } else {
-    	// don't delete if first choice has content
-    	if (pm.doc.path(from.path).size > 0) return true
-    	let cut = getPosInParent(pm, toMC.shorten(), mc)
-    	return pm.tr.delete(cut, cut.move(1)).apply(pm.apply.scroll)
-    }
+    let {before,at} = nodeBefore(pm,toCH)
+    // if only question and one choice then ignore
+    if (mc.size == 2 || before.type != this || ch.lastChild.size > 0) return true;
+    let tr = pm.tr.delete(toMC,toMC.move(1)).apply()
+    renumber(pm, toMC)
+    return tr
   },
   keys: ["Backspace(20)", "Mod-Backspace(20)"]
 })
@@ -89,10 +80,20 @@ MultipleChoice.register("command", "insert", {
 		let {from,to,node} = pm.selection 
 		if (node && node.type == this) {
 			let tr = pm.tr.setNodeType(from, this, {name: name}).apply()
-			//renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
+			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
 			return tr
-		} else
-			return pm.tr.replaceSelection(this.create({name})).apply(pm.apply.scroll)
+		} else {
+			let choice_content = Fragment.from([
+			    this.schema.nodes.radiobutton.create({name: name, value: 1}),
+			    this.schema.nodes.textbox.create()
+			])
+			let content = Fragment.from([
+			    this.schema.nodes.paragraph.create(null,""),
+			    this.schema.nodes.choice.create({name: name, value: 1},choice_content)
+			])
+			let tr = pm.tr.replaceSelection(this.create({name},content)).apply(pm.apply.scroll)
+			return tr
+		}
 	},
 	select(pm) {
 		return true
@@ -115,15 +116,6 @@ insertCSS(`
 
 .widgets-choice input {
 	float: left;
-}
-
-.widgets-multiplechoice {
-	border-top: 1px solid #DDD;
-	padding: 8px;
-}
-
-.ProseMirror .widgets-multiplechoice p:hover {
-    cursor: text;
 }
 
 .ProseMirror .widgets-choice:hover {

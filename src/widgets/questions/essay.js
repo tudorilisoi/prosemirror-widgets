@@ -1,14 +1,15 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
+import {Question} from "./question"
 
-export class Essay extends Block {
+export class Essay extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
 			rows: new Attribute,
 			cols: new Attribute,
-			class: new Attribute({default: "widgets-essay widgets-edit"})
+			class: new Attribute({default: "widgets-essay"})
 		}
 	}
 	create(attrs, content, marks) {
@@ -19,9 +20,6 @@ export class Essay extends Block {
 }
 
 defParser(Essay,"div","widgets-essay")
-
-
-Essay.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
 
 Essay.register("command", "insert", {
 	label: "Essay",
@@ -56,14 +54,5 @@ Essay.register("command", "insert", {
 defParamsClick(Essay,"essay:insert")
 
 insertCSS(`
-
-.ProseMirror .widgets-essay p:hover {
-    cursor: text;
-}
-
-.ProseMirror .widgets-essay {
-	border-top: 1px solid #AAA;
-	padding: 8px;
-}
 
 `)

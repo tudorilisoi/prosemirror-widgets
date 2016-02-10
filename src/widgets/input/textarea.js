@@ -17,6 +17,17 @@ export class TextArea extends Block {
 defParser(TextArea,"textarea","widgets-textarea")
 
 TextArea.prototype.serializeDOM = (node,s) => elt("textarea",node.attrs)
+
+// hack to lock 
+TextArea.register("command", "delete", {
+  run(pm) { 
+	  let {from, node} = pm.selection
+	  console.log(node)
+	  return node && node.type == this? true: false
+  },
+  keys: ["Backspace(10)", "Mod-Backspace(10)"]
+})
+
 TextArea.register("command", "insert",{
 	label: "TextArea",
 	run(pm, name, rows, cols) {

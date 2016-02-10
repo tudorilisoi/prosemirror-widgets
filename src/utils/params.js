@@ -140,12 +140,13 @@ function selectClickedNode(pm, e) {
 	  lastClicked = e.target
 	}
 
-export function defParamsClick(type, cmdname, spots = ["topleft"]) {
+export function defParamsClick(type, cmdname, spots = ["topright"]) {
 	type.prototype.handleClick = (pm, e, path, node) => {
 		let spotClicked = false
 		spots.forEach(function check(loc) {
 			let r = e.target.getBoundingClientRect()
 			if (loc == "all") spotClicked = true;
+			else if (loc == "topright") spotClicked = spotClicked || (e.clientX > (r.right-16) && e.clientY < (r.top+16))
 			else if (loc == "topleft") spotClicked = spotClicked || (e.clientX < (r.left+16) && e.clientY < (r.top+16))
 			else if (loc == "bottomright") spotClicked = spotClicked || (e.clientX > (r.right-32) && e.clientY > (r.bottom-32))			
 		})

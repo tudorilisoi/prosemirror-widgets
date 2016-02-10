@@ -25,6 +25,16 @@ Select.prototype.serializeDOM = node => {
 	return select
 }
 
+//hack to lock 
+Select.register("command", "delete", {
+  run(pm) { 
+	  let {from, node} = pm.selection
+	  console.log(node)
+	  return node && node.type == this? true: false
+  },
+  keys: ["Backspace(10)", "Mod-Backspace(10)"]
+})
+
 Select.register("command", "insert", {
 	label: "Select",
 	run(pm, name, options, size, multiple) {

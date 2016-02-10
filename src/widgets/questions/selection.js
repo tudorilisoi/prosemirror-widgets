@@ -2,15 +2,16 @@ import {Block, Attribute} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {Select} from "../input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
+import {Question} from "./question"
 
-export class Selection extends Block {
+export class Selection extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
 			options: new Attribute,
 			size: new Attribute({default: 1}),
 		    multiple: new Attribute({default: "single"}),
-		    class: new Attribute({default: "widgets-selection widgets-edit"})
+		    class: new Attribute({default: "widgets-selection"})
 		}
 	}
 	create(attrs, content, marks) {
@@ -21,9 +22,6 @@ export class Selection extends Block {
 }
 
 defParser(Selection,"div","widgets-selection")
-
-
-Selection.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
 
 Selection.register("command", "insert", {
 	label: "Selection",
@@ -62,14 +60,5 @@ Selection.register("command", "insert", {
 defParamsClick(Selection,"selection:insert")
 
 insertCSS(`
-
-.ProseMirror .widgets-selection p:hover {
-    cursor: text;
-}
-
-.ProseMirror .widgets-selection {
-	border-top: 1px solid #AAA;
-	padding: 8px;
-}
 
 `)
