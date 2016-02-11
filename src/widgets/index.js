@@ -3,15 +3,10 @@ export {BlockMath,CarryForward,Image,InlineMath,SpreadSheet,Website} from "./con
 export {Input, CheckBox, RadioButton, Select, TextField, TextArea} from "./input"
 
 import {insertCSS} from "prosemirror/dist/dom"
-import {Dropdown, DropdownSubmenu, MenuCommandGroup} from "prosemirror/dist/menu/menu"
+import {Dropdown, MenuCommandGroup} from "prosemirror/dist/menu/menu"
 
-const contentInsertMenu = new DropdownSubmenu({label: "Content"}, [new MenuCommandGroup("content")])
-const questionInsertMenu = new DropdownSubmenu({label: "Question"}, [new MenuCommandGroup("question")])
-
-export const widgetInsertMenu = new Dropdown(
-  {label: "Insert..", displayActive: true, class: "ProseMirror-widgetinsert-dropdown"},
-  [contentInsertMenu, questionInsertMenu]
-)
+export const contentInsertMenu = new Dropdown({label: "Content..", displayActive: true, class: "ProseMirror-widgetinsert-dropdown"}, [new MenuCommandGroup("content")])
+export const questionInsertMenu = new Dropdown({label: "Question..", displayActive: true, class: "ProseMirror-widgetinsert-dropdown"}, [new MenuCommandGroup("question")])
 
 insertCSS(`
 

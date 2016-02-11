@@ -1,4 +1,4 @@
-import {Block, Paragraph, Attribute} from "prosemirror/dist/model"
+import {Fragment, Block, Paragraph, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 import {Question} from "./question"
@@ -10,13 +10,14 @@ export class ScaleDisplay extends Block {
 			startvalue: new Attribute({default: "1"}),
 			startlabel: new Attribute({default: "low"}),
 			endvalue: new Attribute({default: "10"}),
-			endlabel: new Attribute({default: "high"})
+			endlabel: new Attribute({default: "high"}),
+			contenteditable: new Attribute({default: false})
 		}
 	}
 }
 
 ScaleDisplay.prototype.serializeDOM = (node,s) => {
-	let para = elt("div",{contenteditable: false})
+	let para = elt("div",node.attrs)
 	para.appendChild(elt("span", null, node.attrs.startlabel+" "))
 	let startVal = Number(node.attrs.startvalue)
 	let endVal = Number(node.attrs.endvalue)
@@ -56,10 +57,14 @@ export class Scale extends Question {
 		}
 	}
 	create(attrs, content, marks) {
-		return super.create(attrs,[
-		    this.schema.nodes.paragraph.create(null,"",marks),
-		    this.schema.nodes.scaledisplay.create(attrs, null, marks)
-		],marks)
+		let sd = this.schema.nodes.scaledisplay.create(attrs)
+		if (content) {
+			// remove scaledisplay and update with new node
+			let nodes = content.toArray(); nodes.pop()
+			content = Fragment.fromArray(nodes.concat(sd))
+		} else
+			content = Fragment.from([this.schema.nodes.paragraph.create(null,""),sd])
+		return super.create(attrs,content,marks)
 	}
 }
 
@@ -70,8 +75,9 @@ Scale.register("command", "insert",{
 	run(pm, name, startvalue, startlabel, endvalue, endlabel) {
 		let {from,to,node} = pm.selection
 		if (node && node.type == this) {
+			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
 			return pm.tr.setNodeType(from, this, {name,startvalue,startlabel,endvalue,endlabel}).apply(pm.apply.scroll)
-		} else
+		} else 
 			return pm.tr.replaceSelection(this.create({name,startvalue,startlabel,endvalue,endlabel})).apply(pm.apply.scroll)
   	},
 	menu: {group: "question", rank: 74, display: {type: "label", label: "Scale"}},

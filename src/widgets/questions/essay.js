@@ -1,4 +1,4 @@
-import {Block, Attribute} from "prosemirror/dist/model"
+import {Fragment, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
 import {Question} from "./question"
@@ -13,9 +13,14 @@ export class Essay extends Question {
 		}
 	}
 	create(attrs, content, marks) {
-		return super.create(attrs,[
-		    this.schema.nodes.paragraph.create(null,"",marks),
-		    this.schema.nodes.textarea.create(attrs,null,marks)],marks)
+		let ta = this.schema.nodes.textarea.create(attrs)
+		if (content) {
+			// remove textarea and update with new node
+			let nodes = content.toArray(); nodes.pop()
+			content = Fragment.fromArray(nodes.concat(ta))
+		} else
+			content = Fragment.from([this.schema.nodes.paragraph.create(null,""),ta])
+		return super.create(attrs,content,marks)
 	}
 }
 
@@ -26,8 +31,8 @@ Essay.register("command", "insert", {
 	run(pm, name, rows, cols) {
 		let {from,to,node} = pm.selection
 		if (node && node.type == this) {
-			let tr = pm.tr.setNodeType(from, this, {name,rows,cols}).apply()
-			return tr
+			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
+			return pm.tr.setNodeType(from, this, {name,rows,cols}).apply(pm.apply.scroll)
 		} else
 			return pm.tr.replaceSelection(this.create({name,rows,cols})).apply(pm.apply.scroll)
   	},

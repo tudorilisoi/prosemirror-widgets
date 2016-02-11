@@ -21,7 +21,6 @@ Input.prototype.serializeDOM = node => elt("input",node.attrs)
 Input.register("command", "delete", {
   run(pm) { 
 	  let {from, node} = pm.selection
-	  console.log(node)
 	  return node && node.type == this? true: false
   },
   keys: ["Backspace(10)", "Mod-Backspace(10)"]

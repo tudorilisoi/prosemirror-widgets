@@ -13,7 +13,8 @@ import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, Horizonta
 	Paragraph, Heading, Text, HardBreak,
 	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec} from "prosemirror/dist/model"
 
-import {widgetInsertMenu} from "./widgets"
+//import {widgetInsertMenu} from "./widgets"
+import {contentInsertMenu, questionInsertMenu} from "./widgets"
 
 // basic form input elements
 import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
@@ -70,20 +71,20 @@ const widgetSpec = new SchemaSpec({
 
 const widgetSchema = new Schema(widgetSpec)
 
-// remove seletcParentNode and codemark for default use. Move horizontal_rule to content menu
-const updateCmd = Object.create(null)
-updateCmd["horizontal_rule:insert"] = {menu: {group: "content", rank: 71, display: {type: "label", label: "Horizontal Rule"}}}
-updateCmd["selectParentNode"] = null
-updateCmd["code:toggle"] = {menu: {group: "textblock", rank: 99, display: {type: "label", label: "Code"}}}
+const commands = CommandSet.default.update({
+    "horizontal_rule:insert": {menu: {group: "content", rank: 71, display: {type: "label", label: "Horizontal Rule"}}},
+     selectParentNode: { menu: null},
+     "code:toggle": {menu: {group: "textblock", rank: 99, display: {type: "label", label: "Code"}}}
+})
 
 let pm = window.pm = new ProseMirror({
   place: document.querySelector("#editor"),
   menuBar: {
 	float: true,
-	content: [inlineGroup, [blockGroup,textblockMenu],widgetInsertMenu,historyGroup]	 
+	content: [inlineGroup, [blockGroup,textblockMenu],[contentInsertMenu,questionInsertMenu],historyGroup]	 
   },
   schema: widgetSchema,
-  commands: CommandSet.default.update(updateCmd),
+  commands: commands,
   autoInput: true,
   doc: document.querySelector("#content"),
   docFormat: "dom"

@@ -1,4 +1,4 @@
-import {Block, Attribute} from "prosemirror/dist/model"
+import {Fragment,Block, Attribute, Pos} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {Select} from "../input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
@@ -15,9 +15,13 @@ export class Selection extends Question {
 		}
 	}
 	create(attrs, content, marks) {
-		return super.create(attrs,[
-		    this.schema.nodes.paragraph.create(null,"",marks),
-		    this.schema.nodes.select.create(attrs,null,marks)],marks)
+		let sel = this.schema.nodes.select.create(attrs)
+		if (content) {
+			let nodes = content.toArray(); nodes.pop()
+			content = Fragment.fromArray(nodes.concat(sel))
+		} else 
+			content = Fragment.from([this.schema.nodes.paragraph.create(null,""),sel])
+		return super.create(attrs,content,marks)
 	}
 }
 
@@ -28,8 +32,8 @@ Selection.register("command", "insert", {
 	run(pm, name, options, size, multiple) {
 		let {from,to,node} = pm.selection
 		if (node && node.type == this) {
-			let tr = pm.tr.setNodeType(from, this, {name,options,size,multiple}).apply()
-			return tr
+			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
+			return pm.tr.setNodeType(from, this, {name,options,size,multiple}).apply(pm.apply.scroll)
 		} else
 			return pm.tr.replaceSelection(this.create({name,options,size,multiple})).apply(pm.apply.scroll)
   	},

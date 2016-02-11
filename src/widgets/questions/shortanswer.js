@@ -1,4 +1,4 @@
-import {Block, Attribute} from "prosemirror/dist/model"
+import {Fragment, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {TextField} from "../input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
@@ -14,9 +14,14 @@ export class ShortAnswer extends Question {
 		}
 	}	
 	create(attrs, content, marks) {
-		return super.create(attrs,[
-		    this.schema.nodes.paragraph.create(null,"",marks),
-		    this.schema.nodes.textfield.create(attrs)],marks)
+		// remove scaledisplay and update with new node
+		let tf = this.schema.nodes.textfield.create(attrs)
+		if (content) {
+			let nodes = content.toArray(); nodes.pop()
+			content = Fragment.fromArray(nodes.concat(tf))
+		} else
+			content = Fragment.from([this.schema.nodes.paragraph.create(null,""),tf])
+		return super.create(attrs,content,marks)
 	}
 }
 
@@ -25,7 +30,12 @@ defParser(ShortAnswer,"div","widgets-shortanswer")
 ShortAnswer.register("command", "insert", {
 	label: "Short Answer",
 	run(pm, name, size) {
-    	return pm.tr.replaceSelection(this.create({name,size})).apply(pm.apply.scroll)
+		let {from,to,node} = pm.selection
+		if (node && node.type == this) {
+			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
+			return pm.tr.setNodeType(from, this, {name,size}).apply(pm.apply.scroll)
+		} else
+			return pm.tr.replaceSelection(this.create({name,size})).apply(pm.apply.scroll)
   	},
 	menu: {group: "question", rank: 71, display: {type: "label", label: "Short Answer"}},
 	params: [
