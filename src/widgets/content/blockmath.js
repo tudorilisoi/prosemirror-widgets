@@ -1,6 +1,6 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr,insertWidget} from "../../utils"
  
 export class BlockMath extends Block {
 	get attrs() {
@@ -25,14 +25,19 @@ BlockMath.prototype.serializeDOM = node => {
 }
 
 BlockMath.register("command", "insert", {
-	derive: {
-		params: [
+	run(pm,tex) {
+		let {from,node} = pm.selection
+		if (node && node.type == this)
+			return pm.tr.setNodeType(from, this, {tex}).apply()
+		else 
+			return insertWidget(pm,from,this.schema.nodes.blockmath.create({tex}))
+	},
+	params: [
 	      	{ name: "Latex", attr: "tex", label: "Latex Expression", type: "text", 
 	      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "tex") }}
-	 	]
-    },
+	],
 	label: "BlockMath",
-	menu: {group: "content", rank: 73, display: {type: "label", label: "Block Math"}},
+	menu: {group: "content", rank: 72, display: {type: "label", label: "Block Math"}},
 })
 
 defParamsClick(BlockMath,"blockmath:insert")

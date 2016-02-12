@@ -1,6 +1,7 @@
 import {Block, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick} from "../../utils"
+import {joinPoint, joinableBlocks, canLift} from "prosemirror/dist/transform"
 
 export class Question extends Block {
 	static get kinds() { return super.kinds + " question" }

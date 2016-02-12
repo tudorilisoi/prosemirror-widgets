@@ -1,6 +1,6 @@
 import {Fragment, Block, Paragraph, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertWidget} from "../../utils"
 import {Question} from "./question"
 
 export class ScaleDisplay extends Block {
@@ -78,7 +78,7 @@ Scale.register("command", "insert",{
 			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
 			return pm.tr.setNodeType(from, this, {name,startvalue,startlabel,endvalue,endlabel}).apply(pm.apply.scroll)
 		} else 
-			return pm.tr.replaceSelection(this.create({name,startvalue,startlabel,endvalue,endlabel})).apply(pm.apply.scroll)
+			return insertWidget(pm,from,this.create({name,startvalue,startlabel,endvalue,endlabel}))
   	},
 	menu: {group: "question", rank: 74, display: {type: "label", label: "Scale"}},
 	params: [

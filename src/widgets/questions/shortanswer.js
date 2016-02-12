@@ -1,7 +1,7 @@
 import {Fragment, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {TextField} from "../input"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertWidget} from "../../utils"
 import {Question} from "./question"
 
 export class ShortAnswer extends Question {
@@ -35,7 +35,7 @@ ShortAnswer.register("command", "insert", {
 			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
 			return pm.tr.setNodeType(from, this, {name,size}).apply(pm.apply.scroll)
 		} else
-			return pm.tr.replaceSelection(this.create({name,size})).apply(pm.apply.scroll)
+			return insertWidget(pm,from,this.create({name,size}))
   	},
 	menu: {group: "question", rank: 71, display: {type: "label", label: "Short Answer"}},
 	params: [

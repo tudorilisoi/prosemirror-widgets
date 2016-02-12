@@ -1,6 +1,6 @@
 import {Block, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertWidget} from "../../utils"
 import {Question} from "./question"
 
 export class Choice extends Block {
@@ -91,7 +91,7 @@ MultipleChoice.register("command", "insert", {
 			    this.schema.nodes.paragraph.create(null,""),
 			    this.schema.nodes.choice.create({name: name, value: 1},choice_content)
 			])
-			let tr = pm.tr.replaceSelection(this.create({name},content)).apply(pm.apply.scroll)
+			return insertWidget(pm,from,this.create({name},content))
 			return tr
 		}
 	},

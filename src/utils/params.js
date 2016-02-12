@@ -224,10 +224,11 @@ insertCSS(`
 	background: #FFF;
 	z-index: 8888;
 	opacity:0.7;
-	font-family: Helvetica, Arial, Sans-Serif;
 }
 
 .widgetForm {
+	font-family: Helvetica, Arial, Sans-Serif;
+	font-size: 80%;
 	background: white;
 	position: absolute;
 	top: 10px;

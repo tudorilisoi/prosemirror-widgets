@@ -1,6 +1,6 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr,insertWidget} from "../../utils"
 
 export class Website extends Block {
 	get attrs() {
@@ -26,18 +26,23 @@ Website.prototype.serializeDOM = (node, s) => s.renderAs(node, "iframe",{
 })
 
 Website.register("command", "insert", {
-	derive: {
-	   params: [
-	      	{ name: "URL", attr: "src", label: "Link to website, youTube, Google Maps ...", type: "url",
-	        	  prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},
-	      	{ name: "Width", attr: "width", label: "Width in pixels", type: "number", default: 200, 
-	           prefill: function(pm) { return selectedNodeAttr(pm, this, "width") },
-	        	  options: {min: 50, height:800}},
-	      	{ name: "Height", attr: "height", label: "Height in pixels", type: "number", default: 200, 
-	           prefill: function(pm) { return selectedNodeAttr(pm, this, "height") },
-	        	  options: {min: 50, height:800}}
-	 	]
+	run(pm,src,width,height) {
+		let {from,node} = pm.selection
+		if (node && node.type == this)
+			return pm.tr.setNodeType(from, this, {src,width,height}).apply()
+		else 
+			return insertWidget(pm,from,this.schema.nodes.website.create({src,width,height}))
 	},
+	params: [
+      	{ name: "URL", attr: "src", label: "Link to website, youTube, Google Maps ...", type: "url",
+        	  prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},
+      	{ name: "Width", attr: "width", label: "Width in pixels", type: "number", default: 200, 
+           prefill: function(pm) { return selectedNodeAttr(pm, this, "width") },
+        	  options: {min: 50, height:800}},
+      	{ name: "Height", attr: "height", label: "Height in pixels", type: "number", default: 200, 
+           prefill: function(pm) { return selectedNodeAttr(pm, this, "height") },
+        	  options: {min: 50, height:800}}
+ 	],
 	label: "Website",
 	menu: {group: "content", rank: 74, display: {type: "label", label: "Website"}},
 })
@@ -47,7 +52,6 @@ defParamsClick(Website,"website:insert")
 insertCSS(`
 
 .ProseMirror .widgets-website:hover {
-	padding-left: 16px;
     padding-top: 16px;
 }
 

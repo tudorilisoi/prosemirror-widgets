@@ -1,7 +1,7 @@
 import {Fragment,Block, Attribute, Pos} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {Select} from "../input"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertWidget} from "../../utils"
 import {Question} from "./question"
 
 export class Selection extends Question {
@@ -35,7 +35,7 @@ Selection.register("command", "insert", {
 			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
 			return pm.tr.setNodeType(from, this, {name,options,size,multiple}).apply(pm.apply.scroll)
 		} else
-			return pm.tr.replaceSelection(this.create({name,options,size,multiple})).apply(pm.apply.scroll)
+			return insertWidget(pm,from,this.create({name,options,size,multiple}))
   	},
 	menu: {group: "question", rank: 75, display: {type: "label", label: "Selection"}},
 	params: [

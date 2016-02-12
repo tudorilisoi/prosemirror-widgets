@@ -34,7 +34,7 @@ CarryForward.register("command", "insert", {
 	 	]
 	},
 	label: "CarryForward",
-	menu: {group: "content", rank: 72, display: {type: "label", label: "Carry Forward"}},
+	menu: {group: "content", rank: 73, display: {type: "label", label: "Carry Forward"}},
 })
 
 defParamsClick(CarryForward,"carryforward:insert",["all"])

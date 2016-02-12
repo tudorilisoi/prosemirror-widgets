@@ -1,6 +1,6 @@
 import {Fragment, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertWidget} from "../../utils"
 import {Question} from "./question"
 
 export class Essay extends Question {
@@ -34,7 +34,7 @@ Essay.register("command", "insert", {
 			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
 			return pm.tr.setNodeType(from, this, {name,rows,cols}).apply(pm.apply.scroll)
 		} else
-			return pm.tr.replaceSelection(this.create({name,rows,cols})).apply(pm.apply.scroll)
+			return insertWidget(pm,from,this.create({name,rows,cols}))
   	},
     select(pm) { return pm.doc.path(pm.selection.from.path).type.canContainType(this)},
 	menu: {group: "question", rank: 72, display: {type: "label", label: "Essay"}, select: "ignore"},

@@ -1,4 +1,5 @@
 export {widgetParamHandler, defineFileHandler, namePattern, nameTitle, defParamsClick, selectedNodeAttr} from "./params"
+export {alignGroup,LeftAlign,CenterAlign,RightAlign,JustifyAlign} from "./align"
 import {Pos} from "prosemirror/dist/model"
 import {selectableNodeAbove} from "prosemirror/dist/edit/selection"
 import {widgetParamHandler} from "./params"
@@ -41,6 +42,14 @@ export function nodeBefore(pm, pos) {
     }
     return {before,at: new Pos(cut.path,cut.offset-1)}
 }
+
+export function insertWidget(pm, pos, w) {
+  for (;;) {
+    if (pos.depth == 0) return pm.tr.insert(pos,w).apply(pm.apply.scroll) 
+    pos = pos.shorten(null,1)
+  }
+}
+
 
 /*import {InputRule} from "prosemirror/dist/inputrules"
 let urlex = /((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/

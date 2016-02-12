@@ -1,6 +1,6 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr, insertWidget} from "../../utils"
 
 export class SpreadSheet extends Block {
 	get attrs() {
@@ -40,12 +40,17 @@ SpreadSheet.prototype.serializeDOM = node => {
 }
 
 SpreadSheet.register("command", "insert", {
-	derive: {
-	    params: [
-	      	{ name: "Data Link", attr: "data", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
-	   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}
-	 	]
+	run(pm,data) {
+		let {from,node} = pm.selection
+		if (node && node.type == this)
+			return pm.tr.setNodeType(from, this, {data}).apply()
+		else 
+			return insertWidget(pm,from,this.schema.nodes.spreadsheet.create({data}))
 	},
+    params: [
+      	{ name: "Data Link", attr: "data", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
+   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}
+ 	],
 	label: "SpreadSheet",
 	menu: {group: "content", rank: 75, display: {type: "label", label: "Spreadsheet"}},
 })
