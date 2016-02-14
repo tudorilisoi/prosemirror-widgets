@@ -4,8 +4,7 @@ import {defParser, defParamsClick} from "../../utils"
 import {joinPoint, joinableBlocks, canLift} from "prosemirror/dist/transform"
 
 export class Question extends Block {
-	static get kinds() { return super.kinds + " question" }
-	get draggable() { return true }
+//	get draggable() { return true }
 }
 
 defParser(Question,"div","widgets-question")
@@ -27,6 +26,7 @@ insertCSS(`
 	content: "Question " counter(qcnt) ".";
 	font-size: 80%;
 	font-weight: bold;
+	cursor: move;
 }
 
 .ProseMirror .widgets-question p:hover {

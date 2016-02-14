@@ -26,23 +26,18 @@ Website.prototype.serializeDOM = (node, s) => s.renderAs(node, "iframe",{
 })
 
 Website.register("command", "insert", {
-	run(pm,src,width,height) {
-		let {from,node} = pm.selection
-		if (node && node.type == this)
-			return pm.tr.setNodeType(from, this, {src,width,height}).apply()
-		else 
-			return insertWidget(pm,from,this.schema.nodes.website.create({src,width,height}))
+	derive: {
+		params: [
+	      	{ name: "URL", attr: "src", label: "Link to website, youTube, Google Maps ...", type: "url",
+	        	  prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},
+	      	{ name: "Width", attr: "width", label: "Width in pixels", type: "number", default: 200, 
+	           prefill: function(pm) { return selectedNodeAttr(pm, this, "width") },
+	        	  options: {min: 50, height:800}},
+	      	{ name: "Height", attr: "height", label: "Height in pixels", type: "number", default: 200, 
+	           prefill: function(pm) { return selectedNodeAttr(pm, this, "height") },
+	        	  options: {min: 50, height:800}}
+	 	]
 	},
-	params: [
-      	{ name: "URL", attr: "src", label: "Link to website, youTube, Google Maps ...", type: "url",
-        	  prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},
-      	{ name: "Width", attr: "width", label: "Width in pixels", type: "number", default: 200, 
-           prefill: function(pm) { return selectedNodeAttr(pm, this, "width") },
-        	  options: {min: 50, height:800}},
-      	{ name: "Height", attr: "height", label: "Height in pixels", type: "number", default: 200, 
-           prefill: function(pm) { return selectedNodeAttr(pm, this, "height") },
-        	  options: {min: 50, height:800}}
- 	],
 	label: "Website",
 	menu: {group: "content", rank: 74, display: {type: "label", label: "Website"}},
 })

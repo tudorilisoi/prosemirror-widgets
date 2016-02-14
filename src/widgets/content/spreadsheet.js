@@ -40,17 +40,12 @@ SpreadSheet.prototype.serializeDOM = node => {
 }
 
 SpreadSheet.register("command", "insert", {
-	run(pm,data) {
-		let {from,node} = pm.selection
-		if (node && node.type == this)
-			return pm.tr.setNodeType(from, this, {data}).apply()
-		else 
-			return insertWidget(pm,from,this.schema.nodes.spreadsheet.create({data}))
+	derive: {
+	    params: [
+	      	{ name: "Data Link", attr: "data", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
+	   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}
+	 	]
 	},
-    params: [
-      	{ name: "Data Link", attr: "data", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
-   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}
- 	],
 	label: "SpreadSheet",
 	menu: {group: "content", rank: 75, display: {type: "label", label: "Spreadsheet"}},
 })

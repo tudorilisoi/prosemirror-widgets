@@ -25,17 +25,12 @@ BlockMath.prototype.serializeDOM = node => {
 }
 
 BlockMath.register("command", "insert", {
-	run(pm,tex) {
-		let {from,node} = pm.selection
-		if (node && node.type == this)
-			return pm.tr.setNodeType(from, this, {tex}).apply()
-		else 
-			return insertWidget(pm,from,this.schema.nodes.blockmath.create({tex}))
-	},
-	params: [
+	derive: {
+		params: [
 	      	{ name: "Latex", attr: "tex", label: "Latex Expression", type: "text", 
 	      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "tex") }}
-	],
+	    ]
+	},
 	label: "BlockMath",
 	menu: {group: "content", rank: 72, display: {type: "label", label: "Block Math"}},
 })

@@ -3,8 +3,8 @@ import "prosemirror/dist/menu/tooltipmenu"
 import "prosemirror/dist/menu/menubar"
 import "prosemirror/dist/inputrules/autoinput"
 import {inlineGroup, textblockMenu, blockGroup, historyGroup} from "prosemirror/dist/menu/menu"
-import {contentInsertMenu, questionInsertMenu} from "./widgets"
-import {defineFileHandler,alignGroup} from "./utils"
+import {contentInsertMenu, questionInsertMenu, alignGroup} from "./widgets"
+import {defineFileHandler} from "./utils"
 import {widgetSchema,commands} from "./schema" 
 
 let pm = window.pm = new ProseMirror({

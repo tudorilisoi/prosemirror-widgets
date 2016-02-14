@@ -6,7 +6,7 @@ import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, Horizonta
 import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
 import {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
 import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward } from "./widgets"
-import {alignGroup,LeftAlign,CenterAlign,RightAlign,JustifyAlign} from "./utils"
+import {alignGroup,LeftAlign,CenterAlign,RightAlign,JustifyAlign} from "./widgets"
 
 const widgetSpec = new SchemaSpec({
 	doc: Doc,
@@ -46,24 +46,27 @@ const widgetSpec = new SchemaSpec({
 	blockmath: BlockMath,
 	website: Website,
 	carryforward: CarryForward,
-	spreadsheet: SpreadSheet
-}, {
-	em: EmMark,
-	strong: StrongMark,
-	link: LinkMark,
-	code: CodeMark,
+	spreadsheet: SpreadSheet,
+	
 	leftalign: LeftAlign,
 	centeralign: CenterAlign,
 	rightalign: RightAlign,
 	justifyalign: JustifyAlign
+}, {
+	em: EmMark,
+	strong: StrongMark,
+	link: LinkMark,
+	code: CodeMark
 })
 
 export const widgetSchema = new Schema(widgetSpec)
 
 export const commands = CommandSet.default.update({
+    selectParentNode: { menu: null},
+    lift: { menu: null},
     "horizontal_rule:insert": {menu: {group: "content", rank: 71, display: {type: "label", label: "Horizontal Rule"}}},
-     selectParentNode: { menu: null},
-     "code:toggle": {menu: {group: "textblock", rank: 99, display: {type: "label", label: "Code"}}}
+    "code:toggle": {menu: {group: "textblock", rank: 99, display: {type: "label", label: "Code" }}}
+//     "strong:toggle": {menu: {class: }}
 })
 
 insertCSS(`
