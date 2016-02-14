@@ -74,10 +74,9 @@ Scale.register("command", "insert",{
 	label: "Scale",
 	run(pm, name, startvalue, startlabel, endvalue, endlabel) {
 		let {from,to,node} = pm.selection
-		if (node && node.type == this) {
-			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
+		if (node && node.type == this)
 			return pm.tr.setNodeType(from, this, {name,startvalue,startlabel,endvalue,endlabel}).apply(pm.apply.scroll)
-		} else 
+		else 
 			return insertWidget(pm,from,this.create({name,startvalue,startlabel,endvalue,endlabel}))
   	},
 	menu: {group: "question", rank: 74, display: {type: "label", label: "Scale"}},

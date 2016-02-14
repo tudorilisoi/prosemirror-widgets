@@ -31,10 +31,9 @@ ShortAnswer.register("command", "insert", {
 	label: "Short Answer",
 	run(pm, name, size) {
 		let {from,to,node} = pm.selection
-		if (node && node.type == this) {
-			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
+		if (node && node.type == this)
 			return pm.tr.setNodeType(from, this, {name,size}).apply(pm.apply.scroll)
-		} else
+		else
 			return insertWidget(pm,from,this.create({name,size}))
   	},
 	menu: {group: "question", rank: 71, display: {type: "label", label: "Short Answer"}},

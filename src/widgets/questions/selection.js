@@ -31,10 +31,9 @@ Selection.register("command", "insert", {
 	label: "Selection",
 	run(pm, name, options, size, multiple) {
 		let {from,to,node} = pm.selection
-		if (node && node.type == this) {
-			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
+		if (node && node.type == this)
 			return pm.tr.setNodeType(from, this, {name,options,size,multiple}).apply(pm.apply.scroll)
-		} else
+		else
 			return insertWidget(pm,from,this.create({name,options,size,multiple}))
   	},
 	menu: {group: "question", rank: 75, display: {type: "label", label: "Selection"}},

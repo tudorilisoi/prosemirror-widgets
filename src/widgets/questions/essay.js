@@ -30,10 +30,9 @@ Essay.register("command", "insert", {
 	label: "Essay",
 	run(pm, name, rows, cols) {
 		let {from,to,node} = pm.selection
-		if (node && node.type == this) {
-			let sdisplay = new Pos(from.path.concat(from.offset),node.size-1)
+		if (node && node.type == this)
 			return pm.tr.setNodeType(from, this, {name,rows,cols}).apply(pm.apply.scroll)
-		} else
+		else
 			return insertWidget(pm,from,this.create({name,rows,cols}))
   	},
     select(pm) { return pm.doc.path(pm.selection.from.path).type.canContainType(this)},
