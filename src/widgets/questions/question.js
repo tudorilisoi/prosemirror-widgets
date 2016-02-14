@@ -26,7 +26,7 @@ insertCSS(`
 	content: "Question " counter(qcnt) ".";
 	font-size: 80%;
 	font-weight: bold;
-	cursor: move;
+//	cursor: move;
 }
 
 .ProseMirror .widgets-question p:hover {
