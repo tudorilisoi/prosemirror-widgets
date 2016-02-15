@@ -92,7 +92,6 @@ MultipleChoice.register("command", "insert", {
 			    this.schema.nodes.choice.create({name: name, value: 1},choice_content)
 			])
 			return insertWidget(pm,from,this.create({name},content))
-			return tr
 		}
 	},
 	select(pm) {

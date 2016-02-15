@@ -15,15 +15,6 @@ if (window.MathJax)
 		})
 	})
 
-function fillAttrs(type, dom) {
-	let attrs = type.attrs
-	let filled = Object.create(null)
-	if (attrs) for (let name in attrs) filled[name] = attrs[name]
-	conf.params.forEach((param, i) => filled[param.attr] = givenParams[i])
-	attrs = filled
-	return attrs
-}
-
 export function defParser(type,tag,cls) {
 	type.register("parseDOM", tag, {
 		rank: 25,

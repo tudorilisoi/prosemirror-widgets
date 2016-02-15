@@ -41,31 +41,39 @@ export const alignGroup = new MenuCommandGroup("align")
 export class LeftAlign extends Align { get style() { return  "widgets-leftalign"}}
 export class CenterAlign extends Align { get style() { return "widgets-centeralign"}}
 export class RightAlign extends Align { get style() { return  "widgets-rightalign"}}
-export class JustifyAlign extends Align { get style() { return "widgets-justifyalign"}}
 
 
 defParser(LeftAlign,"div","icons/leftalign.png")
 defParser(CenterAlign,"div","widgets-centeralign")
 defParser(RightAlign,"div","widgets-rightalign")
-defParser(JustifyAlign,"div","widgets-justifyalign")
 
-function defAlign(type,label,icon) {
+function alignApplies(pm,type) {
+	let {from, to, node} = pm.selection, isLeft = type.name == "leftalign"
+	let start = getTextblockPos(pm,from)
+	let parent = pm.doc.path(start.path)
+	if (isLeft && !(parent.type instanceof Align)) return true
+	return parent.type.name == type.name
+}
+
+function defAlign(type,label,path) {
 	type.register("command", "align", {
 		run(pm) { return findAlignWrapper(pm,this)},
+		active(pm) { return alignApplies(pm, this)},
 		label: label,
 		menu: {
 			group: "align", rank: 51,
-			display: {
-				render(cmd) { return elt("img",{src: icon, width: "14px", height: "14px", title: label, style: "margin: 0 4px 0 4px"}) }
-			}
+		    display: {
+		      type: "icon",
+		      width: 8, height: 8,
+		      path: path
+		    }
 		}
-	})
-}
+	}
+)}
 
-defAlign(LeftAlign,"Left Align","icons/leftalign.png")
-defAlign(CenterAlign,"Center Align","icons/centeralign.png")
-defAlign(RightAlign,"Right Align","icons/rightalign.png")
-defAlign(JustifyAlign,"Justify Align","icons/justifyalign.png")
+defAlign(LeftAlign,"Left Align","M0 0v1h8v-1h-8zm0 2v1h6v-1h-6zm0 2v1h8v-1h-8zm0 2v1h6v-1h-6z")
+defAlign(CenterAlign,"Center Align","M0 0v1h8v-1h-8zm1 2v1h6v-1h-6zm-1 2v1h8v-1h-8zm1 2v1h6v-1h-6z")
+defAlign(RightAlign,"Right Align","M0 0v1h8v-1h-8zm2 2v1h6v-1h-6zm-2 2v1h8v-1h-8zm2 2v1h6v-1h-6z")
 
 insertCSS(`
 div.widgets-leftalign {

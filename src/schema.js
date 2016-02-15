@@ -6,7 +6,8 @@ import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, Horizonta
 import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
 import {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
 import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward } from "./widgets"
-import {alignGroup,LeftAlign,CenterAlign,RightAlign,JustifyAlign} from "./widgets"
+import {alignGroup,LeftAlign,CenterAlign,RightAlign,UnderlineMark,StrikeThroughMark} from "./widgets"
+import {textblockMenu} from "prosemirror/dist/menu/menu"
 
 const widgetSpec = new SchemaSpec({
 	doc: Doc,
@@ -50,16 +51,20 @@ const widgetSpec = new SchemaSpec({
 	
 	leftalign: LeftAlign,
 	centeralign: CenterAlign,
-	rightalign: RightAlign,
-	justifyalign: JustifyAlign
+	rightalign: RightAlign
 }, {
 	em: EmMark,
 	strong: StrongMark,
 	link: LinkMark,
-	code: CodeMark
+	code: CodeMark,
+	underline: UnderlineMark,
+	strikethrough: StrikeThroughMark
 })
 
 export const widgetSchema = new Schema(widgetSpec)
+
+textblockMenu.options.label = "Format"
+
 
 export const commands = CommandSet.default.update({
     selectParentNode: { menu: null},
