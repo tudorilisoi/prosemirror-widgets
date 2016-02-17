@@ -3,18 +3,6 @@ import {Pos} from "prosemirror/dist/model"
 import {selectableNodeAbove} from "prosemirror/dist/edit/selection"
 import {widgetParamHandler} from "./params"
 
-if (window.MathJax)
-	MathJax.Hub.Queue(function () {
-	    MathJax.Hub.Config({
-	    	tex2jax: {
-	        	displayMath: [ ["\\[","\\]"] ], 
-	        	inlineMath: [ ["\\(","\\)"] ],
-	        	processEscapes: true
-	    	},
-	    	displayAlign:"left"
-		})
-	})
-
 export function defParser(type,tag,cls) {
 	type.register("parseDOM", tag, {
 		rank: 25,
@@ -43,7 +31,14 @@ export function nodeBefore(pm, pos) {
 
 export function insertWidget(pm, pos, w) {
   for (;;) {
-    if (pos.depth == 0) return pm.tr.insert(pos,w).apply(pm.apply.scroll) 
+    if (pos.depth == 0) {
+    	pm.tr.insert(pos,w).apply(pm.apply.scroll)
+    	let side = getPosInParent(pm,pos,w)
+    	let p = new Pos(side.toPath(), 0)
+    	if (w.firstChild && w.firstChild.isTextblock)
+    		pm.setTextSelection(new Pos(p.toPath(), 0))
+    	return true
+    }
     pos = pos.shorten(null,1)
   }
 }

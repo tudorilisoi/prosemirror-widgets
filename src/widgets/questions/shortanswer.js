@@ -12,7 +12,7 @@ export class ShortAnswer extends Question {
 			size: new Attribute({default: "20"}),
 			class: new Attribute({default: "widgets-shortanswer"})
 		}
-	}	
+	}
 	create(attrs, content, marks) {
 		// remove scaledisplay and update with new node
 		let tf = this.schema.nodes.textfield.create(attrs)
