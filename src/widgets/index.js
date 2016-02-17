@@ -6,8 +6,10 @@ export {alignGroup,LeftAlign,CenterAlign,RightAlign,UnderlineMark,StrikeThroughM
 import {insertCSS} from "prosemirror/dist/dom"
 import {Dropdown, MenuCommandGroup} from "prosemirror/dist/menu/menu"
 
-export const contentInsertMenu = new Dropdown({label: "Content..", displayActive: true, class: "ProseMirror-widgetinsert-dropdown"}, [new MenuCommandGroup("content")])
-export const questionInsertMenu = new Dropdown({label: "Question..", displayActive: true, class: "ProseMirror-widgetinsert-dropdown"}, [new MenuCommandGroup("question")])
+export const contentCommandGroup = new MenuCommandGroup("content")
+export const questionCommandGroup = new MenuCommandGroup("question")
+export const contentInsertMenu = new Dropdown({label: "Content..", displayActive: true, class: "ProseMirror-widgetinsert-dropdown"}, [contentCommandGroup])
+export const questionInsertMenu = new Dropdown({label: "Question..", displayActive: true, class: "ProseMirror-widgetinsert-dropdown"}, [questionCommandGroup])
 
 insertCSS(`
 

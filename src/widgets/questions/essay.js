@@ -59,4 +59,8 @@ defParamsClick(Essay,"essay:insert")
 
 insertCSS(`
 
+.ProseMirror .widgets-essay textarea {
+	resize: none;
+}
+
 `)

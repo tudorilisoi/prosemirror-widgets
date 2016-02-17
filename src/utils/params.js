@@ -135,13 +135,12 @@ function selectClickedNode(pm, e) {
 	  }
 
 	  pm.setNodeSelection(pos)
-	  pm.focus()
-	  e.preventDefault()
 	  lastClicked = e.target
 	}
 
 export function defParamsClick(type, cmdname, spots = ["topright"]) {
 	type.prototype.handleClick = (pm, e, path, node) => {
+		selectClickedNode(pm,e)
 		let spotClicked = false
 		spots.forEach(function check(loc) {
 			let r = e.target.getBoundingClientRect()
@@ -153,7 +152,6 @@ export function defParamsClick(type, cmdname, spots = ["topright"]) {
 		if (spotClicked) {
 			let cmd = pm.commands[cmdname]
 			if (cmd) {
-				selectClickedNode(pm,e)
 				cmd.exec(pm)
 				return true;
 			} else

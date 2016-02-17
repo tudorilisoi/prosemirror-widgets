@@ -76,7 +76,7 @@ Choice.register("command", "delete", {
 
 MultipleChoice.register("command", "insert", {
 	label: "MultipleChoice",
-	run(pm, name) { 
+	run(pm, name) {
 		let {from,to,node} = pm.selection 
 		if (node && node.type == this) {
 			let tr = pm.tr.setNodeType(from, this, {name: name}).apply()

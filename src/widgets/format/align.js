@@ -11,7 +11,7 @@ function getTextblockPos(pm,pos) {
 		if (node.type instanceof Textblock || pos.depth == 0) break
 	    pos = pos.shorten()
 	}
-    return pos.shorten()	
+    return pos.depth > 0?pos.shorten():pos	
 }
 
 function findAlignWrapper(pm,align) {
@@ -38,6 +38,7 @@ class Align extends Block {
 Align.prototype.serializeDOM = (node,s) => s.renderAs(node,"div", node.attrs)
 
 export const alignGroup = new MenuCommandGroup("align")
+
 export class LeftAlign extends Align { get style() { return  "widgets-leftalign"}}
 export class CenterAlign extends Align { get style() { return "widgets-centeralign"}}
 export class RightAlign extends Align { get style() { return  "widgets-rightalign"}}

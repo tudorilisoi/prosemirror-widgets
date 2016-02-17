@@ -10,21 +10,13 @@ export class Input extends Block {
 			value: new Attribute
 		}
 	}
+	get selectable() { return false }
 	get contains() { return null}
 }
 
 defParser(Input,"widgets-input")
 
 Input.prototype.serializeDOM = node => elt("input",node.attrs)
-
-// hack to lock 
-Input.register("command", "delete", {
-  run(pm) { 
-	  let {from, node} = pm.selection
-	  return node && node.type == this? true: false
-  },
-  keys: ["Backspace(10)", "Mod-Backspace(10)"]
-})
 
 insertCSS(`
 		
