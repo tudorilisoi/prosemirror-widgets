@@ -8,7 +8,6 @@ export function defParser(type,tag,cls) {
 		rank: 25,
 		parse: (dom, state) => {
 			if (!dom.classList.contains(cls)) return false
-			console.log(dom)
 			state.insert(type)
 		}
 	})	

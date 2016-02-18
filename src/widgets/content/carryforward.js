@@ -21,7 +21,7 @@ defParser(CarryForward,"thinkspace","widgets-carryforward")
 
 CarryForward.prototype.serializeDOM = node => {
 	return elt("thinkspace",node.attrs,
-		elt("img",{src: "forward.png", width:16, height:16, title:"Carry forward "+node.attrs.name})
+		elt("img",{src: "icons/forward.png", width:16, height:16, title:"Carry forward "+node.attrs.name})
 	)
 }
 
@@ -34,7 +34,7 @@ CarryForward.register("command", "insert", {
 	 	]
 	},
 	label: "CarryForward",
-	menu: {group: "content", rank: 73, display: {type: "label", label: "Carry Forward"}},
+	menu: {group: "insert", rank: 73, display: {type: "label", label: "Carry Forward"}},
 })
 
 defParamsClick(CarryForward,"carryforward:insert",["all"])
