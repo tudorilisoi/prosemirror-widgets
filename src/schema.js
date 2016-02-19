@@ -5,7 +5,7 @@ import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, Horizonta
 	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec} from "prosemirror/dist/model"
 import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
 import {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
-import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward } from "./widgets"
+import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward, Graph } from "./widgets"
 import {alignGroup,LeftAlign,CenterAlign,RightAlign,UnderlineMark,StrikeThroughMark} from "./widgets"
 import {textblockMenu} from "prosemirror/dist/menu/menu"
 
@@ -48,6 +48,7 @@ const widgetSpec = new SchemaSpec({
 	website: Website,
 	carryforward: CarryForward,
 	spreadsheet: SpreadSheet,
+	graph: Graph,
 	
 	leftalign: LeftAlign,
 	centeralign: CenterAlign,

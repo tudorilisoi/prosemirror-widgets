@@ -1,4 +1,4 @@
-import {Block, Textblock} from "prosemirror/dist/model"
+import {Inline, Block, Textblock} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser} from "../../utils"
 

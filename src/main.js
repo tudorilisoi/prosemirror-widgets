@@ -24,7 +24,7 @@ pm.setOption("menuBar", false)
 pm.setOption("tooltipMenu", {
 	selectedBlockMenu: true,
 	inlineContent: [inlineGroup,insertMenu],
-	blockContent: [[blockGroup, textblockMenu,alignGroup], [contentInsertMenu, questionInsertMenu]]
+	blockContent: [[blockGroup, textblockMenu,alignGroup], [contentInsertMenu, questionInsertMenu]],
 })
 	
 defineFileHandler(function(files) {

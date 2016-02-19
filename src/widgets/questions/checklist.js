@@ -62,7 +62,9 @@ CheckItem.register("command", "split", {
 CheckItem.register("command", "delete",{
 	label: "delete this checkitem or checklist",
 	run(pm) {
-		let {from,to,head} = pm.selection
+		let {from,to,head,node} = pm.selection
+		// don't allow to delete whole checkitem
+		if (node && node.type == this) return true
 	    let toCH = from.shorten(), ch = pm.doc.path(toCH.path)
 	    if (ch.type != this) return false
 		if (from.offset > 0) return pm.tr.delete(from,to).apply(pm.apply.scroll)
@@ -74,7 +76,7 @@ CheckItem.register("command", "delete",{
 	    renumber(pm, toCL)
 	    return tr
 	},
-	keys: ["Backspace(20)", "Mod-Backspace(20)"]
+	keys: ["Backspace(10)", "Mod-Backspace(10)"]
 })
 
 CheckList.register("command", "insert", {

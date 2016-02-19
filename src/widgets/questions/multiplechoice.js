@@ -1,4 +1,4 @@
-import {Block, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
+import {Block, Inline, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertWidget} from "../../utils"
 import {Question} from "./question"
@@ -59,7 +59,9 @@ Choice.register("command", "split", {
 Choice.register("command", "delete", {
   label: "delete text, this choice or choicelist",
   run(pm) {
-	let {from,to,head} = pm.selection
+	let {from,to,head,node} = pm.selection
+	// don't allow to delete whole choice
+	if (node && node.type == this) return true
     let toCH = from.shorten(), ch = pm.doc.path(toCH.path)
     if (ch.type != this) return false
 	if (from.offset > 0) return pm.tr.delete(from,to).apply(pm.apply.scroll)
@@ -71,7 +73,7 @@ Choice.register("command", "delete", {
     renumber(pm, toMC)
     return tr
   },
-  keys: ["Backspace(20)", "Mod-Backspace(20)"]
+  keys: ["Backspace(10)", "Mod-Backspace(10)"]
 })
 
 MultipleChoice.register("command", "insert", {
