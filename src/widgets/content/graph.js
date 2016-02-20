@@ -1,3 +1,12 @@
+import "prosemirror/node_modules/amcharts3/amcharts/amcharts"
+import "prosemirror/node_modules/amcharts3/amcharts/serial"
+import "prosemirror/node_modules/amcharts3/amcharts/gantt"
+import "prosemirror/node_modules/amcharts3/amcharts/pie"
+import "prosemirror/node_modules/amcharts3/amcharts/funnel"
+import "prosemirror/node_modules/amcharts3/amcharts/gauge"
+import "prosemirror/node_modules/amcharts3/amcharts/radar"
+import "prosemirror/node_modules/amcharts3/amcharts/xy"
+
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr,insertWidget} from "../../utils"
