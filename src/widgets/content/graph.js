@@ -83,16 +83,22 @@ insertCSS(`
 .ProseMirror .widgets-graph {}
 
 .widgets-graph-small {
+	border-radius: 6px;
+	border: 1px solid #DDD;
 	width: 400px;
     height: 300px;
 }
 
 .widgets-graph-medium {
+	border-radius: 6px;
+border: 1px solid #DDD;
 	width: 600px;
     height: 400px;
 }
 
 .widgets-graph-large {
+	border-radius: 6px;
+	border: 1px solid #DDD;
 	width: 800px;
     height: 600px;
 }
