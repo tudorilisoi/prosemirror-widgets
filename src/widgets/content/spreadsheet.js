@@ -55,6 +55,7 @@ defParamsClick(SpreadSheet,"spreadsheet:insert",["all"])
 insertCSS(`
 
 .ProseMirror .widgets-spreadsheet {
+	display: inline-block;
 }
 
 `)

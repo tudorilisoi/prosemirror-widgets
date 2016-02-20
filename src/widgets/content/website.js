@@ -47,6 +47,7 @@ defParamsClick(Website,"website:insert")
 insertCSS(`
 
 .ProseMirror .widgets-website:hover {
+	display: inline-block;
     padding-top: 16px;
 }
 

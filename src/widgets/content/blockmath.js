@@ -39,6 +39,9 @@ defParamsClick(BlockMath,"blockmath:insert")
 
 insertCSS(`
 
-.ProseMirror .widgets-blockmath {}
+.ProseMirror .widgets-blockmath {
+	display: inline-block;
+}
+}
 
 `)

@@ -87,13 +87,15 @@ insertCSS(`
 	border: 1px solid #DDD;
 	width: 400px;
     height: 300px;
+	display: inline-block;
 }
 
 .widgets-graph-medium {
 	border-radius: 6px;
-border: 1px solid #DDD;
+	border: 1px solid #DDD;
 	width: 600px;
     height: 400px;
+	display: inline-block;
 }
 
 .widgets-graph-large {
@@ -101,6 +103,7 @@ border: 1px solid #DDD;
 	border: 1px solid #DDD;
 	width: 800px;
     height: 600px;
+	display: inline-block;
 }
 
 `)

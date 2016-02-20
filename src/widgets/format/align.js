@@ -4,19 +4,18 @@ import {elt, insertCSS} from "prosemirror/dist/dom"
 import {canWrap} from "prosemirror/dist/transform"
 import {defParser,getPosInParent} from "../../utils"
 
-function getTextblockPos(pm,pos) {
+function getAlignPos(pm,pos) {
 	let node
 	for (;;) {
 		node = pm.doc.path(pos.path)
-		if (node.type instanceof Textblock || pos.depth == 0) break
+		if (node.type instanceof Align || pos.depth == 0) return pos
 	    pos = pos.shorten()
 	}
-    return pos.depth > 0?pos.shorten():pos	
 }
 
 function findAlignWrapper(pm,align) {
 	let {from, to, node} = pm.selection, isLeft = align.name == "leftalign"
-	let start = getTextblockPos(pm,from)
+	let start = getAlignPos(pm,from)
 	let parent = pm.doc.path(start.path)
 	if (parent.type instanceof Align) {
 		if (isLeft)
@@ -25,8 +24,8 @@ function findAlignWrapper(pm,align) {
 			return pm.tr.setNodeType(getPosInParent(pm,start.shorten(),parent),align,{class: align.style}).apply(pm.apply.scroll)
 	} else {
 		if (isLeft) return false  //left is default and doesn't need wrapper
-		let end = from.cmp(to)? getTextblockPos(pm,to): start
-		return pm.tr.wrap(start,end.move(1),align,{class: align.style}).apply(pm.apply.scroll)
+		let end = from.cmp(to)? getAlignPos(pm,to): start.move(1)
+		return pm.tr.wrap(start,end,align,{class: align.style}).apply(pm.apply.scroll)
 	}
 }
 
@@ -50,7 +49,7 @@ defParser(RightAlign,"div","widgets-rightalign")
 
 function alignApplies(pm,type) {
 	let {from, to, node} = pm.selection, isLeft = type.name == "leftalign"
-	let start = getTextblockPos(pm,from)
+	let start = getAlignPos(pm,from)
 	let parent = pm.doc.path(start.path)
 	if (isLeft && !(parent.type instanceof Align)) return true
 	return parent.type.name == type.name
@@ -83,10 +82,12 @@ div.widgets-leftalign {
 
 div.widgets-centeralign {
 	text-align: center;
+	margin: 0 auto;
 }
 
 div.widgets-rightalign {
 	text-align: right;
+	float: right;
 }
 
 div.widgets-justifyalign {
