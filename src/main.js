@@ -11,7 +11,7 @@ let pm = window.pm = new ProseMirror({
   place: document.querySelector("#editor"),
   menuBar: {
 	float: true,
-	content: [inlineGroup, [blockGroup,textblockMenu],alignGroup,[contentInsertMenu,questionInsertMenu],historyGroup]	 
+	content: [[inlineGroup, insertMenu], [blockGroup,textblockMenu],alignGroup,[contentInsertMenu,questionInsertMenu],historyGroup]	 
   },
   schema: widgetSchema,
   commands: commands,
