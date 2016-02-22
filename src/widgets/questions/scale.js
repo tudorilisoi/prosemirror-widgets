@@ -11,37 +11,34 @@ export class ScaleDisplay extends Block {
 			startlabel: new Attribute({default: "low"}),
 			endvalue: new Attribute({default: "10"}),
 			endlabel: new Attribute({default: "high"}),
-			contenteditable: new Attribute({default: false})
 		}
 	}
 }
 
 ScaleDisplay.prototype.serializeDOM = (node,s) => {
-	let para = elt("div",node.attrs)
-	para.appendChild(elt("span", null, node.attrs.startlabel+" "))
 	let startVal = Number(node.attrs.startvalue)
 	let endVal = Number(node.attrs.endvalue)
-	if (startVal < endVal)
-		for (let i = startVal; i <= endVal; i++) {
-			let name = node.attrs.name+i
-			para.appendChild(
-				elt("span",{class: "widgets-scaleitem"},
-					elt("label",{for: name},i.toString()),
-					elt("input",{id: name, name:node.attrs.name, type:"radio", value:i})
-				)
-			)
-		}
-	else
-		for (let i = startVal; i >=  endVal; i--) {
-			para.appendChild(
-				elt("span",{class: "widgets-scaleitem"},
-					elt("label",{for: name},i.toString()),
-					elt("input",{id: name, name:node.attrs.name, type:"radio", value:i})
-				)
-			)
-		}
-	para.appendChild(elt("span", null, " "+node.attrs.endlabel))
-	return para
+	let mid = String(Math.round((Math.abs(endVal - startVal))/2))
+	let out = elt("output",{for: node.attrs.name},mid)
+	let setOutputValue
+	if (startVal < endVal) {
+		setOutputValue = function(val) { out.value = val }
+	} else {
+		let max = startVal
+		setOutputValue = function(val) { out.value = max - val }
+		endVal = startVal - endVal; startVal = 0
+	}
+	let range = elt("input",{class: "widgets-input", value: mid, name:node.attrs.name, id: node.attrs.name, type: "range", min: startVal, max: endVal, contenteditable: false})
+	range.addEventListener("input",e => {
+    	e.stopPropagation()
+    	setOutputValue(e.originalTarget.valueAsNumber)
+	})
+	return elt("div",node.attrs,
+		elt("span", null, node.attrs.startlabel),
+		range,
+		elt("span", null,node.attrs.endlabel),
+		out
+	)
 }
 
 export class Scale extends Question {
@@ -105,23 +102,36 @@ insertCSS(`
 .widgets-scaleitem {
 	display: inline-block;
 	text-align: center;
-    padding: 4px;
 }
 
-.widgets-scaleitem input {
-	display: block;
+.widgets-scale input {
+	vertical-align: middle;
+	display: inline;
+}
+
+.widgets-scale output {
+	vertical-align: middle;
+	border-radius: 4px;
+	text-align: right;
+	height: 20px;
+	border: 1px solid #AAA;
+	display: inline;
+	padding: 2px;
+	margin: 4px;
+	background: white;
 }
 
 .widgets-scale span {
 	vertical-align: middle;
 	font-weight: normal;
+	display: inline;
 }
 
 .widgets-scale div {
 	display: inline-block;
 	padding: 4px;
-	background: #EEE;
     border-radius: 6px;
     border: 1px solid #AAA;
+	background: #EEE;
 }
 `)

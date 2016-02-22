@@ -1,28 +1,41 @@
 import "prosemirror/node_modules/amcharts3/amcharts/amcharts"
 import "prosemirror/node_modules/amcharts3/amcharts/serial"
-import "prosemirror/node_modules/amcharts3/amcharts/gantt"
+import "prosemirror/node_modules/amcharts3/amcharts/gantt" 
 import "prosemirror/node_modules/amcharts3/amcharts/pie"
 import "prosemirror/node_modules/amcharts3/amcharts/funnel"
-import "prosemirror/node_modules/amcharts3/amcharts/gauge"
+import "prosemirror/node_modules/amcharts3/amcharts/gauge" 
 import "prosemirror/node_modules/amcharts3/amcharts/radar"
 import "prosemirror/node_modules/amcharts3/amcharts/xy"
+import "prosemirror/node_modules/ammap3/ammap/ammap_amcharts_extension"
+import "prosemirror/node_modules/amcharts3/amcharts/plugins/dataloader/dataloader"
 
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr,insertWidget} from "../../utils"
 
-const graphs = ["graphs/line.json","graphs/column.json","graphs/pie.json","graphs/gantt.json"]
+const graphs = ["graphs/line.json","graphs/column.json","graphs/pie.json","graphs/gantt.json","maps/map.json"]
                 
-function getJSONData(id,url) {
+function getFileData(url,f) {
 	let xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
-	    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-	    	let data = JSON.parse(xmlhttp.responseText)
-	    	AmCharts.makeChart(id, data)
-	    }
+	    if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+	    	f(xmlhttp.responseText)
 	}
 	xmlhttp.open("GET", url, true)
 	xmlhttp.send()
+}
+
+function makeGraph(id,url) {
+	getFileData(url,data => {
+		let graph = JSON.parse(data)
+		if (graph.type == "map")
+			getFileData("maps/"+graph.dataProvider.map+".js", script => {
+                eval.apply(window, [script]);
+				AmCharts.makeChart(id, graph)
+			})
+		else
+			AmCharts.makeChart(id, graph)
+	})
 }
 
 function getGraphOptions() {
@@ -47,10 +60,10 @@ Graph.prototype.serializeDOM = node => {
 		node.rendered = node.rendered.cloneNode(true)
 	} else {
 		node.rendered = elt("div", {
-			class: "widgets-graph widgets-edit widgets-graph-"+node.attrs.size, 
+			class: "widgets-graph widgets-graph-"+node.attrs.size, 
 			id: "amchart"
 		})
-		getJSONData("amchart",node.attrs.data)
+		makeGraph("amchart",node.attrs.data)
 	}
 	return node.rendered; 
 }
@@ -73,10 +86,10 @@ Graph.register("command", "insert", {
 	    ]
 	},
 	label: "Graph",
-	menu: {group: "content", rank: 74, display: {type: "label", label: "Graph"}},
+	menu: {group: "content", rank: 74, display: {type: "label", label: "Graph/Map"}},
 })
 
-defParamsClick(Graph,"graph:insert")
+//defParamsClick(Graph,"graph:insert")
 
 insertCSS(`
 

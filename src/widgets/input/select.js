@@ -48,7 +48,7 @@ Select.register("command", "insert", {
    			  title: nameTitle}},
       	{ name: "Options", label: "comma separated names", type: "text", 
 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "options") }},
-	    { name: "Size", label: "options displayed", type: "range", 
+	    { name: "Size", label: "options displayed", type: "number", 
 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "options") },
 		  options: { min: 1, max:10, default: 1}
 		},
