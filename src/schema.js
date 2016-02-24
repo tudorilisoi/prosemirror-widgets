@@ -70,9 +70,7 @@ textblockMenu.options.label = "Format"
 export const commands = CommandSet.default.update({
     selectParentNode: { menu: null},
     lift: { menu: null},
-    "horizontal_rule:insert": {menu: {group: "content", rank: 71, display: {type: "label", label: "Horizontal Rule"}}},
     "code:toggle": {menu: {group: "textblock", rank: 99, display: {type: "label", label: "Code" }}}
-//     "strong:toggle": {menu: {class: }}
 })
 
 insertCSS(`

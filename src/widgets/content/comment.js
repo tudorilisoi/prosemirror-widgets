@@ -1,3 +1,4 @@
+
 class Comment {
 	constructor(id, text, range) {
 		this.id = id

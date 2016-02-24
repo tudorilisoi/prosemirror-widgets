@@ -20,7 +20,7 @@ let pm = window.pm = new ProseMirror({
   docFormat: "dom"
 })
 
-/*pm.setOption("menuBar", false)
+/*
 pm.setOption("tooltipMenu", {
 	selectedBlockMenu: true,
 	inlineContent: [inlineGroup,insertMenu],
