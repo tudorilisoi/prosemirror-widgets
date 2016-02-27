@@ -1,7 +1,7 @@
 import {Block, Inline, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertWidget} from "../../utils"
-import {Question} from "./question"
+import {Question, qclass} from "./question"
 
 export class Choice extends Block {
 	get attrs() {
@@ -12,8 +12,10 @@ export class Choice extends Block {
 		}
 	}
 	create(attrs, content, marks) {
-		let len = content.content.length
-		content = Fragment.from([this.schema.nodes.radiobutton.create(attrs),content.content[len-1]])
+		if (content.content) {
+			let len = content.content.length
+			content = Fragment.from([this.schema.nodes.radiobutton.create(attrs),content.content[len-1]])
+		} 
 		return super.create(attrs,content,marks)
 	}
 }
@@ -22,7 +24,7 @@ export class MultipleChoice extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
-			class: new Attribute({default: "widgets-multiplechoice"})
+			class: new Attribute({default: "widgets-multiplechoice "+qclass})
 		}
 	}
 	get isList() { return true }

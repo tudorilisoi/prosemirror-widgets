@@ -2,12 +2,45 @@ import {CommandSet} from "prosemirror/dist/edit"
 import {insertCSS} from "prosemirror/dist/dom"
 import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, HorizontalRule,
 	Paragraph, Heading, Text, HardBreak,
-	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec} from "prosemirror/dist/model"
-import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
+	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec, NodeKind} from "prosemirror/dist/model"
 import {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
+import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
 import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward, Graph } from "./widgets"
 import {alignGroup,LeftAlign,CenterAlign,RightAlign,UnderlineMark,StrikeThroughMark} from "./widgets"
 import {textblockMenu} from "prosemirror/dist/menu/menu"
+  
+/*export const TopKind = new NodeKind("toplevel")
+const TopKindOrBlock = new NodeKind("block",TopKind)
+
+class WDoc extends Doc {
+	get kind() { return null }
+	get contains() { return TopKind }
+}
+
+class WHeading extends Heading {
+	get kind() { return TopKind }
+}
+
+class WBlockQuote extends BlockQuote {
+	get kind() { return TopKind }
+	get contains() { return TopKindOrBlock }
+}
+
+class WParagraph extends Paragraph {
+	get kind() { return TopKindOrBlock }
+}
+
+class WBulletList extends BulletList {
+	get kind() { return TopKindOrBlock }
+}
+
+class WOrderedList extends OrderedList {
+	get kind() { return TopKindOrBlock }
+}
+
+class WListItem extends ListItem {
+	get contains() { return TopKindOrBlock }
+}*/
 
 const widgetSpec = new SchemaSpec({
 	doc: Doc,
@@ -65,7 +98,6 @@ const widgetSpec = new SchemaSpec({
 export const widgetSchema = new Schema(widgetSpec)
 
 textblockMenu.options.label = "Format"
-
 
 export const commands = CommandSet.default.update({
     selectParentNode: { menu: null},

@@ -2,7 +2,7 @@ import {Fragment, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {TextField} from "../input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertWidget} from "../../utils"
-import {Question} from "./question"
+import {Question, qclass} from "./question"
 
 export class ShortAnswer extends Question {
 	get attrs() {
@@ -10,18 +10,8 @@ export class ShortAnswer extends Question {
 			name: new Attribute,
 			type: new Attribute({default: "text"}),
 			size: new Attribute({default: "20"}),
-			class: new Attribute({default: "widgets-shortanswer"})
+			class: new Attribute({default: "widgets-shortanswer "+qclass})
 		}
-	}
-	create(attrs, content, marks) {
-		// remove scaledisplay and update with new node
-		let tf = this.schema.nodes.textfield.create(attrs)
-		if (content) {
-			let nodes = content.toArray(); nodes.pop()
-			content = Fragment.fromArray(nodes.concat(tf))
-		} else
-			content = Fragment.from([this.schema.nodes.paragraph.create(null,""),tf])
-		return super.create(attrs,content,marks)
 	}
 }
 
@@ -33,8 +23,13 @@ ShortAnswer.register("command", "insert", {
 		let {from,to,node} = pm.selection
 		if (node && node.type == this)
 			return pm.tr.setNodeType(from, this, {name,size}).apply(pm.apply.scroll)
-		else
-			return insertWidget(pm,from,this.create({name,size}))
+		else {
+			let content = Fragment.from([
+ 			    this.schema.nodes.paragraph.create(null,""),
+ 			   this.schema.nodes.textfield.create({name,size})
+			])
+			return insertWidget(pm,from,this.create({name,size},content))
+		}
   	},
 	menu: {group: "question", rank: 71, display: {type: "label", label: "Short Answer"}},
 	params: [

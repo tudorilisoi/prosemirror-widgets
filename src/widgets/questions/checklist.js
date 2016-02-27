@@ -1,11 +1,13 @@
-import {Block, Textblock, emptyFragment, Fragment, Attribute, Pos} from "prosemirror/dist/model"
+import {Block, Textblock, emptyFragment, Fragment, Attribute, Pos, NodeKind} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {TextBox} from "./textbox"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertWidget} from "../../utils"
-import {Question} from "./question"
+import {Question, qclass} from "./question"
+
+NodeKind.checkitem = new NodeKind("checkitem")
 
 export class CheckItem extends Block {
-	static get kinds() { return "checkitem" }
+	static get kind() { return NodeKind.checkitem }
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -14,8 +16,10 @@ export class CheckItem extends Block {
 		}
 	}
 	create(attrs, content, marks) {
-		let len = content.content.length
-		content = Fragment.from([this.schema.nodes.checkbox.create(attrs),content.content[len-1]])
+		if (content.content) {
+			let len = content.content.length
+			content = Fragment.from([this.schema.nodes.checkbox.create(attrs),content.content[len-1]])
+		}
 		return super.create(attrs,content,marks)
 	}
 }
@@ -24,7 +28,7 @@ export class CheckList extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
-			class: new Attribute({default: "widgets-checklist"})
+			class: new Attribute({default: "widgets-checklist "+qclass})
 		}
 	}
 	get isList() { return true }
@@ -39,7 +43,7 @@ function renumber(pm, pos) {
 	let cl = pm.doc.path(pos.path), i = 1
 	cl.forEach((node,start) => {
 		if (node.type.name == "checkitem") {
-			pm.tr.setNodeType(new Pos(pos.path,start), node.type, {name: node.attrs.name+"-"+i, value:i++}).apply()
+			pm.tr.setNodeType(new Pos(pos.path,start), node.type, {name: cl.attrs.name+"-"+i, value:i++}).apply()
 		}
 	})
 }

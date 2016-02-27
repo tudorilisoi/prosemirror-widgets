@@ -2,7 +2,7 @@ import {Fragment,Block, Attribute, Pos} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {Select} from "../input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertWidget} from "../../utils"
-import {Question} from "./question"
+import {Question, qclass} from "./question"
 
 export class Selection extends Question {
 	get attrs() {
@@ -11,17 +11,8 @@ export class Selection extends Question {
 			options: new Attribute,
 			size: new Attribute({default: 1}),
 		    multiple: new Attribute({default: "single"}),
-		    class: new Attribute({default: "widgets-selection"})
+		    class: new Attribute({default: "widgets-selection "+qclass})
 		}
-	}
-	create(attrs, content, marks) {
-		let sel = this.schema.nodes.select.create(attrs)
-		if (content) {
-			let nodes = content.toArray(); nodes.pop()
-			content = Fragment.fromArray(nodes.concat(sel))
-		} else 
-			content = Fragment.from([this.schema.nodes.paragraph.create(null,""),sel])
-		return super.create(attrs,content,marks)
 	}
 }
 
@@ -33,8 +24,13 @@ Selection.register("command", "insert", {
 		let {from,to,node} = pm.selection
 		if (node && node.type == this)
 			return pm.tr.setNodeType(from, this, {name,options,size,multiple}).apply(pm.apply.scroll)
-		else
-			return insertWidget(pm,from,this.create({name,options,size,multiple}))
+		else {
+			let content = Fragment.from([
+			     this.schema.nodes.paragraph.create(null,""),
+			     this.schema.nodes.select.create({name,options,size,multiple})
+			])
+			return insertWidget(pm,from,this.create({name,options,size,multiple},content))
+		}
   	},
 	menu: {group: "question", rank: 75, display: {type: "label", label: "Selection"}},
 	params: [

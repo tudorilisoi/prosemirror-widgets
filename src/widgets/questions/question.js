@@ -1,15 +1,17 @@
-import {Block, Pos} from "prosemirror/dist/model"
+import {Block, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick} from "../../utils"
 import {joinPoint, joinableBlocks, canLift} from "prosemirror/dist/transform"
+import {TopKind} from "../../schema"
 
+export const qclass = "widgets-question widgets-edit"
+	
 export class Question extends Block {
-//	get draggable() { return true }
+	get kind() { return TopKind }
+	get draggable() { return true }
 }
 
-defParser(Question,"div","widgets-question")
-
-Question.prototype.serializeDOM = (node,s) => elt("div",{class: "widgets-question widgets-edit"},s.renderAs(node,"div",node.attrs))
+Question.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
 
 // disable deletion of first question paragraph
 Question.register("command", "delete", {

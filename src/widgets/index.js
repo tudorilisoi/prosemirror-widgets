@@ -1,4 +1,4 @@
-export {Question, Input, TextBox, CheckList, CheckItem, MultipleChoice, Choice, ScaleDisplay, Scale, Essay, ShortAnswer, Selection} from "./questions"
+export {Question, TextBox, CheckList, CheckItem, MultipleChoice, Choice, ScaleDisplay, Scale, Essay, ShortAnswer, Selection} from "./questions"
 export {BlockMath,CarryForward,Image,InlineMath,SpreadSheet,Website,Graph} from "./content"
 export {Input, CheckBox, RadioButton, Select, TextField, TextArea} from "./input"
 export {alignGroup,LeftAlign,CenterAlign,RightAlign,UnderlineMark,StrikeThroughMark} from "./format"

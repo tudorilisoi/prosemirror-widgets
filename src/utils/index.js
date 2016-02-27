@@ -5,10 +5,11 @@ import {widgetParamHandler} from "./params"
 
 export function defParser(type,tag,cls) {
 	type.register("parseDOM", tag, {
-		rank: 25,
-		parse: (dom, state) => {
+		parse(dom, state) {
 			if (!dom.classList.contains(cls)) return false
-			state.insert(type)
+		    let attrs = Object.create(null)
+		    for (let name in this.attrs) attrs[name] = dom.getAttribute(name)
+			state.wrapIn(dom,this,attrs)
 		}
 	})	
 }

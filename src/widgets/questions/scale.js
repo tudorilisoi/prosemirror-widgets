@@ -1,7 +1,7 @@
 import {Fragment, Block, Paragraph, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertWidget} from "../../utils"
-import {Question} from "./question"
+import {Question, qclass} from "./question"
 
 export class ScaleDisplay extends Block {
 	get attrs() {
@@ -11,6 +11,7 @@ export class ScaleDisplay extends Block {
 			startlabel: new Attribute({default: "low"}),
 			endvalue: new Attribute({default: "10"}),
 			endlabel: new Attribute({default: "high"}),
+			class: new Attribute({default: "widgets-scaledisplay"})
 		}
 	}
 }
@@ -33,12 +34,7 @@ ScaleDisplay.prototype.serializeDOM = (node,s) => {
     	e.stopPropagation()
     	setOutputValue(e.originalTarget.valueAsNumber)
 	})
-	return elt("div",node.attrs,
-		elt("span", null, node.attrs.startlabel),
-		range,
-		elt("span", null,node.attrs.endlabel),
-		out
-	)
+	return elt("div",node.attrs,elt("span", null, node.attrs.startlabel),range,elt("span", null,node.attrs.endlabel),out)
 }
 
 export class Scale extends Question {
@@ -50,21 +46,12 @@ export class Scale extends Question {
 			startlabel: new Attribute({default: "low"}),
 			endvalue: new Attribute({default: "10"}),
 			endlabel: new Attribute({default: "high"}),
-			class: new Attribute({default: "widgets-scale"})
+			class: new Attribute({default: "widgets-scale "+qclass})
 		}
-	}
-	create(attrs, content, marks) {
-		let sd = this.schema.nodes.scaledisplay.create(attrs)
-		if (content) {
-			// remove scaledisplay and update with new node
-			let nodes = content.toArray(); nodes.pop()
-			content = Fragment.fromArray(nodes.concat(sd))
-		} else
-			content = Fragment.from([this.schema.nodes.paragraph.create(null,""),sd])
-		return super.create(attrs,content,marks)
 	}
 }
 
+defParser(Scale,"div","widgets-scaledisplay")
 defParser(Scale,"div","widgets-scale")
 
 Scale.register("command", "insert",{
@@ -73,8 +60,13 @@ Scale.register("command", "insert",{
 		let {from,to,node} = pm.selection
 		if (node && node.type == this)
 			return pm.tr.setNodeType(from, this, {name,startvalue,startlabel,endvalue,endlabel}).apply(pm.apply.scroll)
-		else 
-			return insertWidget(pm,from,this.create({name,startvalue,startlabel,endvalue,endlabel}))
+		else {
+			let content = Fragment.from([
+			    this.schema.nodes.paragraph.create(null,""),
+			    this.schema.nodes.scaledisplay.create({name,startvalue, startlabel, endvalue, endlabel})
+			])
+			return insertWidget(pm,from,this.create({name,startvalue,startlabel,endvalue,endlabel},content))
+		}
   	},
 	menu: {group: "question", rank: 74, display: {type: "label", label: "Scale"}},
 	params: [
@@ -99,9 +91,10 @@ defParamsClick(Scale,"scale:insert")
 
 insertCSS(`
 
-.widgets-scaleitem {
+.widgets-scaledisplay {
 	display: inline-block;
 	text-align: center;
+	font-size: 80%;
 }
 
 .widgets-scale input {
@@ -130,8 +123,95 @@ insertCSS(`
 .widgets-scale div {
 	display: inline-block;
 	padding: 4px;
-    border-radius: 6px;
-    border: 1px solid #AAA;
-	background: #EEE;
+}
+
+.widgets-scale input[type=range] {
+    /*removes default webkit styles*/
+    -webkit-appearance: none;
+    
+    /*fix for FF unable to apply focus style bug */
+    border: 1px solid white;
+    
+    /*required for proper track sizing in FF*/
+    width: 200px;
+}
+.widgets-scale input[type=range]::-webkit-slider-runnable-track {
+    width: 200px;
+    height: 5px;
+    background: skyblue;
+    border: none;
+    border-radius: 3px;
+}
+.widgets-scale input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: navy;
+    margin-top: -4px;
+}
+.widgets-scale input[type=range]:focus {
+    outline: none;
+}
+.widgets-scale input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc;
+}
+
+.widgets-scale input[type=range]::-moz-range-track {
+    width: 200px;
+    height: 5px;
+    background: skyblue;
+    border: none;
+    border-radius: 3px;
+}
+.widgets-scale input[type=range]::-moz-range-thumb {
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: navy;
+}
+
+/*hide the outline behind the border*/
+.widgets-scale input[type=range]:-moz-focusring{
+    outline: 1px solid white;
+    outline-offset: -1px;
+}
+
+.widgets-scale input[type=range]::-ms-track {
+    width: 200px;
+    height: 5px;
+    
+    /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+    background: transparent;
+    
+    /*leave room for the larger thumb to overflow with a transparent border */
+    border-color: transparent;
+    border-width: 6px 0;
+
+    /*remove default tick marks*/
+    color: transparent;
+}
+.widgets-scale input[type=range]::-ms-fill-lower {
+    background: ;
+    border-radius: 10px;
+}
+.widgets-scale input[type=range]::-ms-fill-upper {
+    background: #ddd;
+    border-radius: 10px;
+}
+.widgets-scale input[type=range]::-ms-thumb {
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: navy;
+}
+.widgets-scale input[type=range]:focus::-ms-fill-lower {
+    background: #888;
+}
+.widgets-scale input[type=range]:focus::-ms-fill-upper {
+    background: #ccc;
 }
 `)

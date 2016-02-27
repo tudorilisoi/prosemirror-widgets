@@ -1,7 +1,7 @@
 import {Fragment, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertWidget} from "../../utils"
-import {Question} from "./question"
+import {Question, qclass} from "./question"
 
 export class Essay extends Question {
 	get attrs() {
@@ -9,18 +9,8 @@ export class Essay extends Question {
 			name: new Attribute,
 			rows: new Attribute,
 			cols: new Attribute,
-			class: new Attribute({default: "widgets-essay"})
+			class: new Attribute({default: "widgets-essay "+qclass})
 		}
-	}
-	create(attrs, content, marks) {
-		let ta = this.schema.nodes.textarea.create(attrs)
-		if (content) {
-			// remove textarea and update with new node
-			let nodes = content.toArray(); nodes.pop()
-			content = Fragment.fromArray(nodes.concat(ta))
-		} else
-			content = Fragment.from([this.schema.nodes.paragraph.create(null,""),ta])
-		return super.create(attrs,content,marks)
 	}
 }
 
@@ -32,8 +22,13 @@ Essay.register("command", "insert", {
 		let {from,to,node} = pm.selection
 		if (node && node.type == this)
 			return pm.tr.setNodeType(from, this, {name,rows,cols}).apply(pm.apply.scroll)
-		else
-			return insertWidget(pm,from,this.create({name,rows,cols}))
+		else {
+			let content = Fragment.from([
+			    this.schema.nodes.paragraph.create(null,""),
+			    this.schema.nodes.textarea.create({name,rows,cols})
+			])
+			return insertWidget(pm,from,this.create({name,rows,cols},content))
+		}
   	},
     select(pm) { return pm.doc.path(pm.selection.from.path).type.canContainType(this)},
 	menu: {group: "question", rank: 72, display: {type: "label", label: "Essay"}, select: "ignore"},
