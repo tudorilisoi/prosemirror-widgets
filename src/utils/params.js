@@ -84,7 +84,7 @@ function openWidgetPrompt(wpp, options) {
 
 ParamPrompt.prototype.paramTypes.file = {
   render(param,value) {
-	let field = elt("input", {type: "text",readonly: true,placeholder: param.label,value,required: "required",autocomplete: "off",required: true})
+	let field = elt("input", {type: "text",readonly: true,placeholder: param.label,value,required: "required",autocomplete: "off"})
     let label = param.name? param.name: param.label
     field.setAttribute("name", label)
     let opt = param.options

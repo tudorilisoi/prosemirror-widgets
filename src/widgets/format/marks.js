@@ -54,5 +54,6 @@ StrikeThroughMark.register("parseDOMStyle", "text-decoration", {parse: function(
 	else inner()
 }})
 
+
 insertCSS(`
 `)

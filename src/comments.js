@@ -2,20 +2,21 @@ import {ProseMirror} from "prosemirror/dist/edit"
 import "prosemirror/dist/menu/tooltipmenu"
 import "prosemirror/dist/menu/menubar"
 import "prosemirror/dist/inputrules/autoinput"
-import {defineFileHandler} from "./utils"
-import {widgetSchema, commands, grammarMenuBar} from "./schema" 
+import {widgetSchema, readonlyCommands} from "./schema" 
+import {setReadOnly} from "prosemirror/dist/transform/transform"
+import {initComments} from "./widgets/tool" 
 
 let pm = window.pm = new ProseMirror({
   place: document.querySelector("#editor"),
-  menuBar: grammarMenuBar,
+  menuBar: {float: false, content: null},
   schema: widgetSchema,
-  commands: commands,
+  commands: readonlyCommands,
   autoInput: true,
   doc: document.querySelector("#content"),
   docFormat: "dom"
 })
 
-defineFileHandler(function(files) {
-	console.log(files)
-})
+setReadOnly(function(step) { return true })
+
+initComments(pm)
 

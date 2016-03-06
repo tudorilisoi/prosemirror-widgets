@@ -2,17 +2,13 @@ import {ProseMirror} from "prosemirror/dist/edit"
 import "prosemirror/dist/menu/tooltipmenu"
 import "prosemirror/dist/menu/menubar"
 import "prosemirror/dist/inputrules/autoinput"
-import {inlineGroup, insertMenu, textblockMenu, blockGroup, historyGroup} from "prosemirror/dist/menu/menu"
-import {contentInsertMenu, questionInsertMenu, alignGroup} from "./widgets"
 import {defineFileHandler} from "./utils"
-import {widgetSchema,commands} from "./schema" 
-
+import {setReadOnly} from "prosemirror/dist/transform/transform"
+import {widgetSchema, commands, mainMenuBar, defaultSchema} from "./schema" 
+ 
 let pm = window.pm = new ProseMirror({
   place: document.querySelector("#editor"),
-  menuBar: {
-	float: true,
-	content: [[inlineGroup, insertMenu], [blockGroup,textblockMenu],alignGroup,[contentInsertMenu,questionInsertMenu],historyGroup]	 
-  },
+  menuBar: mainMenuBar,
   schema: widgetSchema,
   commands: commands,
   autoInput: true,

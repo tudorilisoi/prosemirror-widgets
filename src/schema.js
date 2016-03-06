@@ -1,15 +1,17 @@
 import {CommandSet} from "prosemirror/dist/edit"
 import {insertCSS} from "prosemirror/dist/dom"
+import {inlineGroup, insertMenu, textblockMenu, blockGroup, historyGroup} from "prosemirror/dist/menu/menu"
 import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, HorizontalRule,
 	Paragraph, Heading, Text, HardBreak,
 	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec, NodeKind} from "prosemirror/dist/model"
-import {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets"
-import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets"
-import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward, Graph } from "./widgets"
-import {alignGroup,LeftAlign,CenterAlign,RightAlign,UnderlineMark,StrikeThroughMark} from "./widgets"
-import {textblockMenu} from "prosemirror/dist/menu/menu"
-  
-/*export const TopKind = new NodeKind("toplevel")
+import {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, 
+	ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets/question"
+import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets/input"
+import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward, Graph } from "./widgets/content"
+import {alignGroup, LeftAlign, CenterAlign, RightAlign, UnderlineMark, StrikeThroughMark, contentInsertMenu, questionInsertMenu, toolGroup} from "./widgets"
+import {analyzeCmdSpec, commentCmdSpec} from "./widgets/tool"
+
+export const TopKind = new NodeKind("toplevel")
 const TopKindOrBlock = new NodeKind("block",TopKind)
 
 class WDoc extends Doc {
@@ -40,17 +42,17 @@ class WOrderedList extends OrderedList {
 
 class WListItem extends ListItem {
 	get contains() { return TopKindOrBlock }
-}*/
+}
 
 const widgetSpec = new SchemaSpec({
-	doc: Doc,
-	blockquote: BlockQuote,
-	ordered_list: OrderedList,
-	bullet_list: BulletList,
-	list_item: ListItem,
+	doc: WDoc,
+	blockquote: WBlockQuote,
+	ordered_list: WOrderedList,
+	bullet_list: WBulletList,
+	list_item: WListItem,
 
-	paragraph: Paragraph,
-	heading: Heading,
+	paragraph: WParagraph,
+	heading: WHeading,
 
 	text: Text,
 	hard_break: HardBreak,
@@ -97,19 +99,31 @@ const widgetSpec = new SchemaSpec({
 
 export const widgetSchema = new Schema(widgetSpec)
 
+export const mainMenuBar = {
+	float: true,
+	content: [[inlineGroup, insertMenu], [blockGroup,textblockMenu],alignGroup,[contentInsertMenu,questionInsertMenu],historyGroup]	 
+}
+
+export const grammarMenuBar = {
+	float: true,
+	content: [[inlineGroup, insertMenu], [blockGroup,textblockMenu],alignGroup,[contentInsertMenu,questionInsertMenu], toolGroup, historyGroup]	 
+}
+
+
 textblockMenu.options.label = "Format"
 
 export const commands = CommandSet.default.update({
     selectParentNode: { menu: null},
     lift: { menu: null},
-    "code:toggle": {menu: {group: "textblock", rank: 99, display: {type: "label", label: "Code" }}}
+    "code:toggle": {menu: {group: "textblock", rank: 99, display: {type: "label", label: "Code" }}},
+    analyze: analyzeCmdSpec
 })
+
+export const readonlyCommands = new CommandSet(null, () => null)
 
 insertCSS(`
 		
 .ProseMirror {
-	width: 800px;
-	min-height: 200px;
 }
 
 .ProseMirror-menu {

@@ -29,14 +29,20 @@ export function nodeBefore(pm, pos) {
     return {before,at: new Pos(cut.path,cut.offset-1)}
 }
 
+export function getID() {
+	return Math.floor(Math.random() * 0xffffffff)
+}
+
 export function insertWidget(pm, pos, w) {
   for (;;) {
     if (pos.depth == 0) {
     	pm.tr.insert(pos,w).apply(pm.apply.scroll)
-    	let side = getPosInParent(pm,pos,w)
-    	let p = new Pos(side.toPath(), 0)
     	if (w.firstChild && w.firstChild.isTextblock)
-    		pm.setTextSelection(new Pos(p.toPath(), 0))
+    		pm.on("change",() => {
+	        	let side = getPosInParent(pm,pos,w)
+	        	let p = new Pos(side.toPath(), 0)
+	    		pm.setTextSelection(new Pos(p.toPath(),0))
+    		})
     	return true
     }
     pos = pos.shorten(null,1)

@@ -1,17 +1,6 @@
-import "prosemirror/node_modules/amcharts3/amcharts/amcharts"
-import "prosemirror/node_modules/amcharts3/amcharts/serial"
-import "prosemirror/node_modules/amcharts3/amcharts/gantt" 
-import "prosemirror/node_modules/amcharts3/amcharts/pie"
-import "prosemirror/node_modules/amcharts3/amcharts/funnel"
-import "prosemirror/node_modules/amcharts3/amcharts/gauge" 
-import "prosemirror/node_modules/amcharts3/amcharts/radar"
-import "prosemirror/node_modules/amcharts3/amcharts/xy"
-import "prosemirror/node_modules/ammap3/ammap/ammap_amcharts_extension"
-import "prosemirror/node_modules/amcharts3/amcharts/plugins/dataloader/dataloader"
-
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, selectedNodeAttr,insertWidget} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr,insertWidget, getID} from "../../utils"
 
 const graphs = ["graphs/line.json","graphs/column.json","graphs/pie.json","graphs/gantt.json","maps/map.json"]
                 
@@ -59,11 +48,12 @@ Graph.prototype.serializeDOM = node => {
 	if (node.rendered) {
 		node.rendered = node.rendered.cloneNode(true)
 	} else {
+		let id = getID()
 		node.rendered = elt("div", {
 			class: "widgets-graph widgets-graph-"+node.attrs.size, 
-			id: "amchart"
+			id: id
 		})
-		makeGraph("amchart",node.attrs.data)
+		makeGraph(id,node.attrs.data)
 	}
 	return node.rendered; 
 }
