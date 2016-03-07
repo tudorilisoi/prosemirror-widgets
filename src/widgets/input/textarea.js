@@ -3,18 +3,19 @@ import {elt, insertCSS} from "prosemirror/dist/dom"
 import {Input} from "./input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
+const css = "widgets-textarea"
 export class TextArea extends Block {
 	get attrs() {
 		return {
 			name: new Attribute,
 			rows: new Attribute,
 			cols: new Attribute,
-			class: new Attribute({default: "widgets-textarea"})
+			class: new Attribute({default: css })
 		}
 	}
 }
 
-defParser(TextArea,"textarea","widgets-textarea")
+defParser(TextArea,"textarea",css)
 
 TextArea.prototype.serializeDOM = (node,s) => elt("textarea",node.attrs)
 
@@ -52,7 +53,7 @@ TextArea.register("command", "insert",{
 
 insertCSS(`
 
-.ProseMirror .widgets-textarea:hover {
+.ProseMirror .${css}:hover {
 	cursor: pointer;
 }
 

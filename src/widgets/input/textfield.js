@@ -3,18 +3,19 @@ import {elt, insertCSS} from "prosemirror/dist/dom"
 import {Input} from "./input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
+const css = "widgets-textfield"
 export class TextField extends Input {
 	get attrs() {
 		return {
 			name: new Attribute,
 			type: new Attribute({default: "text"}),
 			size: new Attribute({default: "20"}),
-			class: new Attribute({default: "widgets-textfield"})
+			class: new Attribute({default: css})
 		}
 	}
 }
 
-defParser(TextField,"input","widgets-textfield")
+defParser(TextField,"input",css)
 
 TextField.register("command", "insert",{
 	label: "TextField",
@@ -36,7 +37,7 @@ TextField.register("command", "insert",{
 
 insertCSS(`
 
-.ProseMirror .widgets-textfield:hover {
+.ProseMirror .${css}:hover {
 	cursor: pointer;
 }
 

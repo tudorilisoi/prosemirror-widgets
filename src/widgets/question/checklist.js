@@ -4,15 +4,17 @@ import {TextBox} from "./textbox"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertWidget} from "../../utils"
 import {Question, qclass} from "./question"
 
+const cssi = "widgets-checkitem"
+const cssc = "widgets-checklist"
 NodeKind.checkitem = new NodeKind("checkitem")
 
 export class CheckItem extends Block {
 	static get kind() { return NodeKind.checkitem }
 	get attrs() {
 		return {
-			name: new Attribute,
-			value: new Attribute,
-			class: new Attribute({default: "widgets-checkitem"})
+			name: new Attribute({default: ""}),
+			value: new Attribute({default: 1}),
+			class: new Attribute({default: cssi})
 		}
 	}
 	create(attrs, content, marks) {
@@ -27,15 +29,27 @@ export class CheckItem extends Block {
 export class CheckList extends Question {
 	get attrs() {
 		return {
-			name: new Attribute,
-			class: new Attribute({default: "widgets-checklist "+qclass})
+			name: new Attribute({default: ""}),
+			class: new Attribute({default: cssc + " "+qclass})
 		}
 	}
 	get isList() { return true }
+	defaultContent(attrs) {
+		if (!attrs) attrs = this.defaultAttrs
+		attrs.value = 1
+		let choice_content = Fragment.from([
+		    this.schema.nodes.checkbox.create(attrs),
+		    this.schema.nodes.textbox.create()
+		])
+		return Fragment.from([
+		    this.schema.nodes.paragraph.create(null,""),
+		    this.schema.nodes.checkitem.create(attrs,choice_content)
+		])
+	}
 }
 
-defParser(CheckItem,"div","widgets-checkitem")
-defParser(CheckList,"div","widgets-checklist")
+defParser(CheckItem,"div",cssi)
+defParser(CheckList,"div",cssc)
 
 CheckItem.prototype.serializeDOM = (node,s) => s.renderAs(node,"div", node.attrs)
 
@@ -87,21 +101,13 @@ CheckList.register("command", "insert", {
 	label: "Check List",
 	run(pm, name) {
 		let {from,to,node} = pm.selection
+		let attrs = {name: name}
 		if (node && node.type == this) {
-			let tr = pm.tr.setNodeType(from, this, {name: name}).apply()
+			let tr = pm.tr.setNodeType(from, this, attrs).apply()
 			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
 			return tr
-		} else {
-			let choice_content = Fragment.from([
-			    this.schema.nodes.checkbox.create({name: name, value: 1}),
-			    this.schema.nodes.textbox.create()
-			])
-			let content = Fragment.from([
-			    this.schema.nodes.paragraph.create(null,""),
-			    this.schema.nodes.checkitem.create({name: name, value: 1},choice_content)
-			])
-			return insertWidget(pm,from,this.create({name},content))
-	 	}
+		} else
+			return insertWidget(pm,from,this.create(attrs,this.defaultContent(attrs)))
 	},
 	select(pm) {
   		return true
@@ -121,12 +127,12 @@ defParamsClick(CheckList,"checklist:insert")
 
 insertCSS(`
 
-.ProseMirror .widgets-checkitem input {
-	float: left;
+.ProseMirror .${cssi} {
+	cursor: text;
 }
 
-.ProseMirror .widgets-checkitem {
-	cursor: text;
+.ProseMirror .${cssi} input {
+	float: left;
 }
 
 

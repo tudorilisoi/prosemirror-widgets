@@ -3,18 +3,20 @@ import {elt, insertCSS} from "prosemirror/dist/dom"
 import {Input} from "./input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
+const css = "widgets-checkbox"
+	
 export class CheckBox extends Input {
 	get attrs() {
 		return {
 			name: new Attribute,
 			type: new Attribute({default: "checkbox"}),
 			value: new Attribute({default: "1"}),
-			class: new Attribute({default: "widgets-checkbox"})
+			class: new Attribute({default: css})
 		}
 	}
 }
 
-defParser(CheckBox,"input","widgets-checkbox")
+defParser(CheckBox,"input",css)
 
 CheckBox.register("command", "insert",{
 	label: "CheckBox",
@@ -36,7 +38,7 @@ defParamsClick(CheckBox,"checkbox:insert",["all"])
 
 insertCSS(`
 
-.ProseMirror .widgets-checkbox:hover {
+.ProseMirror .${css}:hover {
 	cursor: pointer;
 }
 

@@ -1,8 +1,12 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr, insertWidget} from "../../utils"
+import {TopKindOrBlock} from "../../schema"
 
+const css = "widgets-spreadsheet"
+	
 export class SpreadSheet extends Block {
+	get kind() { return TopKindOrBlock }
 	get attrs() {
 		return {
 			data: new Attribute
@@ -11,13 +15,13 @@ export class SpreadSheet extends Block {
 	get contains() { return null }
 }
 
-defParser(SpreadSheet,"div","widgets-spreadsheet")
+defParser(SpreadSheet,"div",css)
 
 SpreadSheet.prototype.serializeDOM = node => {
 	if (node.rendered) {
 		node.rendered = node.rendered.cloneNode(true)
 	} else {
-		node.rendered = elt("div", { class: "widgets-spreadsheet widgets-edit"});
+		node.rendered = elt("div", { class: css+" widgets-edit"});
 		// wait until node is attached to document to render
 		window.setTimeout(function() {
 			let data = [
@@ -40,21 +44,30 @@ SpreadSheet.prototype.serializeDOM = node => {
 }
 
 SpreadSheet.register("command", "insert", {
-	derive: {
-	    params: [
-	      	{ name: "Data Link", attr: "data", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
-	   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}
-	 	]
-	},
 	label: "SpreadSheet",
+	run(pm, data) {
+		let {from,to,node} = pm.selection
+		if (node && node.type == this) {
+			let tr = pm.tr.setNodeType(from, this, {data}).apply()
+			return tr
+		} else
+			return insertWidget(pm,from,this.create({data}))
+	},
+	select(pm) {
+  		return true
+	},
 	menu: {group: "content", rank: 75, display: {type: "label", label: "Spreadsheet"}},
+    params: [
+      	{ name: "Data Link", attr: "data", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
+   	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}
+ 	]
 })
 
 defParamsClick(SpreadSheet,"spreadsheet:insert",["all"])
 
 insertCSS(`
 
-.ProseMirror .widgets-spreadsheet {
+.ProseMirror .${css} {
 	display: inline-block;
 }
 

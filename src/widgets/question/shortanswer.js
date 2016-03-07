@@ -4,32 +4,36 @@ import {TextField} from "../input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertWidget} from "../../utils"
 import {Question, qclass} from "./question"
 
+const css = "widgets-shortanswer"
+	
 export class ShortAnswer extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
-			type: new Attribute({default: "text"}),
 			size: new Attribute({default: "20"}),
-			class: new Attribute({default: "widgets-shortanswer "+qclass})
+			class: new Attribute({default: css+" "+qclass})
 		}
+	}
+	defaultContent(attrs) {
+		if (!attrs) attrs = {name: ""}
+		return Fragment.from([
+		    this.schema.nodes.paragraph.create(null,""),
+		    this.schema.nodes.textfield.create(attrs)
+		])
 	}
 }
 
-defParser(ShortAnswer,"div","widgets-shortanswer")
+defParser(ShortAnswer,"div",css)
 
 ShortAnswer.register("command", "insert", {
 	label: "Short Answer",
 	run(pm, name, size) {
 		let {from,to,node} = pm.selection
+		let attrs = {name,size}
 		if (node && node.type == this)
-			return pm.tr.setNodeType(from, this, {name,size}).apply(pm.apply.scroll)
-		else {
-			let content = Fragment.from([
- 			    this.schema.nodes.paragraph.create(null,""),
- 			   this.schema.nodes.textfield.create({name,size})
-			])
-			return insertWidget(pm,from,this.create({name,size},content))
-		}
+			return pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
+		else
+			return insertWidget(pm,from,this.create(attrs,this.defaultContent(attrs)))
   	},
 	menu: {group: "question", rank: 71, display: {type: "label", label: "Short Answer"}},
 	params: [

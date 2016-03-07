@@ -12,7 +12,7 @@ import {alignGroup, LeftAlign, CenterAlign, RightAlign, UnderlineMark, StrikeThr
 import {analyzeCmdSpec, commentCmdSpec} from "./widgets/tool"
 
 export const TopKind = new NodeKind("toplevel")
-const TopKindOrBlock = new NodeKind("block",TopKind)
+export const TopKindOrBlock = new NodeKind("block",TopKind)
 
 class WDoc extends Doc {
 	get kind() { return null }

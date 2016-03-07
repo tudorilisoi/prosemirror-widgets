@@ -3,21 +3,23 @@ import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser} from "../../utils"
 import {Input} from "./input"
 
+const css = "widgets-radiobutton"
+	
 export class RadioButton extends Input {
 	get attrs() {
 		return {
 			name: new Attribute,
 			type: new Attribute({default: "radio"}),
 			value: new Attribute,
-			class: new Attribute({default: "widgets-radiobutton"})
+			class: new Attribute({default: css})
 		}
 	}
 }
 
-defParser(RadioButton,"input","widgets-radiobutton")
+defParser(RadioButton,"input",css)
 
 insertCSS(`
 
-.widgets-radiobutton {}
+.${css} {}
 
 `)

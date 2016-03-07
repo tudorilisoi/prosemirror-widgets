@@ -3,12 +3,15 @@ import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertWidget} from "../../utils"
 import {Question, qclass} from "./question"
 
+const cssc = "widgets-choice"
+const cssm = "widgets-multiplechoice"
+	
 export class Choice extends Block {
 	get attrs() {
 		return {
-			name: new Attribute(),
-			value: new Attribute(),
-			class: new Attribute({default: "widgets-choice"})
+			name: new Attribute({default: ""}),
+			value: new Attribute({default: 1}),
+			class: new Attribute({default: cssc})
 		}
 	}
 	create(attrs, content, marks) {
@@ -24,14 +27,25 @@ export class MultipleChoice extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
-			class: new Attribute({default: "widgets-multiplechoice "+qclass})
+			class: new Attribute({default: cssm+" "+qclass})
 		}
 	}
 	get isList() { return true }
+	defaultContent(attrs) {
+		if (!attrs) attrs = getDefaultAttrs()
+		let choice_content = Fragment.from([
+		    this.schema.nodes.radiobutton.create(attrs),
+		    this.schema.nodes.textbox.create()
+		])
+		return Fragment.from([
+		    this.schema.nodes.paragraph.create(null,""),
+		    this.schema.nodes.choice.create(attrs,choice_content)
+		])
+	}
 } 
-
-defParser(Choice,"div","widgets-choice")
-defParser(MultipleChoice,"div","widgets-multiplechoice")
+ 
+defParser(Choice,"div",cssc)
+defParser(MultipleChoice,"div",cssm)
  
 Choice.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
  
@@ -82,21 +96,13 @@ MultipleChoice.register("command", "insert", {
 	label: "MultipleChoice",
 	run(pm, name) {
 		let {from,to,node} = pm.selection 
+		let attrs = {name,value:1}
 		if (node && node.type == this) {
-			let tr = pm.tr.setNodeType(from, this, {name: name}).apply()
+			let tr = pm.tr.setNodeType(from, this, attrs).apply()
 			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
 			return tr
-		} else {
-			let choice_content = Fragment.from([
-			    this.schema.nodes.radiobutton.create({name: name, value: 1}),
-			    this.schema.nodes.textbox.create()
-			])
-			let content = Fragment.from([
-			    this.schema.nodes.paragraph.create(null,""),
-			    this.schema.nodes.choice.create({name: name, value: 1},choice_content)
-			])
-			return insertWidget(pm,from,this.create({name},content))
-		}
+		} else
+			return insertWidget(pm,from,this.create(attrs,this.defaultContent(attrs)))
 	},
 	select(pm) {
 		return true
@@ -117,11 +123,11 @@ defParamsClick(MultipleChoice,"multiplechoice:insert")
 
 insertCSS(`
 
-.widgets-choice input {
+.${cssc} input {
 	float: left;
 }
 
-.ProseMirror .widgets-choice:hover {
+.ProseMirror .${cssc}:hover {
 	cursor: text;
 }
 

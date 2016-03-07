@@ -4,33 +4,38 @@ import {Select} from "../input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertWidget} from "../../utils"
 import {Question, qclass} from "./question"
 
+const css = "widgets-selection"
+	
 export class Selection extends Question {
 	get attrs() {
 		return {
-			name: new Attribute,
-			options: new Attribute,
+			name: new Attribute({default: ""}),
+			options: new Attribute({default: ""}),
 			size: new Attribute({default: 1}),
 		    multiple: new Attribute({default: "single"}),
-		    class: new Attribute({default: "widgets-selection "+qclass})
+		    class: new Attribute({default: css+" "+qclass})
 		}
+	}
+	defaultContent(attrs) {
+		if (!attrs) attrs = getDefaultAttrs()
+		return Fragment.from([
+		     this.schema.nodes.paragraph.create(null,""),
+		     this.schema.nodes.select.create(attrs)
+		])
 	}
 }
 
-defParser(Selection,"div","widgets-selection")
+defParser(Selection,"div",css)
 
 Selection.register("command", "insert", {
 	label: "Selection",
 	run(pm, name, options, size, multiple) {
 		let {from,to,node} = pm.selection
+		let attrs = {name,options,size,multiple}
 		if (node && node.type == this)
-			return pm.tr.setNodeType(from, this, {name,options,size,multiple}).apply(pm.apply.scroll)
-		else {
-			let content = Fragment.from([
-			     this.schema.nodes.paragraph.create(null,""),
-			     this.schema.nodes.select.create({name,options,size,multiple})
-			])
-			return insertWidget(pm,from,this.create({name,options,size,multiple},content))
-		}
+			return pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
+		else
+			return insertWidget(pm,from,this.create(attrs,this.defaultContent(attrs)))
   	},
 	menu: {group: "question", rank: 75, display: {type: "label", label: "Selection"}},
 	params: [
@@ -42,7 +47,7 @@ Selection.register("command", "insert", {
 	    			  title: nameTitle}},
 	       	{ name: "Options", attr: "options", label: "comma separated names", type: "text", 
 	 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "options") }},
- 		    { name: "Size", attr: "size", label: "options displayed", type: "number", default: 1,
+ 		    { name: "Displayed", attr: "size", label: "options displayed", type: "number", default: 1,
  			  prefill: function(pm) { return selectedNodeAttr(pm, this, "size") },
  			  options: { min: 1, max:10}
  			},

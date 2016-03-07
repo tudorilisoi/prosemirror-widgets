@@ -2,6 +2,8 @@ import {Block, Inline, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
+const css = "widgets-select"
+	
 export class Select extends Inline {
 	get contains() { return null}
 	get attrs() {
@@ -14,7 +16,7 @@ export class Select extends Inline {
 	}
 }
 
-defParser(Select,"select","widgets-select")
+defParser(Select,"select",css)
 
 Select.prototype.serializeDOM = node => {
 	let selection = node.attrs.multiple == "multiple"
@@ -64,6 +66,6 @@ Select.register("command", "insert", {
 
 insertCSS(`
 
-.ProseMirror .widgets-select {}
+.ProseMirror .${css} {}
 
 `)

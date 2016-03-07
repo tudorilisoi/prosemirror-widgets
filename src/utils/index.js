@@ -16,7 +16,7 @@ export function defParser(type,tag,cls) {
 
 export function getPosInParent(pm, pos, child) {
 	let i = 0, parent = pm.doc.path(pos.path)
-	parent.forEach((node,start) => { i = node == child?start: 0 })
+	parent.forEach((node,start,end) => { if (node == child) i = start })
 	return new Pos(pos.path,i)
 }
 
@@ -37,12 +37,11 @@ export function insertWidget(pm, pos, w) {
   for (;;) {
     if (pos.depth == 0) {
     	pm.tr.insert(pos,w).apply(pm.apply.scroll)
+    	// put the text cursor in the first text child
+    	let side = getPosInParent(pm,pos,w)
+    	let p = new Pos(side.toPath(), 0)
     	if (w.firstChild && w.firstChild.isTextblock)
-    		pm.on("change",() => {
-	        	let side = getPosInParent(pm,pos,w)
-	        	let p = new Pos(side.toPath(), 0)
-	    		pm.setTextSelection(new Pos(p.toPath(),0))
-    		})
+	    	pm.setTextSelection(new Pos(p.toPath(),0))
     	return true
     }
     pos = pos.shorten(null,1)

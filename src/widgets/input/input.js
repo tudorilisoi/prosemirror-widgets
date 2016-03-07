@@ -2,6 +2,8 @@ import {Block, Inline, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser} from "../../utils"
 
+const css = "widgets-input"
+	
 export class Input extends Block {
 	get attrs() {
 		return {
@@ -14,12 +16,12 @@ export class Input extends Block {
 	get contains() { return null}
 }
 
-defParser(Input,"widgets-input")
+defParser(Input,css)
 
 Input.prototype.serializeDOM = node => elt("input",node.attrs)
 
 insertCSS(`
 		
-.widgets-input {}
+.${css} {}
 
 `)

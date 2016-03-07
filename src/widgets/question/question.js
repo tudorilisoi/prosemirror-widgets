@@ -4,8 +4,18 @@ import {defParser, defParamsClick} from "../../utils"
 import {joinPoint, joinableBlocks, canLift} from "prosemirror/dist/transform"
 import {TopKind} from "../../schema"
 
-export const qclass = "widgets-question widgets-edit"
+const css = "widgets-question"
 	
+export const qclass = css+" widgets-edit"
+
+export function checkUniqueName(name) {
+	let q = document.getElementsByClassName(css)
+	for (let i = 0; i < q.length; ++i) {
+	    if (q[i].getAttribute("name") == name) return "Duplicate question name."
+	}
+	return null;
+}
+
 export class Question extends Block {
 	get kind() { return TopKind }
 	get draggable() { return true }
@@ -50,7 +60,7 @@ Question.register("command", "enter", {
 
 insertCSS(`
 		
-.widgets-question {
+.${css} {
 	counter-increment: qcnt;
 	border: 1px solid #DDD;
     border-radius: 4px;
@@ -58,14 +68,14 @@ insertCSS(`
 	margin-top: 1em;
 }
 
-.widgets-question:before {
-	content: "Question " counter(qcnt) ".";
+.${css}:before {
+	content: counter(qcnt) ".";
 	font-size: 80%;
 	font-weight: bold;
 //	cursor: move;
 }
 
-.ProseMirror .widgets-question p:hover {
+.ProseMirror .${css} p:hover {
     cursor: text;
 }
 

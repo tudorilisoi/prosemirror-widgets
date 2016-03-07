@@ -1,7 +1,10 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr,insertWidget, getID} from "../../utils"
+import {TopKindOrBlock} from "../../schema"
 
+const css = "widgets-graph"
+	
 const graphs = ["graphs/line.json","graphs/column.json","graphs/pie.json","graphs/gantt.json","maps/map.json"]
                 
 function getFileData(url,f) {
@@ -33,16 +36,17 @@ function getGraphOptions() {
  
 
 export class Graph extends Block {
+	get kind() { return TopKindOrBlock }
 	get attrs() {
 		return {
 			data: new Attribute({default: ""}),
-			size: new Attribute({default: "small"})
+			size: new Attribute({default: "medium"})
 		}
 	}
 	get contains() { return null }
 }
 
-defParser(Graph,"div","widgets-graph")
+defParser(Graph,"div",css)
 
 Graph.prototype.serializeDOM = node => {
 	if (node.rendered) {
@@ -50,7 +54,7 @@ Graph.prototype.serializeDOM = node => {
 	} else {
 		let id = getID()
 		node.rendered = elt("div", {
-			class: "widgets-graph widgets-graph-"+node.attrs.size, 
+			class: css+" widgets-graph-"+node.attrs.size, 
 			id: id
 		})
 		makeGraph(id,node.attrs.data)
@@ -59,33 +63,43 @@ Graph.prototype.serializeDOM = node => {
 }
 
 Graph.register("command", "insert", {
-	derive: {
-		params: [
-	      	{ name: "Data URL", attr: "data", label: "Data URL", type: "select", 
-	      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "data") },
-	  		  options: function() { return getGraphOptions()}
-	      	},
-	      	{ name: "Size", attr: "size", label: "Size", type: "select", default: "small",
-		      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "size") },
-	        	  options: [
-	        	      {value: "small", label:"small"},
-	    	      	  {value: "medium", label:"medium"},
-	    	      	  {value: "large", label:"large"}
-	        	  ]
-		    }
-	    ]
-	},
 	label: "Graph",
+	run(pm, data, size) {
+		let {from,to,node} = pm.selection
+		console.log(data,size)
+		if (node && node.type == this) {
+			let tr = pm.tr.setNodeType(from, this, {data,size}).apply()
+			return tr
+		} else
+			return insertWidget(pm,from,this.create({data,size}))
+	},
+	select(pm) {
+  		return true
+	},
 	menu: {group: "content", rank: 74, display: {type: "label", label: "Graph/Map"}},
+	params: [
+      	{ name: "Data URL", attr: "data", label: "Data URL", type: "select", 
+      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "data") },
+  		  options: function() { return getGraphOptions()}
+      	},
+      	{ name: "Size", attr: "size", label: "Size", type: "select", default: "medium",
+	      	  prefill: function(pm) { return selectedNodeAttr(pm, this, "size") },
+        	  options: [
+        	      {value: "small", label:"small"},
+    	      	  {value: "medium", label:"medium"},
+    	      	  {value: "large", label:"large"}
+        	  ]
+	    }
+    ]
 })
 
-//defParamsClick(Graph,"graph:insert")
+defParamsClick(Graph,"graph:insert")
 
 insertCSS(`
 
-.ProseMirror .widgets-graph {}
+.ProseMirror .{css} {}
 
-.widgets-graph-small {
+.${css}-small {
 	border-radius: 6px;
 	border: 1px solid #DDD;
 	width: 400px;
@@ -93,7 +107,7 @@ insertCSS(`
 	display: inline-block;
 }
 
-.widgets-graph-medium {
+.${css}-medium {
 	border-radius: 6px;
 	border: 1px solid #DDD;
 	width: 600px;
@@ -101,7 +115,7 @@ insertCSS(`
 	display: inline-block;
 }
 
-.widgets-graph-large {
+.${css}-large {
 	border-radius: 6px;
 	border: 1px solid #DDD;
 	width: 800px;

@@ -2,6 +2,7 @@ import {ProseMirror} from "prosemirror/dist/edit"
 import "prosemirror/dist/menu/tooltipmenu"
 import "prosemirror/dist/menu/menubar"
 import "prosemirror/dist/inputrules/autoinput"
+import {insertCSS} from "prosemirror/dist/dom"
 import {defineFileHandler} from "./utils"
 import {setReadOnly} from "prosemirror/dist/transform/transform"
 import {widgetSchema, commands, mainMenuBar, defaultSchema} from "./schema" 
@@ -27,3 +28,9 @@ defineFileHandler(function(files) {
 	console.log(files)
 })
 
+insertCSS(`
+#editor {
+	width: 800px;
+}
+
+`)

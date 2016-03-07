@@ -2,6 +2,8 @@ import {Inline, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
 
+const css = "widgets-inlinemath"
+	
 export class InlineMath extends Inline {
 	get attrs() {
 		return {
@@ -11,13 +13,13 @@ export class InlineMath extends Inline {
 	get contains() { return null }
 }
 
-defParser(InlineMath, "span", "widgets-inlinemath")
+defParser(InlineMath, "span", css)
 
 InlineMath.prototype.serializeDOM = node => {
 	if (node.rendered) {
 		node.rendered = node.rendered.cloneNode(true)
 	} else {
-		node.rendered = elt("span", {class: "widgets-inlinemath widgets-edit"}, " \\("+node.attrs.tex+"\\) ")
+		node.rendered = elt("span", {class: css+" widgets-edit"}, " \\("+node.attrs.tex+"\\) ")
 		// wait until node is attached to document to render
 		MathJax.Hub.Queue(["Delay",MathJax.Callback,100],["Typeset",MathJax.Hub,node.rendered])
 	}
@@ -39,6 +41,6 @@ defParamsClick(InlineMath,"inlinemath:insert")
 
 insertCSS(`
 
-.ProseMirror .widgets-inlinemath {}
+.ProseMirror .${css} {}
 
 `)

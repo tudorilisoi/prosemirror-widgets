@@ -2,18 +2,19 @@ import {Inline, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
 
+const css = "widgets-img"
 export class Image extends Inline {
 	get attrs() {
 		return {
 			src: new Attribute,
 			alt: new Attribute,
 			title: new Attribute,
-			class: new Attribute({default: "widgets-img widgets-edit"})
+			class: new Attribute({default: css+" widgets-edit"})
 		}
 	}
 }
  
-defParser(Image, "img", "widgets-img")
+defParser(Image, "img", css)
 
 Image.prototype.serializeDOM = (node, s) => s.renderAs(node, "img", node.attrs)
 
@@ -36,6 +37,6 @@ defParamsClick(Image,"image:insert",["all"])
 
 insertCSS(`
 
-.ProseMirror .widgets-img {}
+.ProseMirror .{$css} {}
 
 `)
