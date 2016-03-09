@@ -27,6 +27,7 @@ export class MultipleChoice extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
+			title: new Attribute({default: ""}),
 			class: new Attribute({default: cssm+" "+qclass})
 		}
 	}
@@ -79,8 +80,9 @@ Choice.register("command", "delete", {
   label: "delete text, this choice or choicelist",
   run(pm) {
 	let {from,to,head,node} = pm.selection
-	// don't allow to delete whole choice
-	if (node && node.type == this) return true
+	if (node && node.type.name == "multiplechoice")
+		return pm.tr.delete(from,to).apply(pm.apply.scroll)
+	if (node) return false
     let toCH = from.shorten(), ch = pm.doc.path(toCH.path)
     if (ch.type != this) return false
 	if (from.offset > 0) return pm.tr.delete(from,to).apply(pm.apply.scroll)
@@ -88,7 +90,7 @@ Choice.register("command", "delete", {
     let {before,at} = nodeBefore(pm,toCH)
     // if only question and one choice then ignore
     if (mc.size == 2 || before.type != this || ch.lastChild.size > 0) return true;
-    let tr = pm.tr.delete(toMC,toMC.move(1)).apply()
+    let tr = pm.tr.delete(toMC,toMC.move(1)).apply(pm.apply.scroll)
     renumber(pm, toMC)
     return tr
   },
@@ -97,9 +99,9 @@ Choice.register("command", "delete", {
 
 MultipleChoice.register("command", "insert", {
 	label: "MultipleChoice",
-	run(pm, name) {
+	run(pm, name,title) {
 		let {from,to,node} = pm.selection 
-		let attrs = {name,value:1}
+		let attrs = {name,title,value:1}
 		if (node && node.type == this) {
 			let tr = pm.tr.setNodeType(from, this, attrs).apply()
 			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
@@ -118,7 +120,12 @@ MultipleChoice.register("command", "insert", {
  			  pattern: namePattern, 
  			  size: 10, 
  			  title: nameTitle}
-   	  	}
+   	  	},
+		{ name: "Title", attr: "title", label: "(optional)", type: "text", default: "",
+	     	  prefill: function(pm) { return selectedNodeAttr(pm, this, "title") },
+	   	  options: {
+	     		required: '' 
+	    }}
 	]
 })
 

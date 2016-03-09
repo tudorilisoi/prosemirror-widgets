@@ -46,6 +46,7 @@ export class Scale extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
+			title: new Attribute({default: ""}),
 			startvalue: new Attribute({default: "1"}),
 			startlabel: new Attribute({default: "low"}),
 			endvalue: new Attribute({default: "10"}),
@@ -70,9 +71,9 @@ defParser(Scale,"div",csss)
 
 Scale.register("command", "insert",{
 	label: "Scale",
-	run(pm, name, startvalue, startlabel, endvalue, endlabel) {
+	run(pm, name, title, startvalue, startlabel, endvalue, endlabel) {
 		let {from,to,node} = pm.selection
-		let attrs = {name,startvalue,startlabel,endvalue,endlabel}
+		let attrs = {name,title,startvalue,startlabel,endvalue,endlabel}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
 			from = new Pos(from.path.concat(from.offset),0)
@@ -88,6 +89,11 @@ Scale.register("command", "insert",{
    			  pattern: namePattern, 
    			  size: 10, 
    			  title: nameTitle}},
+   		{ name: "Title", attr: "title", label: "(optional)", type: "text", default: "",
+	       	  prefill: function(pm) { return selectedNodeAttr(pm, this, "title") },
+	     	  options: {
+	       		required: '' 
+	       	  }},
      	{ label: "Start value", attr: "startvalue", type: "number", default: 1, 
 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "startvalue") }},
      	{ name: "Start Label", attr: "startlabel", label: "Text on left", type: "text", default: "low",

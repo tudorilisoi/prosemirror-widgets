@@ -10,6 +10,7 @@ export class Essay extends Question {
 	get attrs() {
 		return {
 			name: new Attribute({default: ""}),
+			title: new Attribute({default: ""}),
 			rows: new Attribute({default: 4}),
 			cols: new Attribute({default: 60}),
 			class: new Attribute({default: css+" "+qclass})
@@ -31,9 +32,9 @@ defParser(Essay,"div",css)
 
 Essay.register("command", "insert", {
 	label: "Essay",
-	run(pm, name, rows, cols) {
+	run(pm, name, title, rows, cols) {
 		let {from,to,node} = pm.selection
-		let attrs = {name,rows,cols}
+		let attrs = {name,title,rows,cols}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
 			from = new Pos(from.path.concat(from.offset),0)
@@ -51,6 +52,11 @@ Essay.register("command", "insert", {
    			  size: 10, 
    			  title: nameTitle
    		  }},
+ 		{ name: "Title", attr: "title", label: "(optional)", type: "text", default: "",
+       	  prefill: function(pm) { return selectedNodeAttr(pm, this, "title") },
+     	  options: {
+       		required: '' 
+       	  }},
    		  { name: "Rows", attr: "rows", label: "In lines lines", type: "number", default: 4, options: {min: 2, max:24}, 
    			  prefill: function(pm) { return selectedNodeAttr(pm, this, "rows") }
    		  },

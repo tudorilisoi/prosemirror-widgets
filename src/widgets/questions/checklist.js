@@ -30,6 +30,7 @@ export class CheckList extends Question {
 	get attrs() {
 		return {
 			name: new Attribute({default: ""}),
+			title: new Attribute({default: ""}),
 			class: new Attribute({default: cssc + " "+qclass})
 		}
 	}
@@ -83,16 +84,17 @@ CheckItem.register("command", "delete",{
 	label: "delete this checkitem or checklist",
 	run(pm) {
 		let {from,to,head,node} = pm.selection
-		// don't allow to delete whole checkitem
-		if (node && node.type == this) return true
-	    let toCH = from.shorten(), ch = pm.doc.path(toCH.path)
-	    if (ch.type != this) return false
+		if (node && node.type.name == "checklist")
+			return pm.tr.delete(from,to).apply(pm.apply.scroll)
+		if (node) return false
+	    let toCI = from.shorten(), ci = pm.doc.path(toCI.path)
+	    if (ci.type != this) return false
 		if (from.offset > 0) return pm.tr.delete(from,to).apply(pm.apply.scroll)
-	    let toCL = toCH.shorten(), cl = pm.doc.path(toCL.path)
-	    let {before,at} = nodeBefore(pm,toCH)
-	    // if only question and one choice or still textg then ignore
-	    if (cl.size == 2 || before.type != this || ch.lastChild.size > 0) return true;
-	    let tr = pm.tr.delete(toCL,toCL.move(1)).apply()
+	    let toCL = toCI.shorten(), cl = pm.doc.path(toCL.path)
+	    let {before,at} = nodeBefore(pm,toCI)
+	    // if only question and one choice or still text then ignore
+	    if (cl.size == 2 || before.type != this || ci.lastChild.size > 0) return true;
+	    let tr = pm.tr.delete(toCL,toCL.move(1)).apply(pm.apply.scroll)
 	    renumber(pm, toCL)
 	    return tr
 	},
@@ -101,9 +103,9 @@ CheckItem.register("command", "delete",{
 
 CheckList.register("command", "insert", {
 	label: "Check List",
-	run(pm, name) {
+	run(pm, name, title) {
 		let {from,to,node} = pm.selection
-		let attrs = {name: name}
+		let attrs = {name,title}
 		if (node && node.type == this) {
 			let tr = pm.tr.setNodeType(from, this, attrs).apply()
 			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
@@ -121,7 +123,12 @@ CheckList.register("command", "insert", {
  		  options: {
  			  pattern: namePattern, 
  			  size: 10, 
- 			  title: nameTitle}}
+ 			  title: nameTitle}},
+   		{ name: "Title", attr: "title", label: "(optional)", type: "text", default: "",
+       	  prefill: function(pm) { return selectedNodeAttr(pm, this, "title") },
+     	  options: {
+       		required: '' 
+       	}}
 	]
 })
 

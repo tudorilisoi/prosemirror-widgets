@@ -10,6 +10,7 @@ export class ShortAnswer extends Question {
 	get attrs() {
 		return {
 			name: new Attribute,
+			title: new Attribute({default: ""}),
 			size: new Attribute({default: "20"}),
 			class: new Attribute({default: css+" "+qclass})
 		}
@@ -30,9 +31,9 @@ defParser(ShortAnswer,"div",css)
 
 ShortAnswer.register("command", "insert", {
 	label: "Short Answer",
-	run(pm, name, size) {
+	run(pm, name, title, size) {
 		let {from,to,node} = pm.selection
-		let attrs = {name,size}
+		let attrs = {name,title, size}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
 			from = new Pos(from.path.concat(from.offset),0)
@@ -47,10 +48,17 @@ ShortAnswer.register("command", "insert", {
    		  options: {
    			  pattern: namePattern, 
    			  size: 10, 
-   			  title: nameTitle}},
-     	{ name: "Size", attr: "size", label: "Size in characters", type: "number", default: "20", 
+   			  title: nameTitle
+   		  }},
+   		{ name: "Title", attr: "title", label: "(optional)", type: "text", default: "",
+       	  prefill: function(pm) { return selectedNodeAttr(pm, this, "title") },
+     	  options: {
+       		required: '' 
+       	  }},
+       	{ name: "Size", attr: "size", label: "Size in characters", type: "number", default: "20", 
 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "size") },
 	      options: {min: 1, max:80}}
+       	  
 	]
 })
 

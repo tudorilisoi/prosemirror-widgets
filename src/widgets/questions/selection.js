@@ -10,6 +10,7 @@ export class Selection extends Question {
 	get attrs() {
 		return {
 			name: new Attribute({default: ""}),
+			title: new Attribute({default: ""}),
 			options: new Attribute({default: ""}),
 			size: new Attribute({default: 1}),
 		    multiple: new Attribute({default: "single"}),
@@ -32,9 +33,9 @@ defParser(Selection,"div",css)
 
 Selection.register("command", "insert", {
 	label: "Selection",
-	run(pm, name, options, size, multiple) {
+	run(pm, name, title, options, size, multiple) {
 		let {from,to,node} = pm.selection
-		let attrs = {name,options,size,multiple}
+		let attrs = {name,title,options,size,multiple}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
 			from = new Pos(from.path.concat(from.offset),0)
@@ -50,6 +51,11 @@ Selection.register("command", "insert", {
 	    			  pattern: namePattern, 
 	    			  size: 10, 
 	    			  title: nameTitle}},
+	   		{ name: "Title", attr: "title", label: "(optional)", type: "text", default: "",
+	       	  prefill: function(pm) { return selectedNodeAttr(pm, this, "title") },
+	     	  options: {
+	       		required: '' 
+	       	  }},
 	       	{ name: "Options", attr: "options", label: "comma separated names", type: "text", 
 	 		  prefill: function(pm) { return selectedNodeAttr(pm, this, "options") }},
  		    { name: "Displayed", attr: "size", label: "options displayed", type: "number", default: 1,

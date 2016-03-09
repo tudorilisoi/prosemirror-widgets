@@ -67,7 +67,7 @@ insertCSS(`
 }
 
 .${css}:before {
-	content: counter(qcnt) ".";
+	content: counter(qcnt)"." attr(title);
 	font-size: 80%;
 	font-weight: bold;
 //	cursor: move;

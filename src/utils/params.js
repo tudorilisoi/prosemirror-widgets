@@ -68,7 +68,10 @@ function openWidgetPrompt(wpp, options) {
       let label = param.name? param.name: param.label
       field.setAttribute("name", label)
       let opt = param.options
-	  if (opt) for (let prop in opt) field.setAttribute(prop, opt[prop])
+	  if (opt) for (let prop in opt) { 
+		  if (prop == "required") field.removeAttribute(prop) 
+		  else field.setAttribute(prop, opt[prop]) 
+	  }
 	  let fieldLabel = elt("label",{for: label},label)
 	  return elt("div", {class: "widgetField"}, fieldLabel, field)
     },
