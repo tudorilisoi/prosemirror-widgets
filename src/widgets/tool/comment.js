@@ -22,10 +22,10 @@ class Comment {
 	get newDom() {
 		let dom = elt("div",{class: "comment",id:this.id},this.text)
 		dom.addEventListener("click", e => {
-	    	e.preventDefault(); e.stopPropagation()
+	    	e.stopPropagation()
 			let r = e.target.getBoundingClientRect()
 			if (e.clientX > (r.right-16) && e.clientY < (r.top+16)) {
-				showMenu(this)
+				showMenu(this,e.target.style.top)
 			} else {
 				if (dom.className == "comment")
 					commentStore.highlightComment(this.id)
@@ -37,10 +37,10 @@ class Comment {
 	}
 }
 
-function showMenu(comment) {
+function showMenu(comment,top) {
 	if (commentMenu.className == "commentMenu") {
 		commentMenu.className += " show"
-		commentMenu.style.top = (getTop()+5)+"px"
+		commentMenu.style.top = top
 		editId = comment.id
 	} else {
 		commentMenu.className = "commentMenu"
@@ -52,7 +52,7 @@ function getTop() {
 	let {from} = pm.selection
 	let r = pm.coordsAtPos(from)
 	let rect = pm.content.getBoundingClientRect()
-	return Math.round(r.top - rect.top)	
+	return Math.round(r.top - rect.top)
 }
 
 function getCommentMenu() {
@@ -60,15 +60,15 @@ function getCommentMenu() {
 	let reply = elt("li",null,elt("span",null,"Reply"))
 	let remove = elt("li",null,elt("span",null,"Remove"))
 	edit.addEventListener("click", e => {
-    	e.preventDefault(); e.stopPropagation()
+    	e.stopPropagation()
 		showMenu()
 	})
 	reply.addEventListener("click", e => {
-    	e.preventDefault(); e.stopPropagation()
+    	e.stopPropagation()
 		showMenu()
 	})
 	remove.addEventListener("click", e => {
-    	e.preventDefault(); e.stopPropagation()
+		e.stopPropagation()
 		commentStore.removeComment(editId)
 		editId = null;
 		showMenu()
@@ -79,23 +79,26 @@ function getCommentMenu() {
 export function initComments(pm) {
 	commentStore = new CommentStore(pm,0)
 	eventMixin(CommentStore)
-	let newComment = elt("span",{class: "newcomment"},elt("a",{href: "#"},"Add"))
-	let commentHeader = elt("div",{class: "comment-header"}, elt("span",null,"Comments:"),newComment)
+	let commentHeader = elt("div",{class: "comment-header"}, elt("span",null,"Comments:"))
 	let addButton = elt("span",{class: "comment-button"},"Add Comment")
 	let textArea = 	elt("textarea",{name:"newcomment"})
 	let addComment = elt("div",{class: "addComment hide"},textArea,addButton)
-	newComment.addEventListener("click", e => {
+	addButton.addEventListener("click", e => {
+		addComment.className = "addComment hide"
+		if (textArea.value.length > 0)
+			commentStore.createComment(textArea.value)
+	})
+	commentsNode.addEventListener("click", e => {
+		commentMenu.className = "commentMenu"
+		editId = null
+	})
+	pm.content.addEventListener("mouseup", e => {
+    	e.stopPropagation()
 		addComment.className = addComment.className == "addComment"? "addComment hide": "addComment"
 		textArea.value = ''
 		textArea.focus()
 		if (addComment.className == "addComment")
-			addComment.style.top = getTop()+"px"
-			
-	})
-	addButton.addEventListener("click", e => {
-		addComment.className = "addComment hide"
-		if (textArea.value.length > 0)
-			commentStore.createComment(textArea.value,addComment.style.top)
+			addComment.style.top = getTop()+"px"				
 	})
 	commentMenu = getCommentMenu()
 	commentsNode.appendChild(commentHeader)
@@ -114,11 +117,11 @@ export class CommentStore {
     createComment(text,top) {
         let id = getID()
         let sel = this.pm.selection
-        this.addComment(sel.from, sel.to, text, id, top)
+        this.addComment(sel.from, sel.to, text, id)
         this.unsent.push({ type: "create", id: id })
         this.signal("mustSend")
     }
-    addComment(from, to, text, id, top) {
+    addComment(from, to, text, id) {
     	if (!comments[id]) {
     		if (!from.cmp(to)) to = from.move(1)
     		let range = pm.markRange(from, to, { className: "range"})
@@ -151,11 +154,11 @@ export class CommentStore {
     	let sorted = []
         Object.keys(comments).forEach(id => {
         	let c = comments[id]
-        	let top = Math.round(pm.coordsAtPos(c.range.from).top-r.top)
+        	let top = Math.round(pm.coordsAtPos(c.range.from).top-r.top+10)
         	sorted.push({dom:c.dom,top,h:c.height})
     	})
     	sorted.sort((a, b) => a.top - b.top)
-    	let bottom = 16
+    	let bottom = 20
     	sorted.forEach(r => {
     		let top = r.top
     		if(top < bottom) top = bottom
@@ -245,16 +248,25 @@ insertCSS(`
 
 .comments .comment {
 	background: white;
-	margin: 4px;
 	border-radius: 6px;
 	border: 1px solid #AAA;
+	width: 92%;
 	font-size: 90%;
 	padding: 4px;
-	display: inline-block;
-	width: 93%;
-	left: 0;
-	position: absolute;
 	min-height: 30px;
+	position: absolute;	
+	left: 8px;
+}
+
+.comments .comment:after {
+	content: ' ';
+	height: 0;
+	position: absolute;
+	width: 0;
+	border: 8px solid transparent;
+	border-right-color: skyblue;
+	left: -16px;
+	top: 5px;
 }
 
 .comments .comment:hover {

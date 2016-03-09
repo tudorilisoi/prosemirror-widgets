@@ -1,4 +1,4 @@
-import {Inline, Attribute} from "prosemirror/dist/model"
+import {Inline, Attribute,NodeKind} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {Input} from "./input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
@@ -13,6 +13,8 @@ export class TextField extends Input {
 			class: new Attribute({default: css})
 		}
 	}
+	get canBeEmpty() { return true }
+	get contains() { return NodeKind.text }
 }
 
 defParser(TextField,"input",css)

@@ -1,12 +1,10 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr,insertWidget} from "../../utils"
-import {TopKindOrBlock} from "../../schema"
 
 const css = "widgets-website"
 	
 export class Website extends Block {
-	get kind() { return TopKindOrBlock }
 	get attrs() {
 		return {
 			src: new Attribute,
@@ -42,7 +40,7 @@ Website.register("command", "insert", {
 	select(pm) {
   		return true
 	},
-	menu: {group: "content", rank: 74, display: {type: "label", label: "Website"}},
+	menu: {group: "content", rank: 74, select: "disable", display: {type: "label", label: "Website"}},
 	params: [
       	{ name: "URL", attr: "src", label: "Link to website, youTube, Google Maps ...", type: "url",
         	  prefill: function(pm) { return selectedNodeAttr(pm, this, "src") }},

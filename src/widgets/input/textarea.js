@@ -1,9 +1,10 @@
-import {Block, Attribute} from "prosemirror/dist/model"
+import {Block, Attribute,NodeKind} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {Input} from "./input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
 const css = "widgets-textarea"
+	
 export class TextArea extends Block {
 	get attrs() {
 		return {
@@ -13,6 +14,8 @@ export class TextArea extends Block {
 			class: new Attribute({default: css })
 		}
 	}
+	get canBeEmpty() { return true }
+	get contains() { return NodeKind.text }
 }
 
 defParser(TextArea,"textarea",css)

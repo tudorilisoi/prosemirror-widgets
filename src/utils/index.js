@@ -33,21 +33,49 @@ export function getID() {
 	return Math.floor(Math.random() * 0xffffffff)
 }
 
-export function insertWidget(pm, pos, w) {
-  for (;;) {
-    if (pos.depth == 0) {
-    	pm.tr.insert(pos,w).apply(pm.apply.scroll)
-    	// put the text cursor in the first text child
-    	let side = getPosInParent(pm,pos,w)
-    	let p = new Pos(side.toPath(), 0)
-    	if (w.firstChild && w.firstChild.isTextblock)
-	    	pm.setTextSelection(new Pos(p.toPath(),0))
-    	return true
-    }
-    pos = pos.shorten(null,1)
-  }
+function getTopPos(pos) {
+	for (;;) {
+		if (pos.depth == 0) return pos
+		pos = pos.shorten(null,1)
+	}	
 }
 
+function getBlockPos(pm,pos) {
+	for (;;) {
+		if (pos.depth == 0) return pos
+		let node = pm.doc.path(pos.path)
+		if (node.isBlock) {
+			let p = getPosInParent(pm,pos.shorten(),node)
+			return pos.offset? p.move(1): p
+		}
+		pos = pos.shorten(null,1)
+	}	
+}
+
+export function insertQuestion(pm,pos,q) {
+	let p = getTopPos(pos)
+	pm.tr.insert(p,q).apply(pm.apply.scroll)
+	// set text cursor to paragraph in widget
+	let side = getPosInParent(pm,p,q)
+	p = new Pos(side.toPath(), 0)
+	if (q.firstChild && q.firstChild.isTextblock)
+    	pm.setTextSelection(new Pos(p.toPath(),0))
+	return true
+}
+
+export function insertWidget(pm, pos, w) {
+	return pm.tr.insert(getBlockPos(pm,pos),w).apply(pm.apply.scroll)
+}
+
+export function addDropListeners(pm) {
+	pm.content.addEventListener("drop", e => {
+		return false
+		let html = e.dataTransfer.getData("text/html")
+		console.log(html)
+		e.preventDefault()
+		return true
+	})
+}
 
 /*import {InputRule} from "prosemirror/dist/inputrules"
 let urlex = /((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/

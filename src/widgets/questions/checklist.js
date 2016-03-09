@@ -1,7 +1,7 @@
 import {Block, Textblock, emptyFragment, Fragment, Attribute, Pos, NodeKind} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {TextBox} from "./textbox"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertWidget} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertQuestion} from "../../utils"
 import {Question, qclass} from "./question"
 
 const cssi = "widgets-checkitem"
@@ -35,8 +35,6 @@ export class CheckList extends Question {
 	}
 	get isList() { return true }
 	defaultContent(attrs) {
-		if (!attrs) attrs = this.defaultAttrs
-		attrs.value = 1
 		let choice_content = Fragment.from([
 		    this.schema.nodes.checkbox.create(attrs),
 		    this.schema.nodes.textbox.create()
@@ -45,6 +43,10 @@ export class CheckList extends Question {
 		    this.schema.nodes.paragraph.create(null,""),
 		    this.schema.nodes.checkitem.create(attrs,choice_content)
 		])
+	}
+	create(attrs, content, marks) {
+		if (!content) content = this.defaultContent(attrs)
+		return super.create(attrs,content,marks)
 	}
 }
 
@@ -107,7 +109,7 @@ CheckList.register("command", "insert", {
 			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
 			return tr
 		} else
-			return insertWidget(pm,from,this.create(attrs,this.defaultContent(attrs)))
+			return insertQuestion(pm,from,this.create(attrs))
 	},
 	select(pm) {
   		return true

@@ -2,22 +2,20 @@ import {Block, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick} from "../../utils"
 import {joinPoint, joinableBlocks, canLift} from "prosemirror/dist/transform"
-import {TopKind} from "../../schema"
 
 const css = "widgets-question"
 	
 export const qclass = css+" widgets-edit"
 
-export function checkUniqueName(name) {
-	let q = document.getElementsByClassName(css)
-	for (let i = 0; i < q.length; ++i) {
-	    if (q[i].getAttribute("name") == name) return "Duplicate question name."
-	}
-	return null;
+export function setChildAttrs(pm, pos, type, attrs) {
+	pm.doc.path(pos.path).forEach((node,start) => {
+		if (node.type.name == type)
+			return pm.tr.setNodeType(new Pos(pos.path,start), node.type, attrs).apply()
+	})
+	return false
 }
 
 export class Question extends Block {
-	get kind() { return TopKind }
 	get draggable() { return true }
 }
 

@@ -1,7 +1,7 @@
 import {Fragment, Block, Paragraph, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertWidget} from "../../utils"
-import {Question, qclass} from "./question"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertQuestion} from "../../utils"
+import {Question, qclass, setChildAttrs} from "./question"
 
 const cssd = "widgets-scaledisplay"
 const csss = "widgets-scale"
@@ -17,6 +17,7 @@ export class ScaleDisplay extends Block {
 			class: new Attribute({default: cssd})
 		}
 	}
+	get contains() { return null }
 }
 
 ScaleDisplay.prototype.serializeDOM = (node,s) => {
@@ -53,11 +54,14 @@ export class Scale extends Question {
 		}
 	}
 	defaultContent(attrs) {
-		if (!attrs) attrs = getDefaultAttrs()
 		return Fragment.from([
 		    this.schema.nodes.paragraph.create(null,""),
 		    this.schema.nodes.scaledisplay.create(attrs)
 		])
+	}
+	create(attrs, content, marks) {
+		if (!content) content = this.defaultContent(attrs)
+		return super.create(attrs,content,marks)
 	}
 }
 
@@ -69,10 +73,12 @@ Scale.register("command", "insert",{
 	run(pm, name, startvalue, startlabel, endvalue, endlabel) {
 		let {from,to,node} = pm.selection
 		let attrs = {name,startvalue,startlabel,endvalue,endlabel}
-		if (node && node.type == this)
-			return pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-		else
-			return insertWidget(pm,from,this.create(attrs,this.defaultContent(attrs)))
+		if (node && node.type == this) {
+			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
+			from = new Pos(from.path.concat(from.offset),0)
+			return setChildAttrs(pm,from,"scaledisplay",attrs)
+		} else
+			return insertQuestion(pm,from,this.create(attrs))
   	},
 	menu: {group: "question", rank: 74, display: {type: "label", label: "Scale"}},
 	params: [

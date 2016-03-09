@@ -34,7 +34,7 @@ InlineMath.register("command", "insert", {
 	    ]
 	},
 	label: "InlineMath",
-	menu: {group: "insert", rank: 71, display: {type: "label", label: "Inline Math"}},
+	menu: {group: "insert", rank: 71, select: "disable", display: {type: "label", label: "Inline Math"}},
 })
 
 defParamsClick(InlineMath,"inlinemath:insert")

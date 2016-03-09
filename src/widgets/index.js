@@ -1,6 +1,8 @@
 export {BlockMath,CarryForward,Image,InlineMath,SpreadSheet,Website,Graph} from "./content"
 export {Input, CheckBox, RadioButton, Select, TextField, TextArea} from "./input"
 export {alignGroup,LeftAlign,CenterAlign,RightAlign,UnderlineMark,StrikeThroughMark} from "./format"
+export {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, 
+	ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./questions"
 
 import {insertCSS} from "prosemirror/dist/dom"
 import {Dropdown, MenuCommandGroup} from "prosemirror/dist/menu/menu"
@@ -13,6 +15,14 @@ export const questionCommandGroup = new MenuCommandGroup("question")
 export const questionInsertMenu = new Dropdown({label: "Question..", displayActive: true, class: "ProseMirror-widgetinsert-dropdown"}, [questionCommandGroup])
 
 export const toolGroup = new MenuCommandGroup("tool")
+
+/*export function checkUniqueName(name,css) {
+	let q = document.getElementsByClassName(css)
+	for (let i = 0; i < q.length; ++i) {
+	    if (q[i].getAttribute("name") == name) return "Duplicate input or question name."
+	}
+	return null;
+}*/
 
 insertCSS(`
 

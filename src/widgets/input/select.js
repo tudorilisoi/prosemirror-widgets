@@ -4,8 +4,7 @@ import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} fro
 
 const css = "widgets-select"
 	
-export class Select extends Inline {
-	get contains() { return null}
+export class Select extends Block {
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -14,6 +13,7 @@ export class Select extends Inline {
 		    multiple: new Attribute({default: "single"})
 		}
 	}
+	get contains() { return null}
 }
 
 defParser(Select,"select",css)

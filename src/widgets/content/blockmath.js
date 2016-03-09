@@ -1,11 +1,9 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr,insertWidget} from "../../utils"
-import {TopKindOrBlock} from "../../schema"
 
 const css = "widgets-blockmath"
 export class BlockMath extends Block {
-	get kind() { return TopKindOrBlock }
 	get attrs() {
 		return {
 			tex: new Attribute
@@ -22,7 +20,7 @@ BlockMath.prototype.serializeDOM = node => {
 	} else {
 		node.rendered = elt("div", {class: css+" widgets-edit"}, "\\["+node.attrs.tex+"\\]");
 		// wait until node is attached to document to render
-		MathJax.Hub.Queue(["Delay",MathJax.Callback,200],["Typeset",MathJax.Hub,node.rendered])
+		MathJax.Hub.Queue(["Delay",MathJax.Callback,100],["Typeset",MathJax.Hub,node.rendered])
 	}
 	return node.rendered; 
 }

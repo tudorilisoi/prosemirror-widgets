@@ -1,12 +1,10 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr, insertWidget} from "../../utils"
-import {TopKindOrBlock} from "../../schema"
 
 const css = "widgets-spreadsheet"
 	
 export class SpreadSheet extends Block {
-	get kind() { return TopKindOrBlock }
 	get attrs() {
 		return {
 			data: new Attribute
@@ -56,7 +54,7 @@ SpreadSheet.register("command", "insert", {
 	select(pm) {
   		return true
 	},
-	menu: {group: "content", rank: 75, display: {type: "label", label: "Spreadsheet"}},
+	menu: {group: "content", rank: 75, select: "disable", display: {type: "label", label: "Spreadsheet"}},
     params: [
       	{ name: "Data Link", attr: "data", label: "Link to CSV (fixed for demo)", type: "file", default: "cars.csv", 
    	      prefill: function(pm) { return selectedNodeAttr(pm, this, "data") }}

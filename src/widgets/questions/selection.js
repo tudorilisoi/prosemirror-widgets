@@ -1,8 +1,8 @@
 import {Fragment,Block, Attribute, Pos} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {Select} from "../input"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertWidget} from "../../utils"
-import {Question, qclass} from "./question"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertQuestion} from "../../utils"
+import {Question, qclass, setChildAttrs} from "./question"
 
 const css = "widgets-selection"
 	
@@ -17,11 +17,14 @@ export class Selection extends Question {
 		}
 	}
 	defaultContent(attrs) {
-		if (!attrs) attrs = getDefaultAttrs()
 		return Fragment.from([
 		     this.schema.nodes.paragraph.create(null,""),
 		     this.schema.nodes.select.create(attrs)
 		])
+	}
+	create(attrs, content, marks) {
+		if (!content) content = this.defaultContent(attrs)
+		return super.create(attrs,content,marks)
 	}
 }
 
@@ -32,10 +35,12 @@ Selection.register("command", "insert", {
 	run(pm, name, options, size, multiple) {
 		let {from,to,node} = pm.selection
 		let attrs = {name,options,size,multiple}
-		if (node && node.type == this)
-			return pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-		else
-			return insertWidget(pm,from,this.create(attrs,this.defaultContent(attrs)))
+		if (node && node.type == this) {
+			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
+			from = new Pos(from.path.concat(from.offset),0)
+			return setChildAttrs(pm,from,"select",attrs)
+		} else
+			return insertQuestion(pm,from,this.create(attrs))
   	},
 	menu: {group: "question", rank: 75, display: {type: "label", label: "Selection"}},
 	params: [

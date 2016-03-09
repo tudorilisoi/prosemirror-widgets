@@ -1,6 +1,6 @@
 import {Block, Inline, Textblock, Fragment, emptyFragment, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertWidget} from "../../utils"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getPosInParent, nodeBefore, insertQuestion} from "../../utils"
 import {Question, qclass} from "./question"
 
 const cssc = "widgets-choice"
@@ -32,7 +32,6 @@ export class MultipleChoice extends Question {
 	}
 	get isList() { return true }
 	defaultContent(attrs) {
-		if (!attrs) attrs = getDefaultAttrs()
 		let choice_content = Fragment.from([
 		    this.schema.nodes.radiobutton.create(attrs),
 		    this.schema.nodes.textbox.create()
@@ -41,6 +40,10 @@ export class MultipleChoice extends Question {
 		    this.schema.nodes.paragraph.create(null,""),
 		    this.schema.nodes.choice.create(attrs,choice_content)
 		])
+	}
+	create(attrs, content, marks) {
+		if (!content) content = this.defaultContent(attrs)
+		return super.create(attrs,content,marks)
 	}
 } 
  
@@ -102,7 +105,7 @@ MultipleChoice.register("command", "insert", {
 			renumber(pm,Pos.from(from.toPath().concat(from.offset),0))
 			return tr
 		} else
-			return insertWidget(pm,from,this.create(attrs,this.defaultContent(attrs)))
+			return insertQuestion(pm,from,this.create(attrs))
 	},
 	select(pm) {
 		return true

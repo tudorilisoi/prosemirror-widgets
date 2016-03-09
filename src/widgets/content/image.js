@@ -30,7 +30,7 @@ Image.register("command", "insert", {
 	 ],
   },
   label: "Image",
-  menu: {group: "insert", rank: 70, display: {type: "label", label: "Image"}}
+  menu: {group: "insert", rank: 70, select: "disable", display: {type: "label", label: "Image"}}
 })
 
 defParamsClick(Image,"image:insert",["all"])

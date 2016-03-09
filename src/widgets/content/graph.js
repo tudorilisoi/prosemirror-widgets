@@ -1,7 +1,6 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, selectedNodeAttr,insertWidget, getID} from "../../utils"
-import {TopKindOrBlock} from "../../schema"
 
 const css = "widgets-graph"
 	
@@ -36,7 +35,6 @@ function getGraphOptions() {
  
 
 export class Graph extends Block {
-	get kind() { return TopKindOrBlock }
 	get attrs() {
 		return {
 			data: new Attribute({default: ""}),

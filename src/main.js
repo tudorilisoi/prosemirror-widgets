@@ -3,7 +3,7 @@ import "prosemirror/dist/menu/tooltipmenu"
 import "prosemirror/dist/menu/menubar"
 import "prosemirror/dist/inputrules/autoinput"
 import {insertCSS} from "prosemirror/dist/dom"
-import {defineFileHandler} from "./utils"
+import {defineFileHandler,addDropListeners} from "./utils"
 import {setReadOnly} from "prosemirror/dist/transform/transform"
 import {widgetSchema, commands, mainMenuBar, defaultSchema} from "./schema" 
  
@@ -16,6 +16,8 @@ let pm = window.pm = new ProseMirror({
   doc: document.querySelector("#content"),
   docFormat: "dom"
 })
+
+addDropListeners(pm)
 
 /*
 pm.setOption("tooltipMenu", {

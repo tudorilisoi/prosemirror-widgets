@@ -14,6 +14,7 @@ UnderlineMark.register("command", "toggle", {
   label: "Toggle underline",
   menu: {
     group: "inline", rank: 22,
+	select: "disable",
     display: {
       type: "icon",
       width: 8, height: 8,
@@ -40,6 +41,7 @@ StrikeThroughMark.register("command", "toggle", {
   label: "Toggle strike-through",
   menu: {
     group: "inline", rank: 23,
+	select: "disable",
     display: {
       type: "icon",
       width: 512, height: 512,
