@@ -1,5 +1,6 @@
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {Pos} from "prosemirror/dist/model"
+import {onResize} from "../../utils"
 
 let analyzer = require("prosemirror/node_modules/text-stats")
 let flesch = require("prosemirror/node_modules/flesch")
@@ -37,7 +38,7 @@ function clearRanges() {
 
 function clearComments() {
 	while (comments.lastChild) comments.removeChild(comments.lastChild)
-	comments.appendChild(elt("div",{class: "comment-header"},"Comments"))
+		comments.appendChild(elt("div",{class: "comment-header"},"Comments"))
 }
 
 function clearPositions() { grammar.forEach(g => g.clear()) }
@@ -169,6 +170,7 @@ insertCSS(`
 		
 .grammar #editor {
 	float: left;
+	width: 60%;
 }
 
 .grammar #comments {

@@ -1,7 +1,7 @@
 import {elt,insertCSS} from "prosemirror/dist/dom"
 import {Pos} from "prosemirror/dist/model"
 import {eventMixin} from "prosemirror/dist/util/event"
-import {getID} from "../../utils"
+import {getID, onResize} from "../../utils"
 
 let commentsNode = document.querySelector("#comments")
 let commentStore = null
@@ -100,6 +100,8 @@ export function initComments(pm) {
 		if (addComment.className == "addComment")
 			addComment.style.top = getTop()+"px"				
 	})
+	onResize(pm.wrapper, () => { commentStore.reflow() })
+
 	commentMenu = getCommentMenu()
 	commentsNode.appendChild(commentHeader)
 	commentsNode.appendChild(addComment)
@@ -130,13 +132,13 @@ export class CommentStore {
     		comments[id] = new Comment(id, text, range)
     		let dom = comments[id].newDom
     		commentsNode.appendChild(dom)
-    		this.reposition()
+    		this.reflow()
     		this.highlightComment(id)
     	}
     }
     renderComments() {
     	comments.forEach(c=> { commentsNode.appendChild(c.newDom) })
-    	this.reposition()
+    	this.reflow()
     }
     removeComment(id) {
     	let found = comments[id];
@@ -145,11 +147,11 @@ export class CommentStore {
     		if (found.range) pm.removeRange(found.range)
     		delete comments[id]
     		commentsNode.removeChild(found.dom)
-    		this.reposition()
+    		this.reflow()
     		return true;
     	}
     }
-    reposition() {
+    reflow() {
     	let r = pm.content.getBoundingClientRect()
     	let sorted = []
         Object.keys(comments).forEach(id => {

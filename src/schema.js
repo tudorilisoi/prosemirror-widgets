@@ -106,7 +106,7 @@ export const commands = CommandSet.default.update({
     analyze: analyzeCmdSpec
 })
 
-export const readonlyCommands = new CommandSet(null, () => null)
+export const noCommands = new CommandSet(null, () => null)
 
 insertCSS(`
 		

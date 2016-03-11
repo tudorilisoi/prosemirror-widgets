@@ -3,6 +3,8 @@ import {Pos} from "prosemirror/dist/model"
 import {selectableNodeAbove} from "prosemirror/dist/edit/selection"
 import {widgetParamHandler} from "./params"
 
+export const onResize = require("prosemirror/node_modules/element-resize-event/index.js")	 
+
 export function defParser(type,tag,cls) {
 	type.register("parseDOM", tag, {
 		parse(dom, state) {
@@ -33,14 +35,14 @@ export function getID() {
 	return Math.floor(Math.random() * 0xffffffff)
 }
 
-function getTopPos(pos) {
+export function getTopPos(pos) {
 	for (;;) {
 		if (pos.depth == 0) return pos
 		pos = pos.shorten(null,1)
 	}	
 }
 
-function getBlockPos(pm,pos) {
+export function getBlockPos(pm,pos) {
 	for (;;) {
 		if (pos.depth == 0) return pos
 		let node = pm.doc.path(pos.path)

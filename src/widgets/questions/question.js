@@ -1,6 +1,6 @@
 import {Block, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick} from "../../utils"
+import {defParser, defParamsClick, getTopPos, getBlockPos} from "../../utils"
 import {joinPoint, joinableBlocks, canLift} from "prosemirror/dist/transform"
 
 const css = "widgets-question"
@@ -14,9 +14,10 @@ export function setChildAttrs(pm, pos, type, attrs) {
 	})
 	return false
 }
-
+ 
 export class Question extends Block {
 	get draggable() { return true }
+	getDropPos(pm, from, to) { return to? getTopPos(to): null }
 }
 
 Question.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
