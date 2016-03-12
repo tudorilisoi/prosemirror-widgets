@@ -14,7 +14,7 @@ let pm = window.pm = new ProseMirror({
   doc: document.querySelector("#content"),
   docFormat: "dom"
 })
-
+ 
 // turn off editing
 pm.on("filterTransform", () => true)
 
