@@ -42,15 +42,14 @@ class Comment {
 		this.text = text
 		this.range = range
 		this.mode = mode
+		this.dom = null
 	}
 	getRangeClass(select) { return "mode-"+this.mode+(select?"-select":"") }
 	get height() { 
 		let r = this.dom.getBoundingClientRect()
 		return r.bottom-r.top
 	}
-	get dom() { return document.getElementById(this.id) }
 	get newDom() {
-		let dom
 		if (suggestMode) {
 			let modeStatus = elt("span",null,this.mode)
 			let approval = elt("span",{class: "comment-button"},"Approve")
@@ -58,22 +57,22 @@ class Comment {
 			approval.addEventListener("click", e => { commentStore.approveComment(this.id) })
 			reject.addEventListener("click", e => { commentStore.removeComment(this.id) })
 			let approvalPanel = elt("div", {class: "approval"},modeStatus,approval,reject)
-			dom = elt("div",{class: "comment",id:this.id},this.text,approvalPanel)
+			this.dom = elt("div",{class: "comment",id:this.id},this.text,approvalPanel)
 		} else
-			dom = elt("div",{class: "comment",id:this.id},this.text)
-		dom.addEventListener("click", e => {
+			this.dom = elt("div",{class: "comment",id:this.id},this.text)
+		this.dom.addEventListener("click", e => {
 	    	e.stopPropagation()
 			let r = e.target.getBoundingClientRect()
 			if (e.clientX > (r.right-16) && e.clientY < (r.top+16)) {
 				showMenu(this,e.target.style.top)
 			} else {
-				if (dom.className == "comment")
+				if (this.dom.className == "comment")
 					commentStore.highlightComment(this.id)
 				else
 					commentStore.clearHighlight()
 			}
 		})
-		return dom
+		return this.dom
 	}
 }
 
@@ -230,7 +229,6 @@ export class CommentStore {
     }
     renderComments() {
     	comments.forEach(c=> { commentsNode.appendChild(c.newDom) })
-    	// may need to delay until in dom
     	this.reflow()
     }
     reflow() {
