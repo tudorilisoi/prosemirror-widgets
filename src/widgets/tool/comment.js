@@ -293,7 +293,7 @@ insertCSS(`
 
 .comments #editor {
 	float: left;
-	width: 60%;
+	width: 70%;
 	height: 100%;
 }
 
@@ -302,7 +302,7 @@ insertCSS(`
 	margin-left: 1px;
 	padding: 0;
 	height: 100%;
-	width: 250px;
+	width: 300px;
 	display: inline-block;
 	overflow-y: auto;
 	position:relative;
