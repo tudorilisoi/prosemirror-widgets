@@ -7,6 +7,34 @@ let commentsNode = document.querySelector("#comments")
 let commentStore = null
 let commentMenu = null
 let editId = null
+let suggestMode
+
+export const commentCmdSpec = {
+	label: "Comment",
+	select(pm) {
+		return true
+	},
+	run(pm) {
+		let addComment = document.querySelector("#addcomment")
+		let text = addComment.querySelector("#textcomment")
+		text.value = ''
+		if (addComment.className == "addComment") return true;
+		text.focus()
+		addComment.style.top = commentStore.getSelectionTop()+"px"
+		addComment.className = "addComment"
+		setPlaceholderText(text)
+		return true
+	},
+	menu: {
+		group: "tool", rank: 73,
+		select: "disable",
+		display: {
+	      type: "icon",
+	      width: 1024, height: 1024,
+	      path: "M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z"
+	    }
+	}
+}
 
 class Comment {
 	constructor(id, text, range, mode) {
@@ -15,18 +43,24 @@ class Comment {
 		this.range = range
 		this.mode = mode
 	}
-	get rangeClass() { return "mode-"+this.mode }
+	getRangeClass(select) { return "mode-"+this.mode+(select?"-select":"") }
 	get height() { 
 		let r = this.dom.getBoundingClientRect()
 		return r.bottom-r.top
 	}
 	get dom() { return document.getElementById(this.id) }
 	get newDom() {
-		let modeStatus = elt("span",null,this.mode)
-		let approval = elt("span",{class: "comment-button"},"Approve")
-		let reject = elt("span",{class: "comment-button"},"Reject")
-		let approvalPanel = elt("div", {class: "approval"},modeStatus,approval,reject)
-		let dom = elt("div",{class: "comment",id:this.id},this.text,approvalPanel)
+		let dom
+		if (suggestMode) {
+			let modeStatus = elt("span",null,this.mode)
+			let approval = elt("span",{class: "comment-button"},"Approve")
+			let reject = elt("span",{class: "comment-button"},"Reject")
+			approval.addEventListener("click", e => { commentStore.approveComment(this.id) })
+			reject.addEventListener("click", e => { commentStore.removeComment(this.id) })
+			let approvalPanel = elt("div", {class: "approval"},modeStatus,approval,reject)
+			dom = elt("div",{class: "comment",id:this.id},this.text,approvalPanel)
+		} else
+			dom = elt("div",{class: "comment",id:this.id},this.text)
 		dom.addEventListener("click", e => {
 	    	e.stopPropagation()
 			let r = e.target.getBoundingClientRect()
@@ -39,8 +73,6 @@ class Comment {
 					commentStore.clearHighlight()
 			}
 		})
-		approval.addEventListener("click", e => { commentStore.approveComment(this.id) })
-		reject.addEventListener("click", e => { commentStore.removeComment(this.id) })
 		return dom
 	}
 }
@@ -54,13 +86,6 @@ function showMenu(comment,top) {
 		commentMenu.className = "commentMenu"
 		editId = null
 	}
-}
-
-function getTop() {
-	let {from} = pm.selection
-	let r = pm.coordsAtPos(from)
-	let rect = pm.content.getBoundingClientRect()
-	return Math.round(r.top - rect.top)
 }
 
 function getCommentMenu() {
@@ -84,38 +109,55 @@ function getCommentMenu() {
 	return elt("div",{class: "commentMenu"},elt("ul",null,edit,reply,remove))
 }
 
+const placetext = {
+	comment: "Enter your comment",
+	insert: "Enter text to insert",
+	replace: "Enter text to replace",
+	delete: "Enter optional delete comment "
+}
+
+function setPlaceholderText(text) {
+	let mode = commentsNode.querySelector("input[name=mode]:checked")
+	let modevalue = mode? mode.value : "comment"
+	text.placeholder = placetext[modevalue]
+}
+
 function getAddComment() {
+	let addComment
 	let addButton = elt("span",{class: "comment-button"},"Add Comment")
 	let cancelButton = elt("span",{class: "comment-button"},"Cancel")
-	let textArea = 	elt("textarea",{name:"newcomment",placeholder: "Enter comment (not required for delete)"})
+	let textArea = 	elt("textarea",{id:"textcomment",placeholder: "Enter comment (N/A for delete)"})
 	addButton.addEventListener("click", e => {
-		let mode = commentsNode.querySelector("input[name=mode]:checked")
-		let modevalue = mode? mode.value : "comment"
-		if (textArea.value == '' && modevalue != "delete") return;
-		commentStore.createComment(textArea.value, modevalue)
+		let modevalue = "comment"
+		if (suggestMode) {
+			let mode = commentsNode.querySelector("input[name=mode]:checked")
+			modevalue = mode? mode.value : "comment"
+		}
+		if (textArea.value == '' && modevalue != "delete") {
+			textArea.placeholder = "Text is required for "+modevalue
+			return
+		}
 		addComment.className = "addComment hide"
+		commentStore.createComment(textArea.value, modevalue)
 	})
 	cancelButton.addEventListener("click", e => { addComment.className = "addComment hide" })
 	let commentMode = elt("span",null,elt("input",{type: "radio",name: "mode",value: "comment",checked: "checked"}),"comment")
 	let modes = ["insert","replace","delete"].map(s => {
 		return elt("span",null,elt("input",{type: "radio",name: "mode",value: s}),s)
 	})
-	let modesPanel = elt("div",{class:"mode"},commentMode,modes)
-	let addComment = elt("div",{class: "addComment hide"},textArea,modesPanel,addButton,cancelButton)
-	pm.content.addEventListener("mouseup", e => {
-    	e.stopPropagation()
-		textArea.value = ''
-    	if (addComment.className = "addComment") return;
-		addComment.className = "addComment"
-		textArea.focus()
-		addComment.style.top = getTop()+"px"				
-	})
-	return addComment
+	if (suggestMode) {
+		let modesPanel = elt("div",{class: "mode"},commentMode,modes)
+		modesPanel.addEventListener("click", e => setPlaceholderText(textArea))
+		return addComment = elt("div",{class: "addComment hide", id: "addcomment"},textArea,modesPanel,addButton,cancelButton)
+	} else
+		return addComment = elt("div",{class: "addComment hide", id: "addcomment"},textArea,addButton,cancelButton)		
 }
 
-export function initComments(pm) {
+export function initComments(pm,suggest = false) {
 	commentStore = new CommentStore(pm,0)
 	eventMixin(CommentStore)
+	suggestMode = suggest
+	commentsNode.innerHTML = ''
 	onResize(pm.wrapper, () => { commentStore.reflow() })
 	commentMenu = getCommentMenu()
 	let addComment = getAddComment()
@@ -147,32 +189,40 @@ export class CommentStore {
     }
     addComment(from, to, text, id, mode) {
     	if (!comments[id]) {
-    		// readonly can't remove ranges
-    		//range.on("removed", function () { return comments[id].range = null })
     		if (!from.cmp(to)) to = from.move(1)
     		let range = pm.markRange(from, to, { className: "mode-"+mode})
     		comments[id] = new Comment(id, text, range, mode)
     		commentsNode.appendChild(comments[id].newDom)
-    		this.reflow()
-    		this.highlightComment(id)
+    		//HACK: give time for comment to be added
+    		window.setTimeout(() => {
+        		this.reflow()
+        		this.highlightComment(id)
+    		},150)
     	}
     }
     removeComment(id) {
     	let found = comments[id];
     	if (!found) return false
-		if (this.highlight && id == this.highlight.id) this.clearHighlight()
+		this.clearHighlight()
 		if (found.range) pm.removeRange(found.range)
 		delete comments[id]
 		commentsNode.removeChild(found.dom)
 		this.reflow()
-		return true;
     }
     approveComment(id) {
     	let found = comments[id]
     	if (!found) return
-		if (found.mode == "insert") pm.tr.insert(found.range.from,found.text).apply(pm.apply.scroll)
-		else if (found.mode == "delete") pm.tr.delete(found.range.from,found.range.to).apply(pm.apply.scroll)
-		else if (found.mode == "replace") pm.tr.replace(found.range.from,found.range.to,found.text).apply(pm.apply.scroll)
+    	switch (found.mode) {
+	    	case "insert":
+	    		pm.tr.insert(found.range.from,pm.schema.text(found.text)).apply(pm.apply.scroll)
+	    		break
+	    	case "delete":
+	    		pm.tr.delete(found.range.from,found.range.to).apply(pm.apply.scroll)
+	    		break
+	    	case "replace":
+	    		pm.tr.replace(found.range.from,found.range.to,pm.schema.text(found.text)).apply(pm.apply.scroll)
+	    		break
+    	}
     	this.removeComment(id)
     }
     clearComments() {
@@ -180,6 +230,7 @@ export class CommentStore {
     }
     renderComments() {
     	comments.forEach(c=> { commentsNode.appendChild(c.newDom) })
+    	// may need to delay until in dom
     	this.reflow()
     }
     reflow() {
@@ -187,7 +238,7 @@ export class CommentStore {
     	let sorted = []
         Object.keys(comments).forEach(id => {
         	let c = comments[id]
-        	let top = Math.round(pm.coordsAtPos(c.range.from).top-r.top+10)
+         	let top = Math.round(pm.coordsAtPos(c.range.from).top-r.top+10)
         	sorted.push({dom:c.dom,top,h:c.height})
     	})
     	sorted.sort((a, b) => a.top - b.top)
@@ -201,12 +252,13 @@ export class CommentStore {
 	}
 	highlightComment(id) {
 		let c = comments[id]
+		if (!c) return
 	    this.clearHighlight();
 	    c.dom.className += " select"
 	    this.highlight = c
     	let {from, to} = c.range
     	pm.removeRange(c.range)
-    	c.range = pm.markRange(from, to, { className: c.rangeClass+" select"})
+    	c.range = pm.markRange(from, to, { className: c.getRangeClass(true)})
 	}
 	clearHighlight() {
 	    if (this.highlight) {
@@ -216,10 +268,16 @@ export class CommentStore {
 		    	let r = c.range
 		    	let {from,to} = r
 		    	pm.removeRange(r)
-	    		c.range = pm.markRange(from, to, { className: c.rangeClass})
+	    		c.range = pm.markRange(from, to, { className: c.getRangeClass(false)})
 	    	}
 	        this.highlight = null;
 	    }
+	}
+	getSelectionTop() {
+		let {from} = pm.selection
+		let r = pm.coordsAtPos(from)
+		let rect = pm.content.getBoundingClientRect()
+		return Math.round(r.top - rect.top)
 	}
 }
 
@@ -228,21 +286,27 @@ insertCSS(`
 	display: block;
 	margin: 0 auto;
 	width: 100%;
+	height: 400px;
 }
-		
+
+.comments .peer .ProseMirror-menubar {
+	text-align: right;
+}
+
 .comments #editor {
 	float: left;
 	width: 60%;
+	height: 100%;
 }
 
 .comments #comments {
 	border: 1px solid #AAA;
 	margin-left: 1px;
 	padding: 0;
-	height: 500px;
+	height: 100%;
 	width: 250px;
 	display: inline-block;
-	overflow: auto;
+	overflow-y: auto;
 	position:relative;
  }
 
@@ -348,7 +412,7 @@ insertCSS(`
 }
 
 
-.mode-comment .select {
+.mode-comment-select {
 	background: dodgerblue;
 	color: white;
 }
@@ -357,26 +421,29 @@ insertCSS(`
 	text-decoration: line-through;
 }
 
-.mode-delete .select {
+.mode-delete-select {
+	text-decoration: line-through;
 	background: red;
 }
 
 .mode-insert:before {
-	content: "^"
+	content: "^";
 	font-width: bold;
 	color: blue;
 }
 
-.mode-insert .select {
-	background: green;
+.mode-insert-select:before {
+	content: "^";
+	background: yellow;
 }
 
 .mode-replace {
 	text-decoration: overline;
 }
 
-.mode-replace .select {
-	background: yellow;
+.mode-replace-select {
+	text-decoration: overline;
+	background: orange;
 }
 
 .commentMenu {
@@ -422,19 +489,15 @@ insertCSS(`
 	display: block;
 }
 
-.track .approval, .track .mode {
-	display: inline-block;
+.approval, .mode {
+	display: block;
 	font-size: 85%;
 	margin: 4px;
 }
 
-.track .approval {
-	display: block;
-	margin: 8px;
-}
-
-.track .approval span:first-child:after {
+.approval span:first-child:after {
 	content: "?";
+	display: inline-block;
 	font-weight: bold;
 }
 

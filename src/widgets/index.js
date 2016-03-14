@@ -16,14 +16,6 @@ export const questionInsertMenu = new Dropdown({label: "Question..", displayActi
 
 export const toolGroup = new MenuCommandGroup("tool")
 
-/*export function checkUniqueName(name,css) {
-	let q = document.getElementsByClassName(css)
-	for (let i = 0; i < q.length; ++i) {
-	    if (q[i].getAttribute("name") == name) return "Duplicate input or question name."
-	}
-	return null;
-}*/
-
 insertCSS(`
 
 .ProseMirror .widgets-edit:hover {

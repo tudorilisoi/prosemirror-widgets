@@ -68,7 +68,7 @@ export const widgetSchema = new Schema(widgetSpec)
 
 export const mainMenuBar = {
 	float: true,
-	content: [[inlineGroup, insertMenu], [blockGroup,textblockMenu],alignGroup,[contentInsertMenu,questionInsertMenu],historyGroup]	 
+	content: [[inlineGroup, insertMenu], [blockGroup,textblockMenu],alignGroup,[contentInsertMenu,questionInsertMenu],toolGroup, historyGroup]	 
 }
 
 export const grammarMenuBar = {
@@ -76,6 +76,10 @@ export const grammarMenuBar = {
 	content: [[inlineGroup, insertMenu], [blockGroup,textblockMenu],alignGroup,[contentInsertMenu,questionInsertMenu], toolGroup, historyGroup]	 
 }
 
+export const commentMenuBar = {
+	float: true,
+	content: [toolGroup]
+}
 
 textblockMenu.options.label = "Format"
 
@@ -102,11 +106,31 @@ export const commands = CommandSet.default.update({
     lift: { menu: null},
     "code:toggle": {menu: {group: "textblock", rank: 99, select: "disable", display: {type: "label", label: "Code" }}},
     "strong:toggle": {menu: { group: "inline", rank: 20, select: "disable", display: strongIcon}}, 
+    "em:toggle": {menu: { group: "inline", rank: 21, select: "disable", display: emIcon}}
+})
+
+export const commentCommands = CommandSet.default.update({
+    selectParentNode: { menu: null},
+    lift: { menu: null},
+    "code:toggle": {menu: {group: "textblock", rank: 99, select: "disable", display: {type: "label", label: "Code" }}},
+    "strong:toggle": {menu: { group: "inline", rank: 20, select: "disable", display: strongIcon}}, 
     "em:toggle": {menu: { group: "inline", rank: 21, select: "disable", display: emIcon}},
-    analyze: analyzeCmdSpec
+    comment: commentCmdSpec
 })
 
 export const noCommands = new CommandSet(null, () => null)
+
+export const commentOnlyCommands = noCommands.update({ comment: commentCmdSpec })
+
+
+export const grammarCommands = CommandSet.default.update({
+    selectParentNode: { menu: null},
+    lift: { menu: null},
+    "code:toggle": {menu: {group: "textblock", rank: 99, select: "disable", display: {type: "label", label: "Code" }}},
+    "strong:toggle": {menu: { group: "inline", rank: 20, select: "disable", display: strongIcon}}, 
+    "em:toggle": {menu: { group: "inline", rank: 21, select: "disable", display: emIcon}},
+    analyze: analyzeCmdSpec
+})
 
 insertCSS(`
 		
