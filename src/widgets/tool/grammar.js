@@ -166,18 +166,21 @@ insertCSS(`
 .grammar {
 	display: block;
 	margin: 0 auto;
+	width: 100%;
+	height: 400px;
 }
 		
 .grammar #editor {
 	float: left;
-	width: 60%;
+	width: 70%;
+	height: 100%;
 }
 
 .grammar #comments {
 	border: 1px solid #AAA;
 	margin-left: 2px;
 	padding: 0;
-	height: 500px;
+	height: 100%;
 	width: 250px;
 	display: inline-block;
 	vertical-align: top;

@@ -421,18 +421,17 @@ insertCSS(`
 
 .mode-delete-select {
 	text-decoration: line-through;
-	background: red;
+	background: tomato;
 }
 
 .mode-insert:before {
 	content: "^";
 	font-width: bold;
-	color: blue;
 }
 
 .mode-insert-select:before {
 	content: "^";
-	background: yellow;
+	background: turquoise;
 }
 
 .mode-replace {
@@ -441,7 +440,7 @@ insertCSS(`
 
 .mode-replace-select {
 	text-decoration: overline;
-	background: orange;
+	background: violet;
 }
 
 .commentMenu {
