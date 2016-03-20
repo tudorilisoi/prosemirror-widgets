@@ -1,0 +1,82 @@
+<!doctype html>
+
+<meta charset="utf-8"/>
+<title>Mountain Simulation</title>
+<link rel=stylesheet href="mtnsim.css">
+<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+
+<div class="mtnsim">
+	<div class="columns">
+		<div class="col">
+			<canvas id="atgraph" width="200" height="200"></canvas>
+		</div>
+		<div class="col">
+			<canvas id="maincanvas" width="300" height="200"></canvas>
+		</div>
+		<div class="col">
+			<canvas id="etgraph" width="200" height="200"></canvas>
+		</div>
+	</div>
+	<div id="control_panel"
+		<div class="button_panel">
+			<input type="button" id="run" value="Run" title="Run or Resume"/>
+			<input type="button" id="pause" value="Pause" title="Pause trial"/>
+			<input type="button" id="trial" value="New Trial" title="Start new trial"/>
+			<input type="button" id="clear" value="Clear Graphs" title="Clear Graphs for another run"/>
+		</div>
+		<div class="slider_panel">
+			<div class="slider_control">
+				<label for="temp">Temperature</label>
+				<div class="slider">
+				   <input type="range" id="temp" min="-20" max="30" value="20"/>
+				   <input type="text" id="tempout" value="20" readonly/>
+				</div>
+			</div>
+			<div class="slider_control">
+				<label for="vapor">Vapor Pressure</label>
+				<div class="slider">
+				   <input type="range" id="vapor" min="0" max="50" value="25"/>
+				   <input type="text" id="vaporout" value="25" readonly/>
+				</div>
+			</div>
+			<div class="slider_control">	
+	   			<label for="wind">Wind Speed</label>
+				<div class="slider">
+				   <input type="range" id="wind" min="0" max="250" value="100"/>
+				   <input type="text" id="windout" value="100" readonly/>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="results">
+		<table>
+		<caption>Experimental Results</caption>
+		<thead>
+			<tr>
+				<th colspan="3">Initial</th>
+				<th></th>
+				<th colspan="3">Final</th>
+			</tr>
+			<tr>
+		        <th>Temp(C)</th>
+		        <th>Vapor Pressure(mb)</th>
+		        <th>Td(C)</th>
+		        <th>Cloud Base(km)</th>
+		        <th>Temp(C)</th>
+		        <th>Td(C)</th>
+		        <th>Vapor Pressure(mb)</th>
+		     </tr>
+		</thead>
+		<tr>
+			<td>0</td>
+			<td>0</td>
+			<td>0</td>
+			<td>0</td>
+			<td>0</td>
+			<td>0</td>
+			<td>0</td>
+		</table>
+	</div>
+</div>
+
+<script src="mtnsim-built.js"></script>
