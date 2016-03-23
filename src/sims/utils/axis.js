@@ -15,7 +15,8 @@ export class Axis {
 		this.vertical = spec.orient && spec.orient == "vertical" || false
 		this.linear = spec.scale && spec.scale == "linear" || false 
 		this.scale = this.vertical ? (this.h-margin-10)/(this.max - this.min): (this.w-margin-10)/(this.max - this.min)
-		this.origin = new createjs.Point(margin,this.h-margin)
+		this.originX = margin
+		this.originY = this.h-margin
 	}
 
 	drawLine(x1,y1,x2,y2) {
@@ -42,48 +43,48 @@ export class Axis {
     	let label = this.getText(this.label)
     	let label_bnds = label.getBounds()
         if (this.vertical) {
-            this.drawLine(this.origin.x,this.origin.y,margin,0)            
-            let y = this.origin.y - (this.origin.y - label_bnds.width)/2
+            this.drawLine(this.originX,this.originY,margin,0)            
+            let y = this.originY - (this.originY - label_bnds.width)/2
             this.drawText(label, 4, y)
             for (let val = this.min; val <= this.max; val += this.major) {
                 let v = this.getLoc(val)
-                this.drawLine(this.origin.x-3,v,this.origin.x+3,v)                
+                this.drawLine(this.originX-3,v,this.originX+3,v)                
                 let temp = Math.round(val * 10)
                 let s = new String(Math.round(temp/10))
                 let text = this.getText(val)
                 let bnds = text.getBounds()
-                this.drawText(text,this.origin.x-3-bnds.height,v+bnds.height/2)
+                this.drawText(text,this.originX-3-bnds.height,v+bnds.height/2)
             }
         } else {
-            this.drawLine(this.origin.x,this.origin.y, this.w,this.origin.y)            
+            this.drawLine(this.originX,this.originY, this.w,this.originY)            
             let x = (this.w - label_bnds.width)/2
-            this.drawText(label, this.origin.x + x, this.origin.y + 15)
+            this.drawText(label, this.originX + x, this.originY + 15)
             for (let val = this.min; val <= this.max; val += this.major)  {
                 let v = this.getLoc(val)
-                this.drawLine(v,this.origin.y-3,v,this.origin.y+3)              
+                this.drawLine(v,this.originY-3,v,this.originY+3)              
                 let temp = Math.round(val * 10)
                 let s = new String(temp/10)
                 let text = this.getText(val)
                 let bnds = text.getBounds()
-                this.drawText(text,v-bnds.width/2,this.origin.y+4)
+                this.drawText(text,v-bnds.width/2,this.originY+4)
             }
         }
     }
 
     getLoc(val) {
         let ival = this.linear? Math.round(this.scale*(val-this.min)): Math.round(Math.log(this.scale*(val-this.min)))
-        return this.vertical?this.origin.y - ival:this.origin.x + ival
+        return this.vertical?this.originY - ival:this.originX + ival
     }
 
     getValue(v) {
-    	let factor = this.vertical? (this.h - (v - this.origin.y))/this.h:(v - this.origin.x)/this.w
+    	let factor = this.vertical? (this.h - (v - this.originY))/this.h:(v - this.originX)/this.w
         return this.min + (this.max - this.min) * factor
     }
 
     isInside(v) {
         if (this.vertical)
-            return v >= this.origin.y && v <= (this.origin.y + this.h)
+            return v >= this.originY && v <= (this.originY + this.h)
         else
-            return v >= this.origin.x && v <= (this.origin.y + this.w)
+            return v >= this.originX && v <= (this.originY + this.w)
     }
 }
