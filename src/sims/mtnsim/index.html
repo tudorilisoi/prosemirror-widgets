@@ -19,10 +19,10 @@
 	</div>
 	<div id="control_panel"
 		<div class="button_panel">
-			<input type="button" id="run" value="Run" title="Run or Resume"/>
+			<input type="button" id="run" value="Run" title="Run"/>
 			<input type="button" id="pause" value="Pause" title="Pause trial"/>
-			<input type="button" id="trial" value="New Trial" title="Start new trial"/>
-			<input type="button" id="clear" value="Clear Graphs" title="Clear Graphs for another run"/>
+			<input type="button" id="restart" value="Restart" title="Restart for another run"/>
+			<input type="checkbox" id ="mute" value="Mute"</>Mute
 		</div>
 		<div class="slider_panel">
 			<div class="slider_control">
@@ -38,43 +38,25 @@
 				   <input type="range" id="vapor" min="0" max="50" value="25"/>
 				   <input type="text" id="vaporout" value="25" readonly/>
 				</div>
-			</div>
-			<div class="slider_control">	
-	   			<label for="wind">Wind Speed</label>
-				<div class="slider">
-				   <input type="range" id="wind" min="0" max="250" value="100"/>
-				   <input type="text" id="windout" value="100" readonly/>
-				</div>
-			</div>
+			</div> 
 		</div>
 	</div>
 	<div id="results">
-		<table>
-		<caption>Experimental Results</caption>
-		<thead>
+		<table id="results_table">
+			<caption>Experimental Results</caption>
 			<tr>
 				<th colspan="3">Initial</th>
-				<th></th>
-				<th colspan="3">Final</th>
+				<th colspan="4">Final</th>
 			</tr>
 			<tr>
 		        <th>Temp(C)</th>
 		        <th>Vapor Pressure(mb)</th>
 		        <th>Td(C)</th>
-		        <th>Cloud Base(km)</th>
 		        <th>Temp(C)</th>
 		        <th>Td(C)</th>
 		        <th>Vapor Pressure(mb)</th>
-		     </tr>
-		</thead>
-		<tr>
-			<td>0</td>
-			<td>0</td>
-			<td>0</td>
-			<td>0</td>
-			<td>0</td>
-			<td>0</td>
-			<td>0</td>
+		        <th>Cloud Base(km)</th>
+		    </tr>
 		</table>
 	</div>
 </div>

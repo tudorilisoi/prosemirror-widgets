@@ -48,7 +48,7 @@ export class Graph {
     	this.last = null
     }
 
-    drawMarker(x,y) {
+    moveMarker(x,y) {
     	this.marker.x = x-2
     	this.marker.y = y-2
     }
@@ -59,7 +59,7 @@ export class Graph {
 		line.graphics.beginStroke(this.color)
 		line.graphics.moveTo(x1, y1)
 		line.graphics.lineTo(x2, y2)
-		line.graphics.endStroke();
+		line.graphics.endStroke()
 		this.stage.addChild(line)
 	}
 	
@@ -70,14 +70,17 @@ export class Graph {
             if (!this.last)  {
                 this.drawLine(x,y,x,y)
             } else {
-                this.drawMarker(this.last.x,this.last.y)
+                this.moveMarker(this.last.x,this.last.y)
                 if (this.point) 
                 	this.drawLine(x,y,x,y) 
                 else 
                 	this.drawLine(this.last.x,this.last.y,x,y)
             }
             this.last = new createjs.Point(x,y)
-            this.drawMarker(x,y)
+            this.moveMarker(x,y)
         }
     }
+    
+    endPlot() { this.last = null }
+    
 }
