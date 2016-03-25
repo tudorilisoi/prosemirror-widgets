@@ -4,9 +4,9 @@ createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
 createjs.Ticker.frameRate = 60
 
-function dewpoint(temp,vapor) { return temp - ((100.0-humidity(temp,vapor))/5.0) }
+function saturation(temp) { return 10.0 * 0.611 * Math.exp(17.27*temp/(temp+237.3)) }
 function humidity(temp, vapor) { return 100.0 * vapor/saturation(temp)}
-function saturation(temp) { return 10 * 0.611 * Math.exp(17.27*temp/(temp+237.3)) }
+function dewpoint(temp,vapor) { return temp - ((100.0-humidity(temp,vapor))/5.0) }
 
 
 class Trial {
@@ -31,7 +31,7 @@ class Trial {
 	}
 	
 	getCol(val) {
-		let v = val.toPrecision(2)
+		let v = val.toFixed(1)
 		let td = document.createElement("td")
 		td.appendChild(document.createTextNode(v))
 		return td
@@ -63,25 +63,25 @@ class Settings {
 		this.listener = null
 		function slidef(e,input, out, f) {
 	    	e.stopPropagation()
-	    	out.value = input.value
+	    	out.value = input.valueAsNumber
 	    	if (f) f(input)
 		}
 		this.temp.addEventListener("input", e => slidef(e,temp,tempout,this.listener))
 		this.vapor.addEventListener("input", e => slidef(e,vapor,vaporout,this.listener))
 	}
 	
-	getTemp() { return parseFloat(temp.value) }
+	getTemp() { return temp.valueAsNumber }
 
-	getVapor() { return parseFloat(vapor.value) }
+	getVapor() { return vapor.valueAsNumber }
 
 	setTemp(value) {
-		this.temp.value = value.toString()
-		this.tempout.value = value.toString()
+		this.temp.value = value
+		this.tempout.value = value.toFixed(1)
 	}
 	
 	setVapor(value) {
-		this.vapor.value = value.toString()
-		this.vaporout.value = value.toString()
+		this.vapor.value = value
+		this.vaporout.value = value.toFixed(1)
 	}
 	
 	addListener(listener) { this.listener = listener }
@@ -132,9 +132,9 @@ class ETGraph extends Graph {
 		stage.addChild(this.marker)
 		this.settings.addListener(slider => {
             if (slider.id == "temp")
-                this.temp = slider.value
+                this.temp = slider.valueAsNumber
             else if (slider.id == "vapor")
-                this.vapor = slider.value
+                this.vapor = slider.valueAsNumber
             this.moveMarker(true)
 		})
 	}
@@ -173,11 +173,11 @@ class ETGraph extends Graph {
 		
     moveMarker(updateSettings) {
         let sat = saturation(this.temp)
-        if (this.vapor >= sat) {
+        if (this.vapor > sat) {
         	this.vapor = sat
         	if (updateSettings === true) {
         		this.settings.setTemp(this.temp)
-        		this.settings.setVapor(Math.round(sat))
+        		this.settings.setVapor(sat)
         	}
         }
         let x = this.xaxis.getLoc(this.temp)
@@ -234,7 +234,7 @@ class Mtn {
 		this.thunder = null
 		this.mtn = new createjs.Bitmap("assets/mountain.png")
 		this.leaf = new createjs.Bitmap("assets/leaf.gif")
-		this.cloud = new createjs.Bitmap("assets/cloud.png")
+		this.cloud = new createjs.Bitmap("assets/cloud.gif")
 		this.leaftween = null
 		this.mtn.x = 0
 		this.mtn.y = 0
@@ -255,8 +255,8 @@ class Mtn {
 		this.cloud.x = -1000
 		this.cloud.y = 0
 		this.lastalt = 0
-		this.cloud.scaleX = 0.1
-		this.cloud.scaleY = 0.1
+		this.cloud.scaleX = 1.0
+		this.cloud.scaleY = 1.0
 	}
 	
 	clear() {
@@ -294,7 +294,6 @@ class Mtn {
 	}
 	
 	playSound(sound) {
-		return
 		if (!this.settings.mute.checked) {
 			switch(sound) {
 			case "wind":
@@ -308,16 +307,17 @@ class Mtn {
 	}
 	
 	update(trial) {
-		let oldA = this.trial.altitude, oldT = this.trial.temp
-		this.trial.altitude = (165 - this.leaf.y)/165 * 5
-		if (this.trial.altitude < 0) this.trial.altitude = 0
-		this.trial.temp = Number(oldT - this.factor * (this.trial.altitude - oldA))
-		this.trial.humidity = humidity(this.trial.temp,this.trial.vapor)
-		this.trial.dewpoint = dewpoint(this.trial.temp,this.trial.vapor)
-		if (trial.humidity >= 100) {
+		let oldA = trial.altitude, oldT = trial.temp
+		trial.altitude = (165 - this.leaf.y)/165 * 5
+		if (trial.altitude < 0) trial.altitude = 0
+		trial.temp = Number(oldT - this.factor * (trial.altitude - oldA))
+		trial.humidity = humidity(trial.temp,trial.vapor)
+		trial.dewpoint = dewpoint(trial.temp,trial.vapor)
+		let sat = saturation(trial.temp)
+		if (trial.vapor > sat) {
 			this.animateClouds()
-			this.trial.vapor = saturation(this.trial.temp)
-			this.trial.humidity = 100
+			trial.vapor = sat
+			trial.humidity = 100
 			this.factor = 6.0
 		}
 		if (trial.temp > oldT) this.factor = 10.0;
@@ -326,16 +326,15 @@ class Mtn {
 	animateClouds() {
 		if (this.trial.cloudbase == 0) {
 			this.trial.cloudbase = this.trial.altitude
-			if (this.trial.temp == 0) this.playSound("thunder")
+			if (this.trial.temp <= 0 || this.trial.altitude < 1) this.playSound("thunder")
 			this.cloud.x = this.leaf.x - 2
 			this.cloud.y = this.leaf.y
 			this.lasty = this.leaf.y
 		}
 		if ((this.trial.altitude - this.lastalt) > .1) {
 			this.lastalt = this.trial.altitude
-			this.cloud.scaleX += .02
-			this.cloud.scaleY += .04
-			this.cloud.x -= 2
+			this.cloud.scaleX += .05
+			this.cloud.scaleY += .1
 			this.cloud.y = this.leaf.y
 		}
 	}
@@ -345,7 +344,7 @@ class Mtn {
 	}
 	
 	tick(etgraph, atgraph) {
-		if (this.running == true) {
+		if (this.running === true) {
 			this.update(this.trial)
 			etgraph.update(this.trial)
 			atgraph.update(this.trial)
@@ -394,8 +393,8 @@ class MtnSim {
 		
 	reset() {
 		this.enablePlay(true)
-		this.settings.setTemp(25)
-		this.settings.setVapor(7)
+		this.settings.setTemp(20.0)
+		this.settings.setVapor(7.0)
 		this.etgraph.showLeaf(true)
 	}
 	
@@ -420,4 +419,4 @@ class MtnSim {
 	}
 }
 
-new MtnSim().render()
+(new MtnSim()).render()

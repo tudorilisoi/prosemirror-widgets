@@ -56,7 +56,7 @@ label {
 }
 
 #tempout, #vaporout, #windout {
-	width: 2em;
+	width: 3em;
 	text-align: right;
 	border: 1px solid #AAA;
 	border-radius: 4px;

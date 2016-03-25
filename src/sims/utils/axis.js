@@ -49,8 +49,6 @@ export class Axis {
             for (let val = this.min; val <= this.max; val += this.major) {
                 let v = this.getLoc(val)
                 this.drawLine(this.originX-3,v,this.originX+3,v)                
-                let temp = Math.round(val * 10)
-                let s = new String(Math.round(temp/10))
                 let text = this.getText(val)
                 let bnds = text.getBounds()
                 this.drawText(text,this.originX-3-bnds.height,v+bnds.height/2)
@@ -62,8 +60,6 @@ export class Axis {
             for (let val = this.min; val <= this.max; val += this.major)  {
                 let v = this.getLoc(val)
                 this.drawLine(v,this.originY-3,v,this.originY+3)              
-                let temp = Math.round(val * 10)
-                let s = new String(temp/10)
                 let text = this.getText(val)
                 let bnds = text.getBounds()
                 this.drawText(text,v-bnds.width/2,this.originY+4)
