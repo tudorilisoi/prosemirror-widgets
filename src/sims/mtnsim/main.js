@@ -66,8 +66,10 @@ class Settings {
 	    	out.value = input.valueAsNumber
 	    	if (f) f(input)
 		}
-		this.temp.addEventListener("input", e => slidef(e,temp,tempout,this.listener))
-		this.vapor.addEventListener("input", e => slidef(e,vapor,vaporout,this.listener))
+		// IE doesn't have an input event but a change event
+		let event = /msie|trident/g.test(window.navigator.userAgent.toLowerCase())?"change":"input"
+		this.temp.addEventListener(event, e => slidef(e,temp,tempout,this.listener))
+		this.vapor.addEventListener(event, e => slidef(e,vapor,vaporout,this.listener))
 	}
 	
 	getTemp() { return temp.valueAsNumber }
@@ -234,7 +236,7 @@ class Mtn {
 		this.thunder = null
 		this.mtn = new createjs.Bitmap("assets/mountain.png")
 		this.leaf = new createjs.Bitmap("assets/leaf.gif")
-		this.cloud = new createjs.Bitmap("assets/cloud.gif")
+		this.cloud = new createjs.Bitmap("assets/thundercloud.png")
 		this.leaftween = null
 		this.mtn.x = 0
 		this.mtn.y = 0
@@ -255,8 +257,8 @@ class Mtn {
 		this.cloud.x = -1000
 		this.cloud.y = 0
 		this.lastalt = 0
-		this.cloud.scaleX = 1.0
-		this.cloud.scaleY = 1.0
+		this.cloud.scaleX = 0.1
+		this.cloud.scaleY = 0.05
 	}
 	
 	clear() {
@@ -333,8 +335,8 @@ class Mtn {
 		}
 		if ((this.trial.altitude - this.lastalt) > .1) {
 			this.lastalt = this.trial.altitude
-			this.cloud.scaleX += .05
-			this.cloud.scaleY += .1
+			this.cloud.scaleX += .021
+			this.cloud.scaleY += .02
 			this.cloud.y = this.leaf.y
 		}
 	}
