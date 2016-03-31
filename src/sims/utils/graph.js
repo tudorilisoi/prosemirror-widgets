@@ -9,7 +9,8 @@ export class Graph {
 			orient: "horizontal",
 			scale: spec.xscale,
 			major: spec.majorX,
-			minor: spec.minorX
+			minor: spec.minorX,
+			precision: spec.precisionX
 		})
 		this.yaxis = new Axis({
 			stage: this.stage,
@@ -18,7 +19,8 @@ export class Graph {
 			orient: "vertical",
 			scale: spec.yscale,
 			major: spec.majorY,
-			minor: spec.minorY
+			minor: spec.minorY,
+			precision: spec.precisionY
 		})
 		this.last = null
 		this.point = false

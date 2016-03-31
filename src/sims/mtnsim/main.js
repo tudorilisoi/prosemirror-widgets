@@ -8,7 +8,7 @@ function saturation(temp) { return 10.0 * 0.611 * Math.exp(17.27*temp/(temp+237.
 function humidity(temp, vapor) { return 100.0 * vapor/saturation(temp)}
 function dewpoint(temp,vapor) { return temp - ((100.0-humidity(temp,vapor))/5.0) }
 
-
+ 
 class Trial {
 	constructor() {
 		this.start = null
@@ -72,9 +72,9 @@ class Settings {
 		this.vapor.addEventListener(event, e => slidef(e,vapor,vaporout,this.listener))
 	}
 	
-	getTemp() { return temp.valueAsNumber }
+	getTemp() { return this.temp.valueAsNumber }
 
-	getVapor() { return vapor.valueAsNumber }
+	getVapor() { return this.vapor.valueAsNumber }
 
 	setTemp(value) {
 		this.temp.value = value
@@ -227,9 +227,10 @@ class ATGraph extends Graph {
 }
 
 class Mtn {
-	constructor(stage, settings) {
+	constructor(stage, settings, finish) {
 		this.stage = stage
 		this.settings = settings
+		this.finish = finish
 		createjs.Sound.registerSound({id: "thunder", src:"assets/thunder.mp3"})
 		createjs.Sound.registerSound({id: "wind", src:"assets/wind.mp3"})
 		this.wind = null
@@ -237,12 +238,18 @@ class Mtn {
 		this.mtn = new createjs.Bitmap("assets/mountain.png")
 		this.leaf = new createjs.Bitmap("assets/leaf.gif")
 		this.cloud = new createjs.Bitmap("assets/thundercloud.png")
+		this.bolt = new createjs.Bitmap("assets/lightning.png")
 		this.leaftween = null
 		this.mtn.x = 0
 		this.mtn.y = 0
 		this.mtn.scaleX = 0.5
 		this.mtn.scaleY = 0.5
+		this.bolt.x = -100
+		this.bolt.scaleX = 0.015
+		this.bolt.scaleY = 0.015
 		this.running = false
+		this.lightning = false
+		this.lighttick = 0
 		this.path = [50,164, 74,152, 90,131, 112,122, 137,92, 151,64, 173,56, 204,70, 221,92, 224,105, 246,121, 268,141, 290,164]
 		this.results = document.getElementById("results_table")
 		this.trial = new Trial()
@@ -252,6 +259,7 @@ class Mtn {
 		this.stage.addChild(this.mtn)
 		this.stage.addChild(this.leaf)
 		this.stage.addChild(this.cloud)
+		this.stage.addChild(this.bolt)
 		this.leaf.x = 50
 		this.leaf.y = 165
 		this.cloud.x = -1000
@@ -277,11 +285,12 @@ class Mtn {
 		})
 		this.factor = 10.0
 		this.lastalt = 0
-		this.leaftween = createjs.Tween.get(this.leaf).to({guide:{path:this.path}},10000)
+		this.leaftween = createjs.Tween.get(this.leaf).to({guide:{path:this.path}},8000)
 		this.leaftween.call(() => {
 			if (this.wind) this.wind.stop()
 			this.running = false
 			this.results.appendChild(this.trial.getRow())
+			if (this.finish) this.finish()
 		})
 		this.running = true
 		this.leaftween.play()
@@ -307,7 +316,7 @@ class Mtn {
 			}
 		}
 	}
-	
+ 	
 	update(trial) {
 		let oldA = trial.altitude, oldT = trial.temp
 		trial.altitude = (165 - this.leaf.y)/165 * 5
@@ -328,7 +337,11 @@ class Mtn {
 	animateClouds() {
 		if (this.trial.cloudbase == 0) {
 			this.trial.cloudbase = this.trial.altitude
-			if (this.trial.temp <= 0 || this.trial.altitude < 1) this.playSound("thunder")
+			if (this.trial.temp <= 0 || this.trial.altitude < 1) {
+				this.playSound("thunder")
+				this.lighttick = 0
+				this.lightning = true
+			}
 			this.cloud.x = this.leaf.x - 2
 			this.cloud.y = this.leaf.y
 			this.lasty = this.leaf.y
@@ -350,6 +363,18 @@ class Mtn {
 			this.update(this.trial)
 			etgraph.update(this.trial)
 			atgraph.update(this.trial)
+			if (this.lightning === true) {
+				if (this.lighttick == 20) {
+					this.bolt.x = this.leaf.x-30
+					this.bolt.y = this.leaf.y+40
+				} else if (this.lighttick == 25) {
+					this.bolt.x = this.bolt.x + 20
+				} else if (this.lighttick == 35) {
+					this.bolt.x = -100
+					this.lightning = false
+				}
+				this.lighttick++
+			}
 		}
 	}
 }
@@ -363,9 +388,11 @@ class MtnSim {
 		this.settings = new Settings()
 		this.etgraph = new ETGraph(this.etstage,this.settings)
 		this.atgraph = new ATGraph(this.atstage)
-		this.mtn = new Mtn(this.mainstage, this.settings)
+		this.mtn = new Mtn(this.mainstage, this.settings, () => {
+			this.buttons.restart.disabled = false
+			this.buttons.pause.disabled = true
+		})
 		this.pause = false
-		this.buttons.mute.checked = false
 		this.buttons.addListener(e => {
 			switch(e.target.id) {
 			case "run":
@@ -403,12 +430,14 @@ class MtnSim {
 	enablePlay(play) {
 		this.buttons.run.disabled = !play
 		this.buttons.pause.disabled = play
+		this.buttons.restart.disabled = !play
 	}
 	
 	render() {
-		this.buttons.pause.disabled = true
 		this.buttons.run.disabled = false
-		this.reset()
+		this.buttons.mute.checked = false
+		this.buttons.pause.disabled = true
+		this.buttons.restart.disabled = true
 		this.etgraph.render()
 		this.atgraph.render()
 		this.mtn.render()

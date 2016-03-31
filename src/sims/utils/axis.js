@@ -1,4 +1,4 @@
-const margin = 30
+const marginX = 40, marginY = 30
 
 export class Axis {
 	constructor(spec) {
@@ -12,11 +12,12 @@ export class Axis {
 		this.label = spec.label || "label"
 		this.major = spec.major || 10
 		this.minor = spec.minor || 5
+		this.precision = spec.precision || 0
 		this.vertical = spec.orient && spec.orient == "vertical" || false
 		this.linear = spec.scale && spec.scale == "linear" || false 
-		this.scale = this.vertical ? (this.h-margin-10)/(this.max - this.min): (this.w-margin-10)/(this.max - this.min)
-		this.originX = margin
-		this.originY = this.h-margin
+		this.originX = marginX
+		this.originY = this.h-marginY
+		this.scale = this.vertical ? this.originY/(this.max - this.min): (this.w-this.originX)/(this.max - this.min)
 	}
 
 	drawLine(x1,y1,x2,y2) {
@@ -32,7 +33,7 @@ export class Axis {
 	drawText(text,x,y) {
 		text.x = x
 		text.y = y
-		if (this.vertical) text.rotation = 270
+		if (this.vertical && text.text == this.label) text.rotation = 270
 		this.stage.addChild(text)
 		return text
 	}
@@ -43,15 +44,15 @@ export class Axis {
     	let label = this.getText(this.label)
     	let label_bnds = label.getBounds()
         if (this.vertical) {
-            this.drawLine(this.originX,this.originY,margin,0)            
+            this.drawLine(this.originX,this.originY,this.originX,0)            
             let y = this.originY - (this.originY - label_bnds.width)/2
             this.drawText(label, 4, y)
             for (let val = this.min; val <= this.max; val += this.major) {
                 let v = this.getLoc(val)
                 this.drawLine(this.originX-3,v,this.originX+3,v)                
-                let text = this.getText(val)
+                let text = this.getText(val.toFixed(this.precision))
                 let bnds = text.getBounds()
-                this.drawText(text,this.originX-3-bnds.height,v+bnds.height/2)
+                this.drawText(text,this.originX-5-bnds.width,v+bnds.height/2-10)
             }
         } else {
             this.drawLine(this.originX,this.originY, this.w,this.originY)            
@@ -60,7 +61,7 @@ export class Axis {
             for (let val = this.min; val <= this.max; val += this.major)  {
                 let v = this.getLoc(val)
                 this.drawLine(v,this.originY-3,v,this.originY+3)              
-                let text = this.getText(val)
+                let text = this.getText(val.toFixed(this.precision))
                 let bnds = text.getBounds()
                 this.drawText(text,v-bnds.width/2,this.originY+4)
             }
