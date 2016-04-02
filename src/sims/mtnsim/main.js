@@ -1,5 +1,5 @@
 import {Graph} from "../utils"
-
+ 
 createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
 createjs.Ticker.frameRate = 60

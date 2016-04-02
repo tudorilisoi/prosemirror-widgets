@@ -23,21 +23,22 @@ export class Graph {
 			precision: spec.precisionY
 		})
 		this.last = null
-		this.point = false
-		this.color = "#000"
-		this.marker = new createjs.Shape()
-    	this.marker.graphics.beginFill(this.color).drawRect(0,0,2,2)
-    	this.stage.addChild(this.marker)
-
+		this.marker = null
+		this.color = "#000000"
+		this.dotted = false
 	}
 	
-	setMode(mode) {
-		this.point = mode
-        this.last = null
+	setDotted(dotted) {
+		this.dotted = dotted
 	}
 	
 	setColor(color) {
 		this.color = color
+		this.endPlot()
+		this.marker = new createjs.Shape()
+    	this.marker.graphics.beginStroke(color).beginFill(color).drawRect(0,0,4,4)
+    	this.marker.x = -10
+    	this.stage.addChild(this.marker)
 	}
 
     render() {
@@ -47,21 +48,23 @@ export class Graph {
 
     clear() {
     	this.stage.removeAllChildren()
-    	this.last = null
+    	this.endPlot()
     }
 
     moveMarker(x,y) {
-    	this.marker.x = x-2
-    	this.marker.y = y-2
+    	if (this.marker) {
+    		this.marker.x = x-2
+    		this.marker.y = y-2
+
+    	}
     }
 
 	drawLine(x1,y1,x2,y2) {
 		let line = new createjs.Shape()
-		line.graphics.setStrokeStyle(1)
-		line.graphics.beginStroke(this.color)
-		line.graphics.moveTo(x1, y1)
-		line.graphics.lineTo(x2, y2)
-		line.graphics.endStroke()
+		if (this.dotted === true)
+			line.graphics.setStrokeDash([1,4]).setStrokeStyle(1).beginStroke(this.color).moveTo(x1, y1).lineTo(x2, y2).endStroke()
+		else
+			line.graphics.setStrokeStyle(1).beginStroke(this.color).moveTo(x1, y1).lineTo(x2, y2).endStroke()
 		this.stage.addChild(line)
 	}
 	
@@ -69,14 +72,9 @@ export class Graph {
         if (xv >= this.xaxis.min && xv <= this.xaxis.max && yv >= this.yaxis.min && yv <= this.yaxis.max) {                
             let x = this.xaxis.getLoc(xv)
             let y = this.yaxis.getLoc(yv)
-            if (!this.last)  {
-                this.drawLine(x,y,x,y)
-            } else {
+            if (this.last)  {
                 this.moveMarker(this.last.x,this.last.y)
-                if (this.point) 
-                	this.drawLine(x,y,x,y) 
-                else 
-                	this.drawLine(this.last.x,this.last.y,x,y)
+                this.drawLine(this.last.x,this.last.y,x,y)
             }
             this.last = new createjs.Point(x,y)
             this.moveMarker(x,y)
