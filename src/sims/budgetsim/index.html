@@ -2,10 +2,10 @@
 
 <meta charset="utf-8"/>
 <title>Budget Simulation</title>
-<link rel=stylesheet href="mtnsim.css">
+<link rel=stylesheet href="budgetsim.css">
 <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 
-<div class="mtnsim">
+<div class="budgetsim">
 	<div class="columns">
 		<div class="col">
 			<canvas id="rategraph" width="200" height="200"></canvas>
@@ -26,14 +26,14 @@
 		</div>
 		<div class="slider_panel">
 			<div class="slider_control">
-				<label for="temp">Inflow Rate</label>
+				<label for="infow">Inflow Rate (l/hr)</label>
 				<div class="slider">
 				   <input type="range" id="inflow" min="0" max="5" step="0.1" value="0"/>
 				   <input type="text" id="inflowout" value="0" readonly/>
 				</div>
 			</div>
 			<div class="slider_control">
-				<label for="vapor">Outflow Rate</label>
+				<label for="outflow">Outflow Rate (l/hr)</label>
 				<div class="slider">
 				   <input type="range" id="outflow" min="0" max="5" step="0.1" value="0"/>
 				   <input type="text" id="outflowout" value="0" readonly/>
@@ -43,4 +43,4 @@
 	</div>
 </div>
 
-<script src="budgesim-built.js"></script>
+<script src="budgetsim-built.js"></script>

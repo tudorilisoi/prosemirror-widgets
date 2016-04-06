@@ -1,4 +1,4 @@
-const marginX = 40, marginY = 30
+const marginX = 40, marginY = 30, endMargin = 5
 
 export class Axis {
 	constructor(spec) {
@@ -17,7 +17,7 @@ export class Axis {
 		this.linear = spec.scale && spec.scale == "linear" || false 
 		this.originX = marginX
 		this.originY = this.h-marginY
-		this.scale = this.vertical ? this.originY/(this.max - this.min): (this.w-this.originX)/(this.max - this.min)
+		this.scale = this.vertical ? (this.originY-endMargin)/(this.max - this.min): (this.w-this.originX-endMargin)/(this.max - this.min)
 	}
 
 	drawLine(x1,y1,x2,y2) {
@@ -44,7 +44,7 @@ export class Axis {
     	let label = this.getText(this.label)
     	let label_bnds = label.getBounds()
         if (this.vertical) {
-            this.drawLine(this.originX,this.originY,this.originX,0)            
+            this.drawLine(this.originX,this.originY,this.originX,endMargin)            
             let y = this.originY - (this.originY - label_bnds.width)/2
             this.drawText(label, 4, y)
             for (let val = this.min; val <= this.max; val += this.major) {
@@ -55,8 +55,8 @@ export class Axis {
                 this.drawText(text,this.originX-5-bnds.width,v+bnds.height/2-10)
             }
         } else {
-            this.drawLine(this.originX,this.originY, this.w,this.originY)            
-            let x = (this.w - label_bnds.width)/2
+            this.drawLine(this.originX,this.originY, this.w-endMargin,this.originY)            
+            let x = (this.w - endMargin - label_bnds.width)/2
             this.drawText(label, this.originX + x, this.originY + 15)
             for (let val = this.min; val <= this.max; val += this.major)  {
                 let v = this.getLoc(val)
