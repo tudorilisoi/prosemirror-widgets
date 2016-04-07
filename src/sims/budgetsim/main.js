@@ -4,7 +4,14 @@ createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
 
 const water_color = "#EBF4FA", pipe_color ="#AAA", line_color = "#111"
-	
+let searchParams = new URLSearchParams(window.location.search.substring(1))
+let startin = searchParams.get('startin') || 6
+let endin = searchParams.get('endin') || 18
+let startout = searchParams.get('startout') || 0
+let endout = searchParams.get('endout') || 24
+let startlevel = searchParams.get('startlevel') || 50
+let startoutlevel = searchParams.get('startoutlevel') || 2
+
 class Settings {
 	constructor() {
 		this.inflow = document.getElementById("inflow")
@@ -15,8 +22,10 @@ class Settings {
 		this.listener = null
 		function slidef(e,input, out, f) {
 	    	e.stopPropagation()
-	    	out.value = input.valueAsNumber
-	    	if (f) f(input)
+	    	if (f) 
+	    		f(input,out)
+	    	else
+		    	out.value = input.valueAsNumber
 		}
 		// IE doesn't have an input event but a change event
 		let event = /msie|trident/g.test(window.navigator.userAgent.toLowerCase())?"change":"input"
@@ -46,13 +55,11 @@ class Settings {
 class Buttons {
 	constructor() {
 		this.run = document.getElementById("run")
-		this.pause = document.getElementById("pause")
 		this.restart = document.getElementById("restart")
 	}
 	
 	addListener(listener) { 
 		this.run.addEventListener("click", e => listener(e))
-		this.pause.addEventListener("click", e => listener(e))
 		this.restart.addEventListener("click", e => listener(e))
 	}
 }
@@ -72,13 +79,14 @@ class RateGraph extends Graph {
 			minY: 0,
 			maxY: 6,
 			majorX: 4,
-			minorX: 2,
+			minorX: 1,
 			majorY: 1,
 			minorY: .5
 		})
 		this.stage = stage
 		this.lastInflow = null
 		this.lastOutflow = null
+		this.setColor("#000")
 	}
 	
 	render() {
@@ -137,9 +145,9 @@ class LevelGraph extends Graph {
 			minY: 0,
 			maxY: 100,
 			majorX: 4,
-			minorX: 2,
+			minorX: 1,
 			majorY: 10,
-			minorY: 10
+			minorY: 5
 		})
 		this.time = 0
 		this.level = 0
@@ -159,6 +167,7 @@ class Tank {
 		this.finish = finish
 		this.level = 0
 		this.time = 0
+		this.running = false
 		createjs.Sound.registerSound({id: "stream", src:"assets/stream.mp3"})
 		createjs.Sound.on("fileload", e => {
 			this.streamSound = createjs.Sound.play("stream",{loop: -1})
@@ -197,7 +206,7 @@ class Tank {
 		
 		
 		this.surface = new createjs.Shape()
-		this.surface.graphics.beginStroke(water_color).beginFill(water_color).drawEllipse(91,170,118,20).endStroke()
+		this.surface.graphics.beginStroke(pipe_color).beginFill(water_color).drawEllipse(91,170,118,20).endStroke()
 		this.water = new createjs.Shape()
 		this.water.graphics.beginStroke(water_color).beginFill(water_color).drawRect(91,180,118,0).endStroke()
 		
@@ -214,10 +223,20 @@ class Tank {
 		this.stage.addChild(inflowText)
 		this.stage.addChild(outpipe)
 		this.stage.addChild(outflowText)
-		this.stage.addChild(this.stream)
-		this.stage.addChild(this.surface)
 		this.stage.addChild(this.water)
-
+		this.stage.addChild(this.surface)
+		this.stage.addChild(this.stream)
+		this.init()
+	}
+	
+	init() {
+		this.time = 0
+		this.level = startlevel
+		this.showLevel(this.level)
+		this.settings.setOutflow(startoutlevel)
+		this.settings.setInflow(0)
+		this.settings.inflow.disabled = true
+		this.settings.outflow.disabled = true
 	}
 	
 	drawArrow(radian, x, y) {
@@ -234,37 +253,27 @@ class Tank {
 		this.stop()
 		this.stage.removeAllChildren()
 		this.render()
-		this.time = 0
-		this.level = 0
+		this.init()
 	}
 	
 	run() {
 		this.running = true
+		this.settings.inflow.disabled = true
+		this.stream.visible = this.settings.getInflow() > 0
 	}
 	
 	stop() {
 		this.running = false;
 		this.streamSound.paused = true
+		this.stream.visible = false
 		if (this.finish) this.finish()
 	}
 	
 	showStream() {
-		if (this.settings.getInflow() > 0) {
-			this.stream.visible = true
-			this.streamSound.paused = this.settings.getMute()
-		} else {
-			this.stream.visible = false
-			this.streamSound.paused = true
-		}
-	}
-	
-	pause(pause) { 
-		this.running = !pause
-		this.stream.visible = this.running
-		if (pause === true) this.streamSound.paused = true
 	}
 	
 	update() {
+		this.streamSound.paused = this.settings.getMute()
 		let inflow = this.settings.getInflow()
 		let outflow = this.settings.getOutflow()
 		this.level += inflow - outflow
@@ -273,11 +282,16 @@ class Tank {
 			this.stop()
 			return
 		}
-		let y = 170 - 1.7 * this.level
-		this.surface.graphics.clear().beginStroke(water_color).beginFill(water_color).drawEllipse(91,y,118,20).endStroke()
-		this.water.graphics.clear().beginStroke(water_color).beginFill(water_color).drawRect(91,y+10,118,170-y).endStroke()
+		this.showLevel(this.level)
 		this.showStream()
 		this.time++
+	}
+	
+	showLevel(level) {
+		let y = 170 - 1.7 * level
+		this.surface.graphics.clear().beginStroke(pipe_color).beginFill(water_color).drawEllipse(91,y,118,20).endStroke()
+		this.water.graphics.clear().beginStroke(water_color).beginFill(water_color).drawRect(91,y+10,118,170-y).endStroke()
+		this.stream.graphics.clear().beginStroke(water_color).setStrokeStyle(5).moveTo(91,32).bezierCurveTo(105,30,120,40,120,y+10).endStroke()
 	}
 	
 	tick(rategraph, levelgraph) {
@@ -289,6 +303,10 @@ class Tank {
 		this.update()
 		rategraph.update(this.time,this.settings.getInflow(),this.settings.getOutflow())
 		levelgraph.update(this.time,this.level)
+		if (this.time >= startin && this.time <= endin) {
+			this.running = false
+			this.settings.inflow.disabled = false
+		}
 	}
 }
 
@@ -303,23 +321,11 @@ class BudgetSim {
 		this.levelgraph = new LevelGraph(this.levelstage)
 		this.tank = new Tank(this.mainstage, this.settings, () => {
 			this.buttons.restart.disabled = false
-			this.buttons.pause.disabled = true
 		})
-		this.pause = false
-		this.settings.setInflow(0)
-		this.settings.setOutflow(0)
 		this.buttons.addListener(e => {
 			switch(e.target.id) {
 			case "run":
-				this.enablePlay(false)
-				this.buttons.pause.value = "Pause"
-				this.pause = false
 				this.tank.run()
-				break
-			case "pause":
-				this.pause = !this.pause
-				this.tank.pause(this.pause)
-				e.target.value = this.pause? "Resume":"Pause"
 				break
 			case "restart":
 				this.reset()
@@ -331,26 +337,19 @@ class BudgetSim {
 				break
 			}
 		})
-	}
-		
+	}		
 	reset() {
-		this.enablePlay(true)
-	}
-	
-	enablePlay(play) {
-		this.buttons.run.disabled = !play
-		this.buttons.pause.disabled = play
+		this.buttons.run.disabled = false
 	}
 	
 	render() {
 		this.settings.mute.checked = false
 		this.buttons.run.disabled = false
-		this.buttons.pause.disabled = true
 		this.buttons.restart.disabled = false
 		this.rategraph.render()
 		this.levelgraph.render()
 		this.tank.render()
-		createjs.Ticker.framerate = 2
+		createjs.Ticker.framerate = 1
 		createjs.Ticker.addEventListener("tick", e => {
 			this.tank.tick(this.rategraph, this.levelgraph)
 			this.ratestage.update()

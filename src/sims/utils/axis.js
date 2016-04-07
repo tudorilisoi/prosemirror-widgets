@@ -49,10 +49,14 @@ export class Axis {
             this.drawText(label, 4, y)
             for (let val = this.min; val <= this.max; val += this.major) {
                 let v = this.getLoc(val)
-                this.drawLine(this.originX-3,v,this.originX+3,v)                
+                this.drawLine(this.originX-4,v,this.originX+4,v)                
                 let text = this.getText(val.toFixed(this.precision))
                 let bnds = text.getBounds()
                 this.drawText(text,this.originX-5-bnds.width,v+bnds.height/2-10)
+            }
+            for (let val = this.min; val <= this.max; val += this.minor) {
+                let v = this.getLoc(val)
+                this.drawLine(this.originX-2,v,this.originX+2,v)                
             }
         } else {
             this.drawLine(this.originX,this.originY, this.w-endMargin,this.originY)            
@@ -60,10 +64,14 @@ export class Axis {
             this.drawText(label, this.originX + x, this.originY + 15)
             for (let val = this.min; val <= this.max; val += this.major)  {
                 let v = this.getLoc(val)
-                this.drawLine(v,this.originY-3,v,this.originY+3)              
+                this.drawLine(v,this.originY-4,v,this.originY+4)              
                 let text = this.getText(val.toFixed(this.precision))
                 let bnds = text.getBounds()
                 this.drawText(text,v-bnds.width/2,this.originY+4)
+            }
+            for (let val = this.min; val <= this.max; val += this.minor) {
+                let v = this.getLoc(val)
+                this.drawLine(v,this.originY-2,v,this.originY+2)              
             }
         }
     }
