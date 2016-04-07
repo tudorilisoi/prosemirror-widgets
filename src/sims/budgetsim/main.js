@@ -4,14 +4,22 @@ createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
 
 const water_color = "#EBF4FA", pipe_color ="#AAA", line_color = "#111"
-let searchParams = new URLSearchParams(window.location.search.substring(1))
+/*let searchParams = new URLSearchParams(window.location.search.substring(1))
 let startin = searchParams.get('startin') || 6
 let endin = searchParams.get('endin') || 18
 let startout = searchParams.get('startout') || 0
 let endout = searchParams.get('endout') || 24
 let startlevel = searchParams.get('startlevel') || 50
 let startoutlevel = searchParams.get('startoutlevel') || 2
+*/
+let startin = 6
+let endin = 18
+let startout = 0
+let endout = 24
+let startlevel = 50
+let startoutlevel = 2
 
+	
 class Settings {
 	constructor() {
 		this.inflow = document.getElementById("inflow")
@@ -259,7 +267,6 @@ class Tank {
 	run() {
 		this.running = true
 		this.settings.inflow.disabled = true
-		this.stream.visible = this.settings.getInflow() > 0
 	}
 	
 	stop() {
@@ -269,11 +276,9 @@ class Tank {
 		if (this.finish) this.finish()
 	}
 	
-	showStream() {
-	}
-	
 	update() {
 		this.streamSound.paused = this.settings.getMute()
+		this.stream.visible = this.settings.getInflow() > 0
 		let inflow = this.settings.getInflow()
 		let outflow = this.settings.getOutflow()
 		this.level += inflow - outflow
@@ -283,7 +288,6 @@ class Tank {
 			return
 		}
 		this.showLevel(this.level)
-		this.showStream()
 		this.time++
 	}
 	
@@ -306,6 +310,9 @@ class Tank {
 		if (this.time >= startin && this.time <= endin) {
 			this.running = false
 			this.settings.inflow.disabled = false
+		} if (this.time > 18) {
+			this.settings.setInflow(0)
+			this.settings.inflow.disabled = true
 		}
 	}
 }
