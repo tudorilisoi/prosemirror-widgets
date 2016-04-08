@@ -122,22 +122,20 @@ class RateGraph extends Graph {
 	
 	shading() {
 		let x6 = this.xaxis.getLoc(6)
-        let x14 = this.xaxis.getLoc(14)
+        let x12 = this.xaxis.getLoc(12)
 		let x18 = this.xaxis.getLoc(18)
         let xorg = this.xaxis.getLoc(0)
         let yorg = this.yaxis.getLoc(0)
         this.setColor(pipe_color)
         this.setDotted(null)
-		this.drawLine(x14,0,x14,yorg)
+		this.drawLine(x12,0,x12,yorg)
 		let pm = new createjs.Shape()
 		pm.graphics.beginStroke("#EEE").moveTo(xorg,0).lineTo(x6-xorg,yorg).endStroke()
 		pm.alpha = 0.2
 		let morning = new createjs.Shape()
-		morning.graphics.beginFill("#EEE").rect(xorg,0,x6-xorg,yorg).endStroke()
-		morning.alpha = 0.2
+		morning.graphics.beginFill(water_color).rect(xorg,0,x6-xorg,yorg).endStroke()
 		let night = new createjs.Shape()
-		night.graphics.beginFill("#EEE").rect(x18,0,300-x18,yorg).endStroke()
-		night.alpha = 0.2
+		night.graphics.beginFill(water_color).rect(x18,0,300-x18,yorg).endStroke()
 		this.stage.addChild(pm)
 		this.stage.addChild(morning)
 		this.stage.addChild(night)		
@@ -192,25 +190,28 @@ class LevelGraph extends Graph {
 	
 	shading() {
 		let x6 = this.xaxis.getLoc(6)
-        let x14 = this.xaxis.getLoc(14)
+        let x12 = this.xaxis.getLoc(12)
 		let x18 = this.xaxis.getLoc(18)
         let xorg = this.xaxis.getLoc(0)
         let yorg = this.yaxis.getLoc(0)
         this.setColor(pipe_color)
         this.setDotted(null)
-		this.drawLine(x14,0,x14,yorg)
+		this.drawLine(x12,0,x12,yorg)
 		let pm = new createjs.Shape()
 		pm.graphics.beginStroke("#EEE").moveTo(xorg,0).lineTo(x6-xorg,yorg).endStroke()
 		pm.alpha = 0.2
 		let morning = new createjs.Shape()
-		morning.graphics.beginFill("#EEE").rect(xorg,0,x6-xorg,yorg).endStroke()
-		morning.alpha = 0.2
+		morning.graphics.beginFill(water_color).rect(xorg,0,x6-xorg,yorg).endStroke()
 		let night = new createjs.Shape()
-		night.graphics.beginFill("#EEE").rect(x18,0,300-x18,yorg).endStroke()
-		night.alpha = 0.2
+		night.graphics.beginFill(water_color).rect(x18,0,300-x18,yorg).endStroke()
+		let yt = this.yaxis.getLoc(60)
+		let yb = this.yaxis.getLoc(40)
+		let target = new createjs.Shape()
+		target.graphics.setStrokeStyle(2).beginStroke("#F00").moveTo(198,yt).lineTo(198,yb).endStroke()
 		this.stage.addChild(pm)
 		this.stage.addChild(morning)
-		this.stage.addChild(night)		
+		this.stage.addChild(night)	
+		this.stage.addChild(target)
 	}
 	
 	update(time,level) {
