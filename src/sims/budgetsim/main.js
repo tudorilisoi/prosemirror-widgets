@@ -98,6 +98,7 @@ class RateGraph extends Graph {
 	}
 	
 	render() {
+		this.shading()
 		super.render()
 		this.legend()
 	}
@@ -117,6 +118,29 @@ class RateGraph extends Graph {
 		this.stage.addChild(inflowText)
 		this.stage.addChild(outflowline)
 		this.stage.addChild(outflowText)
+	}
+	
+	shading() {
+		let x6 = this.xaxis.getLoc(6)
+        let x14 = this.xaxis.getLoc(14)
+		let x18 = this.xaxis.getLoc(18)
+        let xorg = this.xaxis.getLoc(0)
+        let yorg = this.yaxis.getLoc(0)
+        this.setColor(pipe_color)
+        this.setDotted(null)
+		this.drawLine(x14,0,x14,yorg)
+		let pm = new createjs.Shape()
+		pm.graphics.beginStroke("#EEE").moveTo(xorg,0).lineTo(x6-xorg,yorg).endStroke()
+		pm.alpha = 0.2
+		let morning = new createjs.Shape()
+		morning.graphics.beginFill("#EEE").rect(xorg,0,x6-xorg,yorg).endStroke()
+		morning.alpha = 0.2
+		let night = new createjs.Shape()
+		night.graphics.beginFill("#EEE").rect(x18,0,300-x18,yorg).endStroke()
+		night.alpha = 0.2
+		this.stage.addChild(pm)
+		this.stage.addChild(morning)
+		this.stage.addChild(night)		
 	}
 	
 	clear() {
@@ -145,7 +169,7 @@ class LevelGraph extends Graph {
 			w: 200,
 			h: 200,
 			xlabel: "Time(hour)",
-			ylabel: "Level(liter)",
+			ylabel: "Level(meter)",
 			xscale: "linear",
 			yscale: "linear",
 			minX: 0,
@@ -159,6 +183,34 @@ class LevelGraph extends Graph {
 		})
 		this.time = 0
 		this.level = 0
+	}
+	
+	render() {
+		super.render()
+		this.shading()
+	}
+	
+	shading() {
+		let x6 = this.xaxis.getLoc(6)
+        let x14 = this.xaxis.getLoc(14)
+		let x18 = this.xaxis.getLoc(18)
+        let xorg = this.xaxis.getLoc(0)
+        let yorg = this.yaxis.getLoc(0)
+        this.setColor(pipe_color)
+        this.setDotted(null)
+		this.drawLine(x14,0,x14,yorg)
+		let pm = new createjs.Shape()
+		pm.graphics.beginStroke("#EEE").moveTo(xorg,0).lineTo(x6-xorg,yorg).endStroke()
+		pm.alpha = 0.2
+		let morning = new createjs.Shape()
+		morning.graphics.beginFill("#EEE").rect(xorg,0,x6-xorg,yorg).endStroke()
+		morning.alpha = 0.2
+		let night = new createjs.Shape()
+		night.graphics.beginFill("#EEE").rect(x18,0,300-x18,yorg).endStroke()
+		night.alpha = 0.2
+		this.stage.addChild(pm)
+		this.stage.addChild(morning)
+		this.stage.addChild(night)		
 	}
 	
 	update(time,level) {
