@@ -1,7 +1,7 @@
-import {Fragment, Block, Paragraph, Attribute, Pos} from "prosemirror/dist/model"
+import {Fragment, Block, Paragraph, Attribute, Pos, NodeKind} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertQuestion} from "../../utils"
-import {Question, qclass, setChildAttrs} from "./question"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {Question, qclass, setChildAttrs, insertQuestion} from "./question"
 
 const cssd = "widgets-scaledisplay"
 const csss = "widgets-scale"
@@ -17,14 +17,15 @@ export class ScaleDisplay extends Block {
 			class: new Attribute({default: cssd})
 		}
 	}
-	get contains() { return null }
+	get canBeEmpty() { return true }
+	get contains() { return NodeKind.text }
 }
 
 ScaleDisplay.prototype.serializeDOM = (node,s) => {
 	let startVal = Number(node.attrs.startvalue)
 	let endVal = Number(node.attrs.endvalue)
 	let mid = String(Math.round((Math.abs(endVal - startVal))/2))
-	let out = elt("output",{for: node.attrs.name},mid)
+	let out = elt("input",{for: node.attrs.name, readonly: "readonly"},mid)
 	let setOutputValue
 	if (startVal < endVal) {
 		setOutputValue = function(val) { out.value = val }
@@ -42,7 +43,6 @@ ScaleDisplay.prototype.serializeDOM = (node,s) => {
 }
 
 export class Scale extends Question {
-	static get contains() { return "text"}
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -76,8 +76,7 @@ Scale.register("command", "insert",{
 		let attrs = {name,title,startvalue,startlabel,endvalue,endlabel}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-			from = new Pos(from.path.concat(from.offset),0)
-			return setChildAttrs(pm,from,"scaledisplay",attrs)
+			return setChildAttrs(pm,pm.doc.resolve(from+1),"scaledisplay",attrs)
 		} else
 			return insertQuestion(pm,from,this.create(attrs))
   	},
@@ -120,10 +119,11 @@ insertCSS(`
 	display: inline;
 }
 
-.${csss} output {
+.${csss} input[readonly] {
 	vertical-align: middle;
 	border-radius: 4px;
 	text-align: right;
+	width: 20px;
 	height: 20px;
 	border: 1px solid #AAA;
 	display: inline;

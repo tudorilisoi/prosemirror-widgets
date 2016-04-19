@@ -6,4 +6,3 @@ export {CheckList, CheckItem} from "./checklist"
 export {Scale, ScaleDisplay} from "./scale"
 export {Selection} from "./selection"
 export {Question} from "./question"
-

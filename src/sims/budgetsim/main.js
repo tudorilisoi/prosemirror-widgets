@@ -1,9 +1,13 @@
 import {Graph} from "../utils"
- 
+//import {Url} from "url"
+//import "prosemirror/node_modules/rangetouch"
+
 createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
 
 const water_color = "#EBF4FA", pipe_color ="#AAA", line_color = "#111"
+//let args = Url.parse(window.location)
+//console.log(args)
 /*let searchParams = new URLSearchParams(window.location.search.substring(1))
 let startin = searchParams.get('startin') || 6
 let endin = searchParams.get('endin') || 18

@@ -2,36 +2,31 @@ import {MenuCommandGroup} from "prosemirror/dist/menu/menu"
 import {Doc, Paragraph, Textblock, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {canWrap} from "prosemirror/dist/transform"
-import {defParser,getPosInParent} from "../../utils"
+import {defParser} from "../../utils"
 
-function getAlignPos(pm,pos) {
-	let node
-	for (;;) {
-		node = pm.doc.path(pos.path)
-		if (node.type instanceof Align || pos.depth == 0) return pos
-	    pos = pos.shorten()
-	}
+function getTextblockDepth(pm,$pos) {
+	for (let i = $pos.depth; i > 0; i--)
+		if ($pos.node(i).type instanceof Textblock) return i
+	return 0	
 }
 
 function findAlignWrapper(pm,align) {
-	let {from, to, node} = pm.selection, isLeft = align.name == "leftalign"
-	let start = getAlignPos(pm,from)
-	let parent = pm.doc.path(start.path)
-	if (parent.type instanceof Align) {
-		if (isLeft)
-			return pm.tr.lift(new Pos(start.path,0), new Pos(start.path,parent.size)).apply(pm.apply.scroll)
-		else
-			return pm.tr.setNodeType(getPosInParent(pm,start.shorten(),parent),align,{class: align.style}).apply(pm.apply.scroll)
+	let {from, to, node} = pm.selection, $from = pm.doc.resolve(from), $to = pm.doc.resolve(to), isLeft = align.name == "leftalign"
+	let depth = getTextblockDepth(pm,$from)
+	if (depth > 0 && $from.node(depth-1).type instanceof Align) {
+		let tr = pm.tr.lift($from.start(depth), $from.end(depth)).apply(pm.apply.scroll)
+		if (!isLeft)
+			tr = pm.tr.wrap($from.start(depth),$from.end(depth),align,{class: align.style}).apply(pm.apply.scroll)
+		return tr
 	} else {
 		if (isLeft) return false  //left is default and doesn't need wrapper
-		let end = from.cmp(to)? getAlignPos(pm,to): start.move(1)
-		return pm.tr.wrap(start,end,align,{class: align.style}).apply(pm.apply.scroll)
+		let $end = from == to? $from: $to
+		return pm.tr.wrap($from.start(depth),$end.end(depth),align,{class: align.style}).apply(pm.apply.scroll)
 	}
 }
 
 class Align extends Block {
 	get attrs() { return {class: new Attribute({default: "widgets-leftalign"})} }
-	get contains() { return "block" }
 }
 
 Align.prototype.serializeDOM = (node,s) => s.renderAs(node,"div", node.attrs)
@@ -48,11 +43,10 @@ defParser(CenterAlign,"div","widgets-centeralign")
 defParser(RightAlign,"div","widgets-rightalign")
 
 function alignApplies(pm,type) {
-	let {from, to, node} = pm.selection, isLeft = type.name == "leftalign"
-	let start = getAlignPos(pm,from)
-	let parent = pm.doc.path(start.path)
-	if (isLeft && !(parent.type instanceof Align)) return true
-	return parent.type.name == type.name
+	let {from, to, node} = pm.selection, $from = pm.doc.resolve(from), isLeft = type.name == "leftalign"
+	let index = getTextblockDepth(pm,$from)
+	if (isLeft && index == 0) return true
+	return $from.parent.type.name == type.name
 }
 
 function defAlign(type,label,path) {

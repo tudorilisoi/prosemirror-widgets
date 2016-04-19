@@ -1,6 +1,7 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {elt,insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, selectedNodeAttr,insertWidget, getID} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr, getID} from "../../utils"
+import {insertWidget} from "./index"
 
 const css = "widgets-graph"
 	

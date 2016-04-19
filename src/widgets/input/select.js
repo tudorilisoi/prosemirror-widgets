@@ -1,4 +1,4 @@
-import {Block, Inline, Attribute} from "prosemirror/dist/model"
+import {Block, Inline, Attribute, NodeKind} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 
@@ -13,7 +13,8 @@ export class Select extends Block {
 		    multiple: new Attribute({default: "single"})
 		}
 	}
-	get contains() { return null}
+	get canBeEmpty() { return true }
+	get contains() { return NodeKind.text}
 }
 
 defParser(Select,"select",css)

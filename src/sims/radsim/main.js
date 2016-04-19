@@ -4,7 +4,7 @@ createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
 createjs.Ticker.frameRate = 30
 
-const points = 17
+const points = 17, balloon_x = 200, balloon_y = 270
 
 const surface_times = ["sand-day","plowed-day","grass-day","snow-day","sand-night","plowed-night","grass-night","snow-night"]
                       
@@ -108,8 +108,8 @@ class ATGraph extends Graph {
 	constructor(stage) {
 		super({
 			stage: stage,
-			w: 200,
-			h: 200,
+			w: 300,
+			h: 300,
 			xlabel: "Temperature(C)",
 			ylabel: "Z(km)",
 			xscale: "linear",
@@ -128,12 +128,17 @@ class ATGraph extends Graph {
 	
 	render() {
 		super.render()
-		this.color = "#EEE"
+		this.color = "#888"
 		this.dotted = false
 		for (let t = -8; t < 14; t += 2) {
             let x = this.xaxis.getLoc(t)
             let y = this.yaxis.getLoc(0)
 			this.drawLine(x,y,x,this.yaxis.getLoc(1.5))
+		}
+		for (let z = 0; z < 1.5; z += 0.1) {
+            let x = this.xaxis.getLoc(-8)
+            let y = this.yaxis.getLoc(z)
+			this.drawLine(x,y,this.xaxis.getLoc(12),y)
 		}
 	}
 }
@@ -160,35 +165,49 @@ class Rad {
 		this.profiles = []
 		              
 		this.balloon = new createjs.Bitmap("assets/balloon.png")
-		this.balloon.x = 150
-		this.balloon.y = 150
+		this.balloon.x = balloon_x
+		this.balloon.y = balloon_y
 		this.balloon.scaleX = 0.15
 		this.balloon.scaleY = 0.15
+		this.height = new createjs.Text("","12px Arial","#FFF")
 		this.data = getData()
-		this.sun = new createjs.Shape().set({x:320,y:20})
+		this.sun = new createjs.Shape().set({x:420,y:20})
 		this.sun.graphics.beginFill("#FFFF00").drawCircle(0,0,10)
-		this.moon = new createjs.Shape().set({x:320,y:20})
+		this.moon = new createjs.Shape().set({x:420,y:20})
 		this.moon.graphics.beginFill("#FFFFFF").drawCircle(0,0,10)
 		this.settings.addListener((s,t) => this.changeSetting(s,t))
 		createjs.Touch.enable(this.stage)
 		this.balloon.addEventListener("pressmove", e => {
-		    e.target.x = 150
-		    e.target.y = e.stageY
+			if (e.stageY < balloon_y) this.showBalloon(e.stageY)
+		})
+		this.balloon.addEventListener("pressup", e => {
+			let i = this.getAltIndex(), alt = this.data.altitude[i]
+			let y = this.atgraph.yaxis.getLoc(alt/1000.00)
+			this.showBalloon(y)
 		})
 		this.changeSetting(this.settings.getSurface(),this.settings.getTime())
 	}
 	
 	render() {
 		this.addChildren()
-		this.balloon.y = 150
+		this.showBalloon(balloon_y)
 	}
 	
+	showBalloon(y) {
+		this.balloon.x = balloon_x
+		this.balloon.y = y
+	    this.height.x = balloon_x + 20
+	    this.height.y = y+10
+	    this.height.text = this.atgraph.yaxis.getValue(y).toFixed(2)
+	}
+		
 	addChildren() {
 		this.images.forEach(img => {
 			this.stage.addChild(img.day)
 			this.stage.addChild(img.night)
 		})
 		this.stage.addChild(this.balloon)
+		this.stage.addChild(this.height)
 		this.stage.addChild(this.sun)
 		this.stage.addChild(this.moon)
 	}
@@ -215,26 +234,30 @@ class Rad {
 		this.showTime()
 		this.atgraph.setColor(this.colors[surface])
 		this.atgraph.setDotted(time == "night")
-		this.balloon.y = 150
+		this.showBalloon(balloon_y)
 		this.profiles.push(surface+"-"+time)
 	}
 	
 	showTime() {
-		let path = [320,20, 300,20, 280,20]
+		let path = [420,20, 400,20, 380,20]
 		if (this.settings.getTime() == "day") {
-			this.moon.x = 320
+			this.moon.x = 420
 			createjs.Tween.get(this.sun).to({guide:{path:path}},500).play()
 		} else {
-			this.sun.x = 320
+			this.sun.x = 420
 			createjs.Tween.get(this.moon).to({guide:{path:path}},500).play()
 		}
 	}
 
-	plot() {
-		let alt = 1500.0 * (150-(this.balloon.y+10))/150
+	getAltIndex() {
+		let alt = 1500.0 * (balloon_y-this.balloon.y)/balloon_y
 		let i = 0
 		while(alt > this.data.altitude[i]) i++
-		this.plotted[this.settings.getValue()][i] = true
+		return i
+	}
+	
+	plot() {
+		this.plotted[this.settings.getValue()][this.getAltIndex()] = true
 		this.plotProfiles()
 	}
 	
@@ -262,7 +285,7 @@ class Rad {
 	}
 	
 	clearLast() {
-		this.balloon.y = 150
+		this.showBalloon(balloon_y)
 		if (!this.profiles.length) return
 		let st = this.profiles[this.profiles.length-1]
 		if (!this.hasPlots(st)) {
@@ -279,7 +302,7 @@ class Rad {
 	clearAll() {
 		this.clearProfiles()
 		this.plotProfiles()
-		this.balloon.y = 150
+		this.balloon.y = balloon_y
 	}
 }
 

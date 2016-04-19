@@ -1,8 +1,8 @@
-import {Fragment,Block, Attribute, Pos} from "prosemirror/dist/model"
+import {Fragment,Block, Attribute, Pos, NodeKind} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
 import {Select} from "../input"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertQuestion} from "../../utils"
-import {Question, qclass, setChildAttrs} from "./question"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
+import {Question, qclass, setChildAttrs, insertQuestion} from "./question"
 
 const css = "widgets-selection"
 	
@@ -38,8 +38,7 @@ Selection.register("command", "insert", {
 		let attrs = {name,title,options,size,multiple}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-			from = new Pos(from.path.concat(from.offset),0)
-			return setChildAttrs(pm,from,"select",attrs)
+			return setChildAttrs(pm,pm.doc.resolve(from+1),"select",attrs)
 		} else
 			return insertQuestion(pm,from,this.create(attrs))
   	},

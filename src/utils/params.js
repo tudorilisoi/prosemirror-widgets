@@ -5,7 +5,7 @@ import {selectableNodeAbove} from "prosemirror/dist/edit/dompos"
 import {AssertionError} from "prosemirror/dist/util/error"
 
 let fhandler = null,lastClicked = null
-
+ 
 export const namePattern = "[A-Za-z0-9_-]{1,10}"
 export const nameTitle = "letters,digits, -, _ (max:10)"
 
@@ -127,25 +127,14 @@ ParamPrompt.prototype.paramTypes.select = {
   }
 }
 
-function selectClickedNode(pm, e) {
-	  let pos = selectableNodeAbove(pm, e.target, {left: e.clientX, top: e.clientY}, true)
-	  if (!pos) return pm.sel.fastPoll()
-
-	  let {node, from} = pm.selection
-	  if (node && pos.depth >= from.depth && pos.shorten(from.depth).cmp(from) == 0) {
-	    if (from.depth == 0) return pm.sel.fastPoll()
-	    pos = from.shorten()
-	  }
-
-	  pm.setNodeSelection(pos)
-	  lastClicked = e.target
-	}
-
 export function defParamsClick(type, cmdname, spots = ["topright"]) {
-	type.prototype.handleClick = (pm, e, path, node) => {
-		selectClickedNode(pm,e)
+	type.prototype.handleClick = (pm, e, pos, node) => {
+		e.preventDefault()
+		pm.setNodeSelection(pos)
+		pm.focus()
+		lastClicked = e.target
 		let spotClicked = false
-		spots.forEach(function check(loc) {
+		spots.forEach(loc => {
 			let r = e.target.getBoundingClientRect()
 			if (loc == "all") spotClicked = true;
 			else if (loc == "topright") spotClicked = spotClicked || (e.clientX > (r.right-16) && e.clientY < (r.top+16))

@@ -1,8 +1,8 @@
 import {Fragment, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {TextField} from "../input"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, insertQuestion} from "../../utils"
-import {Question, qclass, setChildAttrs} from "./question"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
+import {Question, qclass, setChildAttrs, insertQuestion} from "./question"
 
 const css = "widgets-shortanswer"
 	 
@@ -36,8 +36,7 @@ ShortAnswer.register("command", "insert", {
 		let attrs = {name,title, size}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-			from = new Pos(from.path.concat(from.offset),0)
-			return setChildAttrs(pm,from,"textfield",attrs)
+			return setChildAttrs(pm,pm.doc.resolve(from+1),"textfield",attrs)
 		} else
 			return insertQuestion(pm,from,this.create(attrs))
   	},

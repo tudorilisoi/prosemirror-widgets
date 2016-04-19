@@ -1,10 +1,10 @@
-import {Block, Inline, Attribute} from "prosemirror/dist/model"
+import {Block, Inline, Attribute,NodeKind} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser} from "../../utils"
 
 const css = "widgets-input"
 	
-export class Input extends Block {
+export class Input extends Inline {
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -13,7 +13,7 @@ export class Input extends Block {
 		}
 	}
 	get selectable() { return false }
-	get contains() { return null}
+	get contains() { return null }
 }
 
 defParser(Input,css)

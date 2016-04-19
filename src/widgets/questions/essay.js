@@ -1,7 +1,7 @@
 import {Fragment, Block, Attribute, Pos} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked, insertQuestion} from "../../utils"
-import {Question, qclass, setChildAttrs} from "./question"
+import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr, getLastClicked} from "../../utils"
+import {Question, qclass, setChildAttrs, insertQuestion} from "./question"
 import {checkUniqueName} from "../../widgets"
 
 const css = "widgets-essay"
@@ -33,16 +33,15 @@ defParser(Essay,"div",css)
 Essay.register("command", "insert", {
 	label: "Essay",
 	run(pm, name, title, rows, cols) {
-		let {from,to,node} = pm.selection
+		let {from, node} = pm.selection, $from = pm.doc.resolve(from)
 		let attrs = {name,title,rows,cols}
-		if (node && node.type == this) {
+		if (node && node.type instanceof Essay) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-			from = new Pos(from.path.concat(from.offset),0)
-			return setChildAttrs(pm,from,"textarea",attrs)
+			return setChildAttrs(pm,pm.doc.resolve(from+1),"textarea",attrs)
 		} else
 			return insertQuestion(pm,from,this.create(attrs))
   	},
-    select(pm) { return pm.doc.path(pm.selection.from.path).type.canContainType(this)},
+    select(pm) { return from.parent.type.canContainType(this)},
 	menu: {group: "question", rank: 72, display: {type: "label", label: "Essay"}, select: "ignore"},
 	params: [
   	    { name: "Name", attr: "name", label: "Short ID", type: "text",

@@ -1,5 +1,5 @@
 import {Graph} from "../utils"
-  
+
 createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
 createjs.Ticker.frameRate = 60
@@ -164,13 +164,10 @@ class ETGraph extends Graph {
 		this.leaf.y = y-10
 	}
 	
-	showLeaf(on) {
-		if (on === true) {
-	       let x = this.xaxis.getLoc(this.temp)
-	       let y = this.yaxis.getLoc(this.vapor)
-	       this.moveLeaf(x,y)
-		} else
-		   this.leaf.x = -1000
+	showLeaf() {
+       let x = this.xaxis.getLoc(this.temp)
+       let y = this.yaxis.getLoc(this.vapor)
+       this.moveLeaf(x,y)
 	}
 		
     moveMarker(updateSettings) {
@@ -194,6 +191,7 @@ class ETGraph extends Graph {
 		this.vapor = trial.vapor
 		this.plot(trial.temp,trial.vapor)
 		this.moveMarker(false)
+		this.showLeaf()
 	}
 }
 
@@ -396,7 +394,6 @@ class MtnSim {
 		this.buttons.addListener(e => {
 			switch(e.target.id) {
 			case "run":
-				this.etgraph.showLeaf(false)
 				this.enablePlay(false)
 				this.buttons.pause.value = "Pause"
 				this.pause = false
@@ -424,7 +421,6 @@ class MtnSim {
 		this.enablePlay(true)
 		this.settings.setTemp(20.0)
 		this.settings.setVapor(7.0)
-		this.etgraph.showLeaf(true)
 	}
 	
 	enablePlay(play) {

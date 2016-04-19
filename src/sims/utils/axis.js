@@ -82,7 +82,7 @@ export class Axis {
     }
 
     getValue(v) {
-    	let factor = this.vertical? (this.h - (v - this.originY))/this.h:(v - this.originX)/this.w
+    	let factor = this.vertical? (this.originY - v)/this.originY:(v - this.originX)/(this.w - this.originX)
         return this.min + (this.max - this.min) * factor
     }
 

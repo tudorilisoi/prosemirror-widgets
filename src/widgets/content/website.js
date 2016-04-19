@@ -1,6 +1,7 @@
 import {Block, Attribute} from "prosemirror/dist/model"
 import {insertCSS} from "prosemirror/dist/dom"
-import {defParser, defParamsClick, selectedNodeAttr,insertWidget} from "../../utils"
+import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
+import {insertWidget} from "./index"
 
 const css = "widgets-website"
 	
