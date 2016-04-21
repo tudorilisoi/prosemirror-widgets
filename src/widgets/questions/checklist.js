@@ -56,8 +56,8 @@ defParser(CheckList,"div",cssc)
 
 CheckItem.prototype.serializeDOM = (node,s) => s.renderAs(node,"div", node.attrs)
 
-function renumber(pm, $pos) {
-	let i = 1, cl = $pos.parent, parentpos = $pos.start($pos.depth)
+function renumber(pm, cl, parentpos) {
+	let i = 1
 	cl.forEach((node,start) => {
 		if (node.type instanceof CheckItem) {
 			pm.tr.setNodeType(parentpos+start, node.type, {name: cl.attrs.name+"-"+i, value:i++}).apply()
@@ -74,7 +74,8 @@ CheckItem.register("command", "split", {
 	    if (ci.type != this) return false    
 	    let tr = pm.tr.split(from, 2).apply(pm.apply.scroll)
 	    tr = pm.tr.insert(from+3,this.schema.nodes.checkbox.create(ci.attrs)).apply(pm.apply.scroll)
-	    renumber(pm, pm.doc.resolve(from))
+	    $from = pm.doc.resolve(from)
+	    renumber(pm, $from.node($from.depth-2),$from.start($from.depth-2))
 	    return tr
 	  },
 	  keys: ["Enter(20)"]
@@ -94,13 +95,19 @@ CheckItem.register("command", "delete",{
 	    let cl = $from.node($from.depth-2)
 	    // if only one choice or still text then ignore
 	    if (cl.childCount == 2 || ci.lastChild.content.size > 0) return true
-	    let pos = $from.before($from.depth-1)
-	    let tr = pm.tr.delete(pos,$from.after($from.depth-1)).apply(pm.apply.scroll)
-	    ci = pm.doc.nodeAt(pos)
-	    let tpos = ci && ci.type instanceof CheckItem ? pos+3+pm.doc.nodeAt(pos+3).nodeSize: from-5
-	    pm.setTextSelection(tpos)	    	
-	    renumber(pm, pm.doc.resolve(from-5))	    
-		return tr
+	    let before = $from.before($from.depth-1)
+	    let after = $from.after($from.depth-1)
+	    let tr = pm.tr.delete(before,after).apply(pm.apply.scroll)
+	    $from = pm.doc.resolve(from)
+	    if ($from.nodeAfter) {
+	    	let $pos = pm.doc.resolve(after)
+		    renumber(pm, $from.node($from.depth-2),$from.start($from.depth-2))
+	    	pm.setTextSelection($pos.end($pos.depth)-1)
+	    } else {
+	    	let $pos = pm.doc.resolve(before)
+	    	pm.setTextSelection($pos.after($pos.depth)+1)
+	    }
+	    return tr
 	},
 	keys: ["Backspace(9)", "Mod-Backspace(9)"]
 })
@@ -109,10 +116,11 @@ CheckList.register("command", "insert", {
 	label: "Check List",
 	run(pm, name, title) {
 		let {from,node} = pm.selection, $from = pm.doc.resolve(from)
-		let attrs = {name,title}
+		let attrs = {name,title,value:1}
 		if (node && node.type == this) {
 			let tr = pm.tr.setNodeType(from, this, attrs).apply()
-			renumber(pm,pm.doc.resolve(from+1))
+			$from = pm.doc.resolve(from)
+			renumber(pm,$from.nodeAfter,from+1)
 			return tr
 		} else
 			return insertQuestion(pm,from,this.create(attrs))

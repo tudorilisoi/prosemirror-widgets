@@ -6,8 +6,7 @@ import {Question, qclass, insertQuestion} from "./question"
 const cssc = "widgets-choice"
 const cssm = "widgets-multiplechoice"
 	
-export class Choice extends Textblock {
-	get contains() { return NodeKind.text}
+export class Choice extends Block {
 	get attrs() {
 		return {
 			name: new Attribute({default: ""}),
@@ -54,8 +53,8 @@ defParser(MultipleChoice,"div",cssm)
  
 Choice.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
  
-function renumber(pm, $pos) {
-	let i = 1, mc = $pos.node($pos.depth-1), parentpos = $pos.start($pos.depth-1)
+function renumber(pm, mc, parentpos) {
+	let i = 1
 	mc.forEach((node,start) => {
 		if (node.type instanceof Choice) {
 			pm.tr.setNodeType(parentpos+start, node.type, {name: mc.attrs.name+"-"+i, value:i++}).apply()
@@ -72,7 +71,8 @@ Choice.register("command", "split", {
 	    if (chc.type != this) return false    
 	    let tr = pm.tr.split(from, 2).apply(pm.apply.scroll)
 	    tr = pm.tr.insert(from+3,this.schema.nodes.radiobutton.create(chc.attrs)).apply(pm.apply.scroll)
-	    renumber(pm, pm.doc.resolve(from+1))
+	    $from = pm.doc.resolve(from)
+	    renumber(pm, $from.node($from.depth-2),$from.start($from.depth-2))
 	    return tr
 	},
 	keys: ["Enter(20)"]
@@ -95,10 +95,15 @@ Choice.register("command", "delete",{
 	    let before = $from.before($from.depth-1)
 	    let after = $from.after($from.depth-1)
 	    let tr = pm.tr.delete(before,after).apply(pm.apply.scroll)
-	    let $pos = pm.doc.resolve(from)
-	    chc = $pos.nodeAfter
-	    pm.setTextSelection($pos.end($pos.depth))
-	    //renumber(pm, pm.doc.resolve(from-5))
+	    $from = pm.doc.resolve(from)
+	    if ($from.nodeAfter) {
+	    	let $pos = pm.doc.resolve(after)
+		    renumber(pm, $from.node($from.depth-2),$from.start($from.depth-2))
+	    	pm.setTextSelection($pos.end($pos.depth)-1)
+	    } else {
+	    	let $pos = pm.doc.resolve(before)
+	    	pm.setTextSelection($pos.after($pos.depth)+1)
+	    }
 	    return tr
 	},
 	keys: ["Backspace(9)", "Mod-Backspace(9)"]
@@ -110,8 +115,9 @@ MultipleChoice.register("command", "insert", {
 	let {from,node} = pm.selection, $from = pm.doc.resolve(from)
 		let attrs = {name,title,value:1}
 		if (node && node.type == this) {
-			let tr = pm.tr.setNodeType(from, this, attrs).apply()
-			renumber(pm,pm.doc.resolve(from+1))
+			let tr = pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
+			$from = pm.doc.resolve(from)
+			renumber(pm, $from.nodeAfter,from+1)
 			return tr
 		} else
 			return insertQuestion(pm,from,this.create(attrs))

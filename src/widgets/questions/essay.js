@@ -36,8 +36,9 @@ Essay.register("command", "insert", {
 		let {from, node} = pm.selection, $from = pm.doc.resolve(from)
 		let attrs = {name,title,rows,cols}
 		if (node && node.type instanceof Essay) {
-			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-			return setChildAttrs(pm,pm.doc.resolve(from+1),"textarea",attrs)
+			let tr = pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
+			$from = pm.doc.resolve(from)
+			return setChildAttrs(pm,$from.nodeAfter,from+1,"textarea",attrs)
 		} else
 			return insertQuestion(pm,from,this.create(attrs))
   	},

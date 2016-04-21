@@ -76,7 +76,8 @@ Scale.register("command", "insert",{
 		let attrs = {name,title,startvalue,startlabel,endvalue,endlabel}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-			return setChildAttrs(pm,pm.doc.resolve(from+1),"scaledisplay",attrs)
+			let $from = pm.doc.resolve(from)
+			return setChildAttrs(pm,$from.nodeAfter,from+1,"scaledisplay",attrs)
 		} else
 			return insertQuestion(pm,from,this.create(attrs))
   	},

@@ -8,11 +8,13 @@ const css = "widgets-question"
 	
 export const qclass = css+" widgets-edit"
 
-export function setChildAttrs(pm, $pos, type, attrs) {
-	let parentpos = $pos.start($pos.depth)
-	$pos.parent.forEach((node,start) => {
+export function setChildAttrs(pm, parent, parentpos, type, attrs) {
+	//if attrs are same then don't change
+	let pa = parent.attrs
+	for (let key in pa) if (pa[key] != attrs[key]) return
+	parent.forEach((node,start) => {
 		if (node.type.name == type)
-			return pm.tr.setNodeType(parentpos+start, node.type, attrs).apply(pm.apply.scroll)
+			return pm.tr.setNodeType(parentpos+start, node.type, attrs).apply()
 	})
 	return false
 }

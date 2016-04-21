@@ -38,7 +38,8 @@ Selection.register("command", "insert", {
 		let attrs = {name,title,options,size,multiple}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-			return setChildAttrs(pm,pm.doc.resolve(from+1),"select",attrs)
+			$from = pm.doc.resolve(from)
+			return setChildAttrs(pm,$from.nodeAfter,from+1,"select",attrs)
 		} else
 			return insertQuestion(pm,from,this.create(attrs))
   	},

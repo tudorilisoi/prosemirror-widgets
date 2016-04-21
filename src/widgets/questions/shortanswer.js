@@ -36,7 +36,8 @@ ShortAnswer.register("command", "insert", {
 		let attrs = {name,title, size}
 		if (node && node.type == this) {
 			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
-			return setChildAttrs(pm,pm.doc.resolve(from+1),"textfield",attrs)
+			let $from = pm.doc.resolve(from)
+			return setChildAttrs(pm,$from.nodeAfter,from+1,"textfield",attrs)
 		} else
 			return insertQuestion(pm,from,this.create(attrs))
   	},
