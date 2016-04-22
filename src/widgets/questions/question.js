@@ -46,7 +46,12 @@ Question.register("command", "delete", {
 	label: "delete text from question",
 	run(pm) {
 		let {from, node} = pm.selection, $from = pm.doc.resolve(from)
-		if ($from.parentOffset > 0 || !($from.parent.type instanceof TextBox)) return false
+		if ($from.parentOffset > 0 || from < 2) return false
+		let $prev = pm.doc.resolve(from-2)
+		// delete whole question
+		if ($prev.parent.type instanceof Question)
+			return pm.tr.delete($prev.before($prev.depth),$prev.after(($prev.depth))).apply(pm.apply.scroll)
+		if (!($from.parent.type instanceof TextBox)) return false
 		let parent = $from.node($from.depth-2)
 		// don't let empty question or choice be deleted
 		return parent.type instanceof Question

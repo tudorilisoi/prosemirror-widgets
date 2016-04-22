@@ -188,7 +188,7 @@ export class CommentStore {
     }
     addComment(from, to, text, id, mode) {
     	if (!comments[id]) {
-    		if (!from.cmp(to)) to = from.move(1)
+    		if (from == to) to = from+1
     		let range = pm.markRange(from, to, { className: "mode-"+mode})
     		comments[id] = new Comment(id, text, range, mode)
     		commentsNode.appendChild(comments[id].newDom)
@@ -219,7 +219,7 @@ export class CommentStore {
 	    		pm.tr.delete(found.range.from,found.range.to).apply(pm.apply.scroll)
 	    		break
 	    	case "replace":
-	    		pm.tr.replace(found.range.from,found.range.to,pm.schema.text(found.text)).apply(pm.apply.scroll)
+	    		pm.tr.replaceWith(found.range.from,found.range.to,pm.schema.text(found.text)).apply(pm.apply.scroll)
 	    		break
     	}
     	this.removeComment(id)
