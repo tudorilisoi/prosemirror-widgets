@@ -335,13 +335,9 @@ class Mtn {
 	animateClouds() {
 		if (this.trial.cloudbase == 0) {
 			this.trial.cloudbase = this.trial.altitude
-			if (this.trial.temp <= 0 || this.trial.altitude < 1) {
-				this.playSound("thunder")
-				this.lighttick = 0
-				this.lightning = true
-			}
 			this.cloud.x = this.leaf.x - 2
 			this.cloud.y = this.leaf.y
+			this.bolt.y = this.cloud.y + 20
 			this.lasty = this.leaf.y
 		}
 		if ((this.trial.altitude - this.lastalt) > .1) {
@@ -349,6 +345,11 @@ class Mtn {
 			this.cloud.scaleX += .021
 			this.cloud.scaleY += .02
 			this.cloud.y = this.leaf.y
+		}
+		if (!this.lightning && this.trial.temp <= -5 && (this.trial.altitude - this.trial.cloudbase) > .5) {
+			this.playSound("thunder")
+			this.lighttick = 0
+			this.lightning = true
 		}
 	}
 	
@@ -363,8 +364,7 @@ class Mtn {
 			atgraph.update(this.trial)
 			if (this.lightning === true) {
 				if (this.lighttick == 20) {
-					this.bolt.x = this.leaf.x-30
-					this.bolt.y = this.leaf.y+40
+					this.bolt.x = this.cloud.x+30
 				} else if (this.lighttick == 25) {
 					this.bolt.x = this.bolt.x + 20
 				} else if (this.lighttick == 35) {
