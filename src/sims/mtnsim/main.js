@@ -1,4 +1,7 @@
-import {Graph} from "../utils"
+import {Graph, getStore} from "../utils"
+
+let mtnsim_results = "mtnsim_results"
+let store = getStore()
 
 createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
@@ -8,7 +11,29 @@ function saturation(temp) { return 10.0 * 0.611 * Math.exp(17.27*temp/(temp+237.
 function humidity(temp, vapor) { return 100.0 * vapor/saturation(temp)}
 function dewpoint(temp,vapor) { return temp - ((100.0-humidity(temp,vapor))/5.0) }
 
- 
+function getCol(val) {
+	let v = val.toFixed(1)
+	let td = document.createElement("td")
+	td.appendChild(document.createTextNode(v))
+	return td
+}
+
+function getRow(json) {
+	let tr = document.createElement("tr")
+	tr.appendChild(getCol(json.start.temp))
+	tr.appendChild(getCol(json.start.vapor))
+	tr.appendChild(getCol(json.start.dewpoint))
+	tr.appendChild(getCol(json.temp))
+	tr.appendChild(getCol(json.vapor))
+	tr.appendChild(getCol(json.dewpoint))
+	if (json.cloudbase > 0)
+		tr.appendChild(getCol(json.cloudbase))
+	else
+		tr.appendChild(document.createElement("td").appendChild(document.createTextNode("Clear")))
+	return tr
+}
+
+
 class Trial {
 	constructor() {
 		this.start = null
@@ -20,6 +45,18 @@ class Trial {
 	    this.dewpoint = 0
 	}
 	
+	toJSON() {
+		return {
+			start: this.start,
+		    cloudbase: this.cloudbase,
+		    temp: this.temp,
+		    altitude: this.altitude,
+		    vapor: this.vapor,
+		    humidity: this.humidity,
+		    dewpoint: this.dewpoint
+		}
+	}
+	
 	init(start) {
 		this.start = start
 	    this.cloudbase = 0
@@ -28,28 +65,6 @@ class Trial {
 	    this.vapor = start.vapor
 	    this.humidity = start.humidity
 	    this.dewpoint = start.dewpoint
-	}
-	
-	getCol(val) {
-		let v = val.toFixed(1)
-		let td = document.createElement("td")
-		td.appendChild(document.createTextNode(v))
-		return td
-	}
-	
-	getRow() {
-		let tr = document.createElement("tr")
-		tr.appendChild(this.getCol(this.start.temp))
-		tr.appendChild(this.getCol(this.start.vapor))
-		tr.appendChild(this.getCol(this.start.dewpoint))
-		tr.appendChild(this.getCol(this.temp))
-		tr.appendChild(this.getCol(this.vapor))
-		tr.appendChild(this.getCol(this.dewpoint))
-		if (this.cloudbase > 0)
-			tr.appendChild(this.getCol(this.cloudbase))
-		else
-			tr.appendChild(document.createElement("td").appendChild(document.createTextNode("Clear")))
-		return tr
 	}
 }
 
@@ -251,6 +266,12 @@ class Mtn {
 		this.path = [50,164, 74,152, 90,131, 112,122, 137,92, 151,64, 173,56, 204,70, 221,92, 224,105, 246,121, 268,141, 290,164]
 		this.results = document.getElementById("results_table")
 		this.trial = new Trial()
+		// get previous trials
+		let trials = store.get(mtnsim_results)
+		if (trials)
+			trials.forEach(json => this.results.appendChild(getRow(json)))
+		else
+			store.set(mtnsim_results,[])
 	}
 	
 	render() {
@@ -287,7 +308,10 @@ class Mtn {
 		this.leaftween.call(() => {
 			if (this.wind) this.wind.stop()
 			this.running = false
-			this.results.appendChild(this.trial.getRow())
+			let trials = store.get(mtnsim_results)
+			let json = this.trial.toJSON()
+			store.set(mtnsim_results,trials.concat(json))
+			this.results.appendChild(getRow(json))
 			if (this.finish) this.finish()
 		})
 		this.running = true
@@ -346,7 +370,7 @@ class Mtn {
 			this.cloud.scaleY += .02
 			this.cloud.y = this.leaf.y
 		}
-		if (!this.lightning && this.trial.temp <= -5 && (this.trial.altitude - this.trial.cloudbase) > .5) {
+		if (!this.lightning && this.leaf.x < 140 && this.trial.temp <= -5 && (this.trial.altitude - this.trial.cloudbase) > .5) {
 			this.playSound("thunder")
 			this.lighttick = 0
 			this.lightning = true
@@ -363,11 +387,11 @@ class Mtn {
 			etgraph.update(this.trial)
 			atgraph.update(this.trial)
 			if (this.lightning === true) {
-				if (this.lighttick == 20) {
+				if (this.lighttick == 5) {
 					this.bolt.x = this.cloud.x+30
-				} else if (this.lighttick == 25) {
+				} else if (this.lighttick == 10) {
 					this.bolt.x = this.bolt.x + 20
-				} else if (this.lighttick == 35) {
+				} else if (this.lighttick == 15) {
 					this.bolt.x = -100
 					this.lightning = false
 				}
