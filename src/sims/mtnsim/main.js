@@ -18,7 +18,25 @@ function getCol(val) {
 	return td
 }
 
-function getRow(json) {
+function getDelete(row) {
+	let td = document.createElement("td")
+	let img = document.createElement("img")
+	img.setAttribute("src","assets/delete.jpg")
+	img.setAttribute("class","delete_img")
+	img.setAttribute("alt","Delete row")
+	img.setAttribute("title","Delete row")
+	img.addEventListener("click", event => {
+		if (confirm("Delete row?")) {
+			// <tr><td><img...
+			let node = event.target.parentNode.parentNode
+			mtnsim.mtn.deleteTrial(Array.prototype.indexOf.call(node.parentNode.childNodes,node))
+		}
+	})
+	td.appendChild(img)
+	return td
+}
+
+function getRow(json,row) {
 	let tr = document.createElement("tr")
 	tr.appendChild(getCol(json.start.temp))
 	tr.appendChild(getCol(json.start.vapor))
@@ -30,6 +48,7 @@ function getRow(json) {
 		tr.appendChild(getCol(json.cloudbase))
 	else
 		tr.appendChild(document.createElement("td").appendChild(document.createTextNode("Clear")))
+	tr.appendChild(getDelete(row))
 	return tr
 }
 
@@ -265,13 +284,11 @@ class Mtn {
 		this.lighttick = 0
 		this.path = [50,164, 74,152, 90,131, 112,122, 137,92, 151,64, 173,56, 204,70, 221,92, 224,105, 246,121, 268,141, 290,164]
 		this.results = document.getElementById("results_table")
+		document.getElementById("delete_all").addEventListener("click",event => {
+			if (confirm("Delete all data?")) this.deleteResults()
+		})
 		this.trial = new Trial()
-		// get previous trials
-		let trials = store.get(mtnsim_results)
-		if (trials)
-			trials.forEach(json => this.results.appendChild(getRow(json)))
-		else
-			store.set(mtnsim_results,[])
+		this.showResults()
 	}
 	
 	render() {
@@ -308,10 +325,7 @@ class Mtn {
 		this.leaftween.call(() => {
 			if (this.wind) this.wind.stop()
 			this.running = false
-			let trials = store.get(mtnsim_results)
-			let json = this.trial.toJSON()
-			store.set(mtnsim_results,trials.concat(json))
-			this.results.appendChild(getRow(json))
+			this.addTrial()
 			if (this.finish) this.finish()
 		})
 		this.running = true
@@ -319,6 +333,34 @@ class Mtn {
 		this.playSound("wind")
 	}
 	
+	showResults() {
+		for (let i = this.results.children.length-1; i > 1 ; i--) this.results.removeChild(this.results.children[i])
+		let trials = store.get(mtnsim_results)
+		if (trials) {
+			trials.forEach(json => this.results.appendChild(getRow(json)))
+		} else
+			store.set(mtnsim_results,[])
+	}
+	
+	addTrial() {
+		let trials = store.get(mtnsim_results)
+		let json = this.trial.toJSON()
+		store.set(mtnsim_results,trials.concat(json))
+		this.results.appendChild(getRow(json))
+	}
+	
+	deleteTrial(row) {
+		let trials = store.get(mtnsim_results)
+		trials = trials.splice(row,1)
+		store.set(mtnsim_results,trials)
+		this.showResults()
+	}
+	
+	deleteResults() {
+		store.set(mtnsim_results,[])
+		this.showResults()
+	}
+
 	pause(pause) { 
 		this.leaftween.setPaused(pause) 
 		if (this.wind) this.wind.paused = pause
@@ -470,4 +512,5 @@ class MtnSim {
 	}
 }
 
-(new MtnSim()).render()
+let mtnsim = new MtnSim()
+mtnsim.render()
