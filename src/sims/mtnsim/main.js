@@ -5,7 +5,7 @@ let store = getStore()
 
 createjs.MotionGuidePlugin.install()
 createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin])
-createjs.Ticker.frameRate = 60
+createjs.Ticker.frameRate = 20
 
 function saturation(temp) { return 10.0 * 0.611 * Math.exp(17.27*temp/(temp+237.3)) }
 function humidity(temp, vapor) { return 100.0 * vapor/saturation(temp)}
@@ -282,7 +282,7 @@ class Mtn {
 		this.running = false
 		this.lightning = false
 		this.lighttick = 0
-		this.path = [50,164, 74,152, 90,131, 112,122, 137,92, 151,64, 173,56, 204,70, 221,92, 224,105, 246,121, 268,141, 290,164]
+		this.path = [50,164, 60,155, 74,152, 80,140, 90,131, 100,125, 112,122, 120,110, 137,92, 140,75, 151,64, 150,60, 173,56, 185,60, 204,70, 210,80, 221,92, 221,95, 224,105, 230,110, 246,121, 250,130, 268,141, 280,150, 290,164]
 		this.results = document.getElementById("results_table")
 		document.getElementById("delete_all").addEventListener("click",event => {
 			if (confirm("Delete all data?")) this.deleteResults()
@@ -309,7 +309,6 @@ class Mtn {
 		this.stage.removeAllChildren()
 		this.render()
 	}
-	
 	play() {
 		this.temp = this.settings.getTemp()
 		this.vapor = this.settings.getVapor()
@@ -321,7 +320,7 @@ class Mtn {
 		})
 		this.factor = 10.0
 		this.lastalt = 0
-		this.leaftween = createjs.Tween.get(this.leaf).to({guide:{path:this.path}},8000)
+		this.leaftween = createjs.Tween.get(this.leaf).to({guide:{path:this.path}},12000)
 		this.leaftween.call(() => {
 			if (this.wind) this.wind.stop()
 			this.running = false
@@ -413,7 +412,6 @@ class Mtn {
 			this.cloud.y = this.leaf.y
 		}
 		if (!this.lightning && this.leaf.x < 140 && this.trial.temp <= -5 && (this.trial.altitude - this.trial.cloudbase) > .5) {
-			this.playSound("thunder")
 			this.lighttick = 0
 			this.lightning = true
 		}
@@ -429,13 +427,23 @@ class Mtn {
 			etgraph.update(this.trial)
 			atgraph.update(this.trial)
 			if (this.lightning === true) {
-				if (this.lighttick == 5) {
-					this.bolt.x = this.cloud.x+30
-				} else if (this.lighttick == 10) {
-					this.bolt.x = this.bolt.x + 20
-				} else if (this.lighttick == 15) {
+				switch(this.lighttick) {
+				case 0:
+					this.bolt.x = this.cloud.x + 10					
+					break
+				case 5:
+					this.bolt.x += 10
+					break
+				case 7:
+					this.bolt.x += 10
+					break
+				case 10:
 					this.bolt.x = -100
+					break
+				case 60:
+					this.playSound("thunder")
 					this.lightning = false
+					break
 				}
 				this.lighttick++
 			}
