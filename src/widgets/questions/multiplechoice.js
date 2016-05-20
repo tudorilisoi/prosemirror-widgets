@@ -7,6 +7,7 @@ const cssc = "widgets-choice"
 const cssm = "widgets-multiplechoice"
 	
 export class Choice extends Block {
+	serializeDOM(node,s) { return s.renderAs(node,"div",node.attrs)}
 	get attrs() {
 		return {
 			name: new Attribute({default: ""}),
@@ -50,8 +51,6 @@ export class MultipleChoice extends Question {
  
 defParser(Choice,"div",cssc)
 defParser(MultipleChoice,"div",cssm)
- 
-Choice.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
  
 function renumber(pm, mc, parentpos) {
 	let i = 1
@@ -103,7 +102,7 @@ Choice.register("command", "delete",{
 	    } else {
 	    	let $pos = pm.doc.resolve(before)
 	    	pm.setTextSelection($pos.after($pos.depth)+1)
-	    }
+	    }  
 	    return tr
 	},
 	keys: ["Backspace(9)", "Mod-Backspace(9)"]
@@ -112,15 +111,14 @@ Choice.register("command", "delete",{
 MultipleChoice.register("command", "insert", {
 	label: "MultipleChoice",
 	run(pm, name,title) {
-	let {from,node} = pm.selection, $from = pm.doc.resolve(from)
+		let {from,node} = pm.selection, $from = pm.doc.resolve(from)
 		let attrs = {name,title,value:1}
-		if (node && node.type == this) {
-			let tr = pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
+		if (node && node.type == this) { 
+			pm.tr.setNodeType(from, this, attrs).apply(pm.apply.scroll)
 			$from = pm.doc.resolve(from)
 			renumber(pm, $from.nodeAfter,from+1)
-			return tr
 		} else
-			return insertQuestion(pm,from,this.create(attrs))
+			insertQuestion(pm,from,this.create(attrs))
 	},
 	select(pm) {
 		return true

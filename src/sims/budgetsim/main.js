@@ -324,6 +324,7 @@ class Tank {
 	run() {
 		this.running = true
 		this.settings.inflow.disabled = true
+		this.streamSound.paused = this.settings.getMute()
 	}
 	
 	stop() {
@@ -367,9 +368,11 @@ class Tank {
 		if (this.time >= startin && this.time <= endin) {
 			this.running = false
 			this.settings.inflow.disabled = false
+			this.streamSound.paused = true
 		} if (this.time > 18) {
 			this.settings.setInflow(0)
 			this.settings.inflow.disabled = true
+			this.streamSound.paused = this.settings.getMute()
 		}
 	}
 }

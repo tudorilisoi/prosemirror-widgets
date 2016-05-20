@@ -9,7 +9,7 @@ const css = "widgets-shortanswer"
 export class ShortAnswer extends Question {
 	get attrs() {
 		return {
-			name: new Attribute,
+			name: new Attribute({default: ""}),
 			title: new Attribute({default: ""}),
 			size: new Attribute({default: "20"}),
 			class: new Attribute({default: css+" "+qclass})

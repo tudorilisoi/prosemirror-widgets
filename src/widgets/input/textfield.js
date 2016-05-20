@@ -1,4 +1,4 @@
-import {Inline, Attribute,NodeKind} from "prosemirror/dist/model"
+import {Inline, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {Input} from "./input"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
@@ -7,14 +7,13 @@ const css = "widgets-textfield"
 export class TextField extends Input {
 	get attrs() {
 		return {
-			name: new Attribute,
+			name: new Attribute({default: ""}),
 			type: new Attribute({default: "text"}),
 			size: new Attribute({default: "20"}),
 			class: new Attribute({default: css})
 		}
 	}
 	get canBeEmpty() { return true }
-	get contains() { return NodeKind.text }
 }
 
 defParser(TextField,"input",css)

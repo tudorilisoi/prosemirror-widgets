@@ -6,41 +6,39 @@ import {insertWidget} from "./index"
 const css = "widgets-spreadsheet"
 	
 export class SpreadSheet extends Block {
+	serializeDOM(node,s){
+		if (node.rendered) {
+			node.rendered = node.rendered.cloneNode(true)
+		} else {
+			node.rendered = elt("div", { class: css+" widgets-edit"});
+			// wait until node is attached to document to render
+			window.setTimeout(function() {
+				let data = [
+		            ["", "Ford", "Volvo", "Toyota", "Honda"],
+		            ["2014", 10, 11, 12, 13],
+		            ["2015", 20, 11, 14, 13],
+		            ["2016", 30, 15, 12, 13]
+		        ];
+		
+		        new Handsontable(node.rendered, {
+		        	data: data,
+		            minSpareRows: 1,
+		            rowHeaders: true,
+		            colHeaders: true,
+		            contextMenu: true
+		        });
+			}, 100)
+		}
+		return node.rendered
+	}
 	get attrs() {
 		return {
 			data: new Attribute
 		}
 	}
-	get contains() { return null }
 }
 
 defParser(SpreadSheet,"div",css)
-
-SpreadSheet.prototype.serializeDOM = node => {
-	if (node.rendered) {
-		node.rendered = node.rendered.cloneNode(true)
-	} else {
-		node.rendered = elt("div", { class: css+" widgets-edit"});
-		// wait until node is attached to document to render
-		window.setTimeout(function() {
-			let data = [
-	            ["", "Ford", "Volvo", "Toyota", "Honda"],
-	            ["2014", 10, 11, 12, 13],
-	            ["2015", 20, 11, 14, 13],
-	            ["2016", 30, 15, 12, 13]
-	        ];
-	
-	        new Handsontable(node.rendered, {
-	        	data: data,
-	            minSpareRows: 1,
-	            rowHeaders: true,
-	            colHeaders: true,
-	            contextMenu: true
-	        });
-		}, 100)
-	}
-	return node.rendered; 
-}
 
 SpreadSheet.register("command", "insert", {
 	label: "SpreadSheet",

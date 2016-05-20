@@ -1,4 +1,4 @@
-import {Fragment, Block, Paragraph, Attribute, Pos, NodeKind} from "prosemirror/dist/model"
+import {Fragment, Block, Paragraph, Attribute, Pos} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
 import {Question, qclass, setChildAttrs, insertQuestion} from "./question"
@@ -7,6 +7,26 @@ const cssd = "widgets-scaledisplay"
 const csss = "widgets-scale"
 	
 export class ScaleDisplay extends Block {
+	serializeDOM(node,s) {
+		let startVal = Number(node.attrs.startvalue)
+		let endVal = Number(node.attrs.endvalue)
+		let mid = String(Math.round((Math.abs(endVal - startVal))/2))
+		let out = elt("input",{for: node.attrs.name, readonly: "readonly"},mid)
+		let setOutputValue
+		if (startVal < endVal) {
+			setOutputValue = function(val) { out.value = val }
+		} else {
+			let max = startVal
+			setOutputValue = function(val) { out.value = max - val }
+			endVal = startVal - endVal; startVal = 0
+		}
+		let range = elt("input",{class: "widgets-input", value: mid, name:node.attrs.name, id: node.attrs.name, type: "range", min: startVal, max: endVal, contenteditable: false})
+		range.addEventListener("input",e => {
+	    	e.stopPropagation()
+	    	setOutputValue(e.originalTarget.valueAsNumber)
+		})
+		return elt("div",node.attrs,elt("span", null, node.attrs.startlabel),range,elt("span", null,node.attrs.endlabel),out)
+	}	
 	get attrs() {
 		return {
 			name: new Attribute({default: ""}),
@@ -18,28 +38,6 @@ export class ScaleDisplay extends Block {
 		}
 	}
 	get canBeEmpty() { return true }
-	get contains() { return NodeKind.text }
-}
-
-ScaleDisplay.prototype.serializeDOM = (node,s) => {
-	let startVal = Number(node.attrs.startvalue)
-	let endVal = Number(node.attrs.endvalue)
-	let mid = String(Math.round((Math.abs(endVal - startVal))/2))
-	let out = elt("input",{for: node.attrs.name, readonly: "readonly"},mid)
-	let setOutputValue
-	if (startVal < endVal) {
-		setOutputValue = function(val) { out.value = val }
-	} else {
-		let max = startVal
-		setOutputValue = function(val) { out.value = max - val }
-		endVal = startVal - endVal; startVal = 0
-	}
-	let range = elt("input",{class: "widgets-input", value: mid, name:node.attrs.name, id: node.attrs.name, type: "range", min: startVal, max: endVal, contenteditable: false})
-	range.addEventListener("input",e => {
-    	e.stopPropagation()
-    	setOutputValue(e.originalTarget.valueAsNumber)
-	})
-	return elt("div",node.attrs,elt("span", null, node.attrs.startlabel),range,elt("span", null,node.attrs.endlabel),out)
 }
 
 export class Scale extends Question {

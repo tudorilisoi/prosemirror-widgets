@@ -4,6 +4,7 @@ import {defParser, defParamsClick, selectedNodeAttr} from "../../utils"
 
 const css = "widgets-img"
 export class Image extends Inline {
+	serializeDOM(node, s) { return s.renderAs(node, "img", node.attrs)}
 	get attrs() {
 		return {
 			src: new Attribute,
@@ -15,8 +16,6 @@ export class Image extends Inline {
 }
  
 defParser(Image, "img", css)
-
-Image.prototype.serializeDOM = (node, s) => s.renderAs(node, "img", node.attrs)
 
 Image.register("command", "insert", {
   derive: {

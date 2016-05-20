@@ -9,6 +9,11 @@ function getCarryOptions(names) {
 }
  
 export class CarryForward extends Inline {
+	serializeDOM(node,s) {
+		return elt("thinkspace",node.attrs,
+			elt("img",{src: "icons/forward.png", width:16, height:16, title:"Carry forward "+node.attrs.name})
+		)
+	}
 	get attrs() {
 		return {
 			name: new Attribute,
@@ -20,12 +25,6 @@ export class CarryForward extends Inline {
 }
                              
 defParser(CarryForward,"thinkspace",css)
-
-CarryForward.prototype.serializeDOM = node => {
-	return elt("thinkspace",node.attrs,
-		elt("img",{src: "icons/forward.png", width:16, height:16, title:"Carry forward "+node.attrs.name})
-	)
-}
 
 CarryForward.register("command", "insert", {
 	derive: {

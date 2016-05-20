@@ -1,4 +1,4 @@
-import {Block, Textblock, Fragment, Attribute, NodeKind} from "prosemirror/dist/model"
+import {Block, Textblock, Fragment, Attribute} from "prosemirror/dist/model"
 import {elt, insertCSS} from "prosemirror/dist/dom"
 import {TextBox} from "./textbox"
 import {defParser, defParamsClick, namePattern, nameTitle, selectedNodeAttr} from "../../utils"
@@ -6,10 +6,9 @@ import {Question, qclass, insertQuestion} from "./question"
 
 const cssi = "widgets-checkitem"
 const cssc = "widgets-checklist"
-NodeKind.checkitem = new NodeKind("checkitem")
 
 export class CheckItem extends Block {
-	static get kind() { return NodeKind.checkitem }
+	serializeDOM(node,s) { return s.renderAs(node,"div", node.attrs)}
 	get attrs() {
 		return {
 			name: new Attribute({default: ""}),
@@ -53,8 +52,6 @@ export class CheckList extends Question {
 
 defParser(CheckItem,"div",cssi)
 defParser(CheckList,"div",cssc)
-
-CheckItem.prototype.serializeDOM = (node,s) => s.renderAs(node,"div", node.attrs)
 
 function renumber(pm, cl, parentpos) {
 	let i = 1
@@ -118,12 +115,11 @@ CheckList.register("command", "insert", {
 		let {from,node} = pm.selection, $from = pm.doc.resolve(from)
 		let attrs = {name,title,value:1}
 		if (node && node.type == this) {
-			let tr = pm.tr.setNodeType(from, this, attrs).apply()
+			pm.tr.setNodeType(from, this, attrs).apply()
 			$from = pm.doc.resolve(from)
 			renumber(pm,$from.nodeAfter,from+1)
-			return tr
 		} else
-			return insertQuestion(pm,from,this.create(attrs))
+			insertQuestion(pm,from,this.create(attrs))
 	},
 	select(pm) {
   		return true

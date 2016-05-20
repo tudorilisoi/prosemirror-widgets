@@ -4,7 +4,7 @@ import "prosemirror/dist/menu/menubar"
 import "prosemirror/dist/inputrules/autoinput"
 import {insertCSS} from "prosemirror/dist/dom"
 import {defineFileHandler} from "./utils"
-import {widgetSchema, commands, mainMenuBar, defaultSchema} from "./schema" 
+import {widgetSchema, commands, mainMenuBar} from "./schema" 
  
 let pm = window.pm = new ProseMirror({
   place: document.querySelector("#editor"),

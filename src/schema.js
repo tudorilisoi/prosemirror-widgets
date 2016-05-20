@@ -3,7 +3,7 @@ import {insertCSS} from "prosemirror/dist/dom"
 import {inlineGroup, insertMenu, textblockMenu, blockGroup, historyGroup} from "prosemirror/dist/menu/menu"
 import {Doc, Textblock, BlockQuote, OrderedList, BulletList, ListItem, HorizontalRule,
 	Paragraph, Heading, Text, HardBreak,
-	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec, NodeKind} from "prosemirror/dist/model"
+	EmMark, StrongMark, LinkMark, CodeMark, Schema, SchemaSpec} from "prosemirror/dist/model"
 import {Question, TextBox, ShortAnswer, Essay, Choice, MultipleChoice, 
 	ScaleDisplay, Scale, CheckItem, CheckList, Selection} from "./widgets/questions"
 import {Input, RadioButton, CheckBox, Select, TextField, TextArea} from "./widgets/input"
@@ -11,60 +11,71 @@ import {Website, InlineMath, BlockMath, Image, SpreadSheet, CarryForward, Graph 
 import {alignGroup, LeftAlign, CenterAlign, RightAlign, UnderlineMark, StrikeThroughMark, contentInsertMenu, questionInsertMenu, toolGroup} from "./widgets"
 import {analyzeCmdSpec, commentCmdSpec} from "./widgets/tool"
 
-const widgetSpec = new SchemaSpec({
-	doc: Doc,
-	blockquote: BlockQuote,
-	ordered_list: OrderedList,
-	bullet_list: BulletList,
-	list_item: ListItem,
+export const widgetSchema = new Schema({
+	nodes: {
+	    doc: {type: Doc, content: "(block | question | content)+"},
+	    blockquote: {type: BlockQuote, content: "block+"},
+	    ordered_list: {type: OrderedList, content: "list_item+"},
+	    bullet_list: {type: BulletList, content: "list_item+"},
+	    list_item: {type: ListItem, content: "block+"},
+	    horizontal_rule: {type: HorizontalRule},
 
-	paragraph: Paragraph,
-	heading: Heading,
+	    // blocks
+	    paragraph: {type: Paragraph, content: "inline[_]*"},
+	    heading: {type: Heading, content: "inline_only[_]*"},
+		textbox: {type: TextBox, content:"inline[_]*"},
+		choice: {type: Choice, content: "radiobutton textbox"},
+		multiplechoice: {type: MultipleChoice, content: "paragraph+ choice+"},
+		scaledisplay: {type: ScaleDisplay},
+		scale: {type: Scale, content: "paragraph+ scaledisplay"},
+		checkitem: {type: CheckItem, content: "checkbox textbox"},
+		checklist: {type: CheckList, content: "paragraph+ checkitem+"},
+		shortanswer: {type: ShortAnswer, content: "paragraph+ textfield"},
+		essay: {type: Essay, content: "paragraph+ textarea"},
+		selection: {type: Selection, content: "paragraph+ select"},
+		blockmath: {type: BlockMath},
+		website: {type: Website},
+		spreadsheet: {type: SpreadSheet},
+		graph: {type: Graph},
 
-	text: Text,
-	hard_break: HardBreak,
-	
-	input: Input,
-	checkbox: CheckBox,
-	radiobutton: RadioButton,
-	select: Select,
-	textfield: TextField,
-	textarea: TextArea,
+		// inline
+	    text: {type: Text},
+	    image: {type: Image},
+	    hard_break: {type: HardBreak},
+		inlinemath: {type: InlineMath},
+		carryforward: {type: CarryForward},
 
-	question: Question,
-	textbox: TextBox,
-	choice: Choice,
-	multiplechoice: MultipleChoice,
-	scaledisplay: ScaleDisplay,
-	scale: Scale,
-	checkitem: CheckItem,
-	checklist: CheckList,
-	shortanswer: ShortAnswer,
-	essay: Essay,
-	selection: Selection,
-	
-	horizontal_rule: HorizontalRule,
-	image: Image,
-	inlinemath: InlineMath,
-	blockmath: BlockMath,
-	website: Website,
-	carryforward: CarryForward,
-	spreadsheet: SpreadSheet,
-	graph: Graph,
-	
-	leftalign: LeftAlign,
-	centeralign: CenterAlign,
-	rightalign: RightAlign
-}, {
-	em: EmMark,
-	strong: StrongMark,
-	link: LinkMark,
-	code: CodeMark,
-	underline: UnderlineMark,
-	strikethrough: StrikeThroughMark
+		// form elements
+		checkbox: {type: CheckBox},
+		radiobutton: {type: RadioButton},
+		select: {type: Select},
+		textfield: {type: TextField},
+		textarea: {type: TextArea},
+
+		// alignment
+		leftalign: {type: LeftAlign},
+		centeralign: {type: CenterAlign},
+		rightalign: {type: RightAlign}
+	},
+
+	groups: {
+	    block: ["paragraph", "blockquote", "ordered_list", "bullet_list", "heading", "horizontal_rule"],
+	    content: ["blockmath", "website", "spreadsheet", "graph"],
+	    question: ["multiplechoice", "checklist", "essay", "shortanswer", "scale", "selection"],
+	    input: ["checkbox", "radiobutton", "select", "textfield", "textarea"],
+	    inline: ["text", "image", "hard_break", "inlinemath", "carryforward", "input"],
+	    inline_only: ["text", "image", "hard_break"]
+	},
+
+	marks: {
+		em: EmMark,
+		strong: StrongMark,
+		link: LinkMark,
+		code: CodeMark,
+		underline: UnderlineMark,
+		strikethrough: StrikeThroughMark
+	}
 })
-
-export const widgetSchema = new Schema(widgetSpec)
 
 export const mainMenuBar = {
 	float: true,

@@ -21,16 +21,16 @@ export function setChildAttrs(pm, parent, parentpos, type, attrs) {
 
 export function insertQuestion(pm,pos,q) {
 	let $pos = pm.doc.resolve(pos)
-	//insert at document level
-	let p = $pos.end(1)
+	let p = $pos.end(1) //insert at document level
 	pm.tr.insert(p,q).apply(pm.apply.scroll)
 	// set text cursor to paragraph in widget if there is one
 	if (q.firstChild && q.firstChild.isTextblock)
     	pm.setTextSelection(p+3)
-	return true
+
 }
 
 export class Question extends Block {
+	serializeDOM(node,s) { return s.renderAs(node,"div",node.attrs) }
 	get draggable() { return true }
 	getDropPos(pm, from, to) { 
 		if (!to) return null
@@ -38,8 +38,6 @@ export class Question extends Block {
 		return $to.start(1)
 	}
 }
-
-Question.prototype.serializeDOM = (node,s) => s.renderAs(node,"div",node.attrs)
 
 // disable deletion of first question paragraph
 Question.register("command", "delete", {

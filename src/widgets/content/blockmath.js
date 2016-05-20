@@ -5,12 +5,21 @@ import {insertWidget} from "./index"
 
 const css = "widgets-blockmath"
 export class BlockMath extends Block {
+	serializeDOM(node,s){
+		if (node.rendered) {
+			node.rendered = node.rendered.cloneNode(true)
+		} else {
+			node.rendered = elt("div", {class: css+" widgets-edit"}, "\\["+node.attrs.tex+"\\]");
+			// wait until node is attached to document to render
+			MathJax.Hub.Queue(["Delay",MathJax.Callback,100],["Typeset",MathJax.Hub,node.rendered])
+		}
+		return node.rendered; 
+	}
 	get attrs() {
 		return {
 			tex: new Attribute
 		}
 	}
-	get contains() { return null }
 }
 
 defParser(BlockMath,"div", css)

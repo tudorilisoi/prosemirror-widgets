@@ -8,7 +8,7 @@ const css = "widgets-checkbox"
 export class CheckBox extends Input {
 	get attrs() {
 		return {
-			name: new Attribute,
+			name: new Attribute({default: ""}),
 			type: new Attribute({default: "checkbox"}),
 			value: new Attribute({default: "1"}),
 			class: new Attribute({default: css})

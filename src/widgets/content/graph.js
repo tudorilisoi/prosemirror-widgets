@@ -36,30 +36,28 @@ function getGraphOptions() {
  
 
 export class Graph extends Block {
+	serializeDOM(node,s){
+		if (node.rendered) {
+			node.rendered = node.rendered.cloneNode(true)
+		} else {
+			let id = getID()
+			node.rendered = elt("div", {
+				class: css+" widgets-graph-"+node.attrs.size, 
+				id: id
+			})
+			makeGraph(id,node.attrs.data)
+		}
+		return node.rendered; 
+	}	
 	get attrs() {
 		return {
 			data: new Attribute({default: ""}),
 			size: new Attribute({default: "medium"})
 		}
 	}
-	get contains() { return null }
 }
 
 defParser(Graph,"div",css)
-
-Graph.prototype.serializeDOM = node => {
-	if (node.rendered) {
-		node.rendered = node.rendered.cloneNode(true)
-	} else {
-		let id = getID()
-		node.rendered = elt("div", {
-			class: css+" widgets-graph-"+node.attrs.size, 
-			id: id
-		})
-		makeGraph(id,node.attrs.data)
-	}
-	return node.rendered; 
-}
 
 Graph.register("command", "insert", {
 	label: "Graph",

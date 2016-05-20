@@ -508,6 +508,7 @@ class MtnSim {
 		this.buttons.mute.checked = false
 		this.buttons.pause.disabled = true
 		this.buttons.restart.disabled = true
+		this.reset()
 		this.etgraph.render()
 		this.atgraph.render()
 		this.mtn.render()

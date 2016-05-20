@@ -7,8 +7,8 @@ const css = "widgets-select"
 export class Select extends Block {
 	get attrs() {
 		return {
-			name: new Attribute,
-			options: new Attribute,
+			name: new Attribute({default: ""}),
+			options: new Attribute({default: ""}),
 			size: new Attribute({default: 1}),
 		    multiple: new Attribute({default: "single"})
 		}

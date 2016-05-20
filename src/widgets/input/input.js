@@ -13,7 +13,6 @@ export class Input extends Block {
 		}
 	}
 	get selectable() { return false }
-	get contains() { return null}
 }
 
 defParser(Input,css)

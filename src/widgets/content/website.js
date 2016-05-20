@@ -6,6 +6,16 @@ import {insertWidget} from "./index"
 const css = "widgets-website"
 	
 export class Website extends Block {
+	serializeDOM(node, s) { 
+		return s.renderAs(node, "iframe",{ 
+		src: node.attrs.src,
+		width: node.attrs.width,
+		height: node.attrs.height,
+		content: "text/html;charset=UTF-8",
+		class: css+" widgets-edit",
+		frameborder: "1",
+		allowfullscreen: "1"
+	})}
 	get attrs() {
 		return {
 			src: new Attribute,
@@ -13,20 +23,9 @@ export class Website extends Block {
 			height: new Attribute({default: 200})
 		}
 	}
-	get contains() { return null }
 }
 
 defParser(Website, "website", css)
-
-Website.prototype.serializeDOM = (node, s) => s.renderAs(node, "iframe",{ 
-	src: node.attrs.src,
-	width: node.attrs.width,
-	height: node.attrs.height,
-	content: "text/html;charset=UTF-8",
-	class: css+" widgets-edit",
-	frameborder: "1",
-	allowfullscreen: "1"
-})
 
 Website.register("command", "insert", {
 	label: "Website",
