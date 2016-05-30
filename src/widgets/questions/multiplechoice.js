@@ -15,25 +15,25 @@ export class Choice extends Block {
 			class: new Attribute({default: cssc})
 		}
 	}
-	create(attrs, content, marks) {
+/*	create(attrs, content, marks) {
 		if (content.content) {
 			let len = content.content.length
 			content = Fragment.from([this.schema.nodes.radiobutton.create(attrs),content.content[len-1]])
 		} 
 		return super.create(attrs,content,marks)
 	}
-}
+*/}
  
 export class MultipleChoice extends Question {
 	get attrs() {
 		return {
-			name: new Attribute,
+			name: new Attribute({default: ""}),
 			title: new Attribute({default: ""}),
 			class: new Attribute({default: cssm+" "+qclass})
 		}
 	}
 	get isList() { return true }
-	defaultContent(attrs) {
+/*	defaultContent(attrs) {
 		let choice_content = Fragment.from([
 		    this.schema.nodes.radiobutton.create(attrs),
 		    this.schema.nodes.textbox.create()
@@ -47,7 +47,7 @@ export class MultipleChoice extends Question {
 		if (!content) content = this.defaultContent(attrs)
 		return super.create(attrs,content,marks)
 	}
-} 
+*/} 
  
 defParser(Choice,"div",cssc)
 defParser(MultipleChoice,"div",cssm)
@@ -102,7 +102,7 @@ Choice.register("command", "delete",{
 	    } else {
 	    	let $pos = pm.doc.resolve(before)
 	    	pm.setTextSelection($pos.after($pos.depth)+1)
-	    }  
+	    }   
 	    return tr
 	},
 	keys: ["Backspace(9)", "Mod-Backspace(9)"]
@@ -119,6 +119,7 @@ MultipleChoice.register("command", "insert", {
 			renumber(pm, $from.nodeAfter,from+1)
 		} else
 			insertQuestion(pm,from,this.create(attrs))
+//			insertQuestion(pm,from,this.fixContent(Fragment.empty),attrs)
 	},
 	select(pm) {
 		return true
