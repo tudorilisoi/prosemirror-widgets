@@ -1,0 +1,22 @@
+{
+  "name": "prosemirror-widgets-npm",
+  "version": "1.0.0",
+  "description": "A collection of widgets for use in the ProseMirror Editor [View Demo](https://pboysen.github.io)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tudorilisoi/prosemirror-widgets.git"
+  },
+  "keywords": [
+    "prosemirror"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tudorilisoi/prosemirror-widgets/issues"
+  },
+  "homepage": "https://github.com/tudorilisoi/prosemirror-widgets#readme"
+}
